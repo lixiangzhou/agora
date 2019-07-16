@@ -1,0 +1,443 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		10B8912022DD54B4009DDFE8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8911F22DD54B4009DDFE8 /* AppDelegate.swift */; };
+		10B8912222DD54B4009DDFE8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8912122DD54B4009DDFE8 /* ViewController.swift */; };
+		10B8912522DD54B4009DDFE8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 10B8912322DD54B4009DDFE8 /* Main.storyboard */; };
+		10B8912722DD54B7009DDFE8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10B8912622DD54B7009DDFE8 /* Assets.xcassets */; };
+		10B8912A22DD54B7009DDFE8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 10B8912822DD54B7009DDFE8 /* LaunchScreen.storyboard */; };
+		10B8913222DD5545009DDFE8 /* AgoraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8913122DD5545009DDFE8 /* AgoraManager.swift */; };
+		10B8913422DD5556009DDFE8 /* AgoraRTMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8913322DD5556009DDFE8 /* AgoraRTMManager.swift */; };
+		10B8913622DD556A009DDFE8 /* AgoraVideoCallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8913522DD556A009DDFE8 /* AgoraVideoCallManager.swift */; };
+		10B8913822DD56AF009DDFE8 /* AgoraSingleCallController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8913722DD56AF009DDFE8 /* AgoraSingleCallController.swift */; };
+		10B8913B22DD5AEA009DDFE8 /* AgoraHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8913A22DD5AEA009DDFE8 /* AgoraHelper.swift */; };
+		10B8913D22DD78D2009DDFE8 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8913C22DD78D2009DDFE8 /* ButtonView.swift */; };
+		10B8913F22DDB090009DDFE8 /* AgoraAudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8913E22DDB090009DDFE8 /* AgoraAudioManager.swift */; };
+		10B8914122DDB4E6009DDFE8 /* voip_calling_ring.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 10B8914022DDB4E6009DDFE8 /* voip_calling_ring.mp3 */; };
+		10B8914322DDBB41009DDFE8 /* AgoraPortartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8914222DDBB41009DDFE8 /* AgoraPortartView.swift */; };
+		10B8914522DDD280009DDFE8 /* AgoraNameTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B8914422DDD280009DDFE8 /* AgoraNameTimeView.swift */; };
+		9950CB208521FC40062ACACA /* Pods_AgoraSingleCall.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E958000BD90D3E698F5D7493 /* Pods_AgoraSingleCall.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		10B8911C22DD54B4009DDFE8 /* AgoraSingleCall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgoraSingleCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		10B8911F22DD54B4009DDFE8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		10B8912122DD54B4009DDFE8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		10B8912422DD54B4009DDFE8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		10B8912622DD54B7009DDFE8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		10B8912922DD54B7009DDFE8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		10B8912B22DD54B7009DDFE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		10B8913122DD5545009DDFE8 /* AgoraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraManager.swift; sourceTree = "<group>"; };
+		10B8913322DD5556009DDFE8 /* AgoraRTMManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTMManager.swift; sourceTree = "<group>"; };
+		10B8913522DD556A009DDFE8 /* AgoraVideoCallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraVideoCallManager.swift; sourceTree = "<group>"; };
+		10B8913722DD56AF009DDFE8 /* AgoraSingleCallController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraSingleCallController.swift; sourceTree = "<group>"; };
+		10B8913A22DD5AEA009DDFE8 /* AgoraHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraHelper.swift; sourceTree = "<group>"; };
+		10B8913C22DD78D2009DDFE8 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
+		10B8913E22DDB090009DDFE8 /* AgoraAudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraAudioManager.swift; sourceTree = "<group>"; };
+		10B8914022DDB4E6009DDFE8 /* voip_calling_ring.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = voip_calling_ring.mp3; sourceTree = "<group>"; };
+		10B8914222DDBB41009DDFE8 /* AgoraPortartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraPortartView.swift; sourceTree = "<group>"; };
+		10B8914422DDD280009DDFE8 /* AgoraNameTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraNameTimeView.swift; sourceTree = "<group>"; };
+		83E62AA0CA0A3C419E5A4DA9 /* Pods-AgoraSingleCall.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AgoraSingleCall.debug.xcconfig"; path = "Target Support Files/Pods-AgoraSingleCall/Pods-AgoraSingleCall.debug.xcconfig"; sourceTree = "<group>"; };
+		A9B63E2B0E25B79221D8EA12 /* Pods-AgoraSingleCall.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AgoraSingleCall.release.xcconfig"; path = "Target Support Files/Pods-AgoraSingleCall/Pods-AgoraSingleCall.release.xcconfig"; sourceTree = "<group>"; };
+		E958000BD90D3E698F5D7493 /* Pods_AgoraSingleCall.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AgoraSingleCall.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		10B8911922DD54B4009DDFE8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9950CB208521FC40062ACACA /* Pods_AgoraSingleCall.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		10B8911322DD54B3009DDFE8 = {
+			isa = PBXGroup;
+			children = (
+				10B8911E22DD54B4009DDFE8 /* AgoraSingleCall */,
+				10B8911D22DD54B4009DDFE8 /* Products */,
+				71E76C8ACED0B2CC1B766062 /* Pods */,
+				2B3433CABB6E96B8E8897B4C /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		10B8911D22DD54B4009DDFE8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				10B8911C22DD54B4009DDFE8 /* AgoraSingleCall.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		10B8911E22DD54B4009DDFE8 /* AgoraSingleCall */ = {
+			isa = PBXGroup;
+			children = (
+				10B8913922DD5ACB009DDFE8 /* SingleCall */,
+				10B8911F22DD54B4009DDFE8 /* AppDelegate.swift */,
+				10B8912122DD54B4009DDFE8 /* ViewController.swift */,
+				10B8912322DD54B4009DDFE8 /* Main.storyboard */,
+				10B8912622DD54B7009DDFE8 /* Assets.xcassets */,
+				10B8912822DD54B7009DDFE8 /* LaunchScreen.storyboard */,
+				10B8912B22DD54B7009DDFE8 /* Info.plist */,
+			);
+			path = AgoraSingleCall;
+			sourceTree = "<group>";
+		};
+		10B8913922DD5ACB009DDFE8 /* SingleCall */ = {
+			isa = PBXGroup;
+			children = (
+				10B8913122DD5545009DDFE8 /* AgoraManager.swift */,
+				10B8913522DD556A009DDFE8 /* AgoraVideoCallManager.swift */,
+				10B8913322DD5556009DDFE8 /* AgoraRTMManager.swift */,
+				10B8913722DD56AF009DDFE8 /* AgoraSingleCallController.swift */,
+				10B8913C22DD78D2009DDFE8 /* ButtonView.swift */,
+				10B8914222DDBB41009DDFE8 /* AgoraPortartView.swift */,
+				10B8914422DDD280009DDFE8 /* AgoraNameTimeView.swift */,
+				10B8913A22DD5AEA009DDFE8 /* AgoraHelper.swift */,
+				10B8913E22DDB090009DDFE8 /* AgoraAudioManager.swift */,
+				10B8914022DDB4E6009DDFE8 /* voip_calling_ring.mp3 */,
+			);
+			path = SingleCall;
+			sourceTree = "<group>";
+		};
+		2B3433CABB6E96B8E8897B4C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E958000BD90D3E698F5D7493 /* Pods_AgoraSingleCall.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		71E76C8ACED0B2CC1B766062 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				83E62AA0CA0A3C419E5A4DA9 /* Pods-AgoraSingleCall.debug.xcconfig */,
+				A9B63E2B0E25B79221D8EA12 /* Pods-AgoraSingleCall.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		10B8911B22DD54B4009DDFE8 /* AgoraSingleCall */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 10B8912E22DD54B7009DDFE8 /* Build configuration list for PBXNativeTarget "AgoraSingleCall" */;
+			buildPhases = (
+				C48DDEC3135AE6C3BE0048DB /* [CP] Check Pods Manifest.lock */,
+				10B8911822DD54B4009DDFE8 /* Sources */,
+				10B8911922DD54B4009DDFE8 /* Frameworks */,
+				10B8911A22DD54B4009DDFE8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AgoraSingleCall;
+			productName = AgoraSingleCall;
+			productReference = 10B8911C22DD54B4009DDFE8 /* AgoraSingleCall.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		10B8911422DD54B3009DDFE8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1020;
+				LastUpgradeCheck = 1020;
+				ORGANIZATIONNAME = sphr;
+				TargetAttributes = {
+					10B8911B22DD54B4009DDFE8 = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
+				};
+			};
+			buildConfigurationList = 10B8911722DD54B3009DDFE8 /* Build configuration list for PBXProject "AgoraSingleCall" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 10B8911322DD54B3009DDFE8;
+			productRefGroup = 10B8911D22DD54B4009DDFE8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				10B8911B22DD54B4009DDFE8 /* AgoraSingleCall */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		10B8911A22DD54B4009DDFE8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10B8912A22DD54B7009DDFE8 /* LaunchScreen.storyboard in Resources */,
+				10B8914122DDB4E6009DDFE8 /* voip_calling_ring.mp3 in Resources */,
+				10B8912722DD54B7009DDFE8 /* Assets.xcassets in Resources */,
+				10B8912522DD54B4009DDFE8 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C48DDEC3135AE6C3BE0048DB /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-AgoraSingleCall-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		10B8911822DD54B4009DDFE8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10B8913422DD5556009DDFE8 /* AgoraRTMManager.swift in Sources */,
+				10B8912222DD54B4009DDFE8 /* ViewController.swift in Sources */,
+				10B8914322DDBB41009DDFE8 /* AgoraPortartView.swift in Sources */,
+				10B8913D22DD78D2009DDFE8 /* ButtonView.swift in Sources */,
+				10B8913822DD56AF009DDFE8 /* AgoraSingleCallController.swift in Sources */,
+				10B8912022DD54B4009DDFE8 /* AppDelegate.swift in Sources */,
+				10B8913622DD556A009DDFE8 /* AgoraVideoCallManager.swift in Sources */,
+				10B8914522DDD280009DDFE8 /* AgoraNameTimeView.swift in Sources */,
+				10B8913B22DD5AEA009DDFE8 /* AgoraHelper.swift in Sources */,
+				10B8913222DD5545009DDFE8 /* AgoraManager.swift in Sources */,
+				10B8913F22DDB090009DDFE8 /* AgoraAudioManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		10B8912322DD54B4009DDFE8 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				10B8912422DD54B4009DDFE8 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		10B8912822DD54B7009DDFE8 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				10B8912922DD54B7009DDFE8 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		10B8912C22DD54B7009DDFE8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		10B8912D22DD54B7009DDFE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		10B8912F22DD54B7009DDFE8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 83E62AA0CA0A3C419E5A4DA9 /* Pods-AgoraSingleCall.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = GG8NZVPWNG;
+				INFOPLIST_FILE = AgoraSingleCall/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lxz.agora.AgoraSingleCall;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		10B8913022DD54B7009DDFE8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A9B63E2B0E25B79221D8EA12 /* Pods-AgoraSingleCall.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = GG8NZVPWNG;
+				INFOPLIST_FILE = AgoraSingleCall/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.lxz.agora.AgoraSingleCall;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		10B8911722DD54B3009DDFE8 /* Build configuration list for PBXProject "AgoraSingleCall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10B8912C22DD54B7009DDFE8 /* Debug */,
+				10B8912D22DD54B7009DDFE8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		10B8912E22DD54B7009DDFE8 /* Build configuration list for PBXNativeTarget "AgoraSingleCall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10B8912F22DD54B7009DDFE8 /* Debug */,
+				10B8913022DD54B7009DDFE8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 10B8911422DD54B3009DDFE8 /* Project object */;
+}
