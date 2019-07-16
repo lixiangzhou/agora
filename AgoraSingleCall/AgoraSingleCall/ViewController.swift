@@ -14,18 +14,49 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
     }
-
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        AgoraManager.shared.presentCallController(AgoraSingleCallController())
+    
+    @IBAction func receiverLinkAction(_ sender: Any) {
+        AgoraRTMManager.shared.connectToSDK(user: "ppp")
+        AgoraRTMManager.shared.receiveMessageClosure = { msg, user in
+            let agoraVC = AgoraSingleCallController()
+            agoraVC.account = user
+            agoraVC.channel = msg.text
+            AgoraManager.shared.presentCallController(agoraVC)
+        }
+    }
+    
+    @IBAction func senderLinkAction(_ sender: Any) {
         let user = "ddd"
         let toUser = "ppp"
         
-//        AgoraVideoCallManager.shared.prepare()
-//        AgoraVideoCallManager.shared.setLocalView(self.smallView, uid: self.uid)
-//        AgoraVideoCallManager.shared.rtcEngineFirstRemoteVideoDecodedOfUidClosure = { _, uid in
-//            AgoraVideoCallManager.shared.setRemoteView(self.fullView, uid: uid)
-//        }
+        if AgoraRTMManager.shared.connectionState == .connected {
+            print("目前连接状态")
+            AgoraManager.shared.checkOnlineAndCall(to: toUser)
+        } else {
+            AgoraRTMManager.shared.connectToSDK(user: user)
+            AgoraRTMManager.shared.connectionStateClosure = { (state) in
+                if state == .connected {    // 连接成功
+                    print("连接成功 connectionStateClosure", state.rawValue)
+                    AgoraManager.shared.checkOnlineAndCall(to: toUser)
+                } else {
+                    print("连接失败，不能通知到对方加入 channel")
+                }
+            }
+        }
+    }
+}
+
+extension ViewController {
+    func test() {
+        //        AgoraManager.shared.presentCallController(AgoraSingleCallController())
+        let user = "ddd"
+        let toUser = "ppp"
+        
+        //        AgoraVideoCallManager.shared.prepare()
+        //        AgoraVideoCallManager.shared.setLocalView(self.smallView, uid: self.uid)
+        //        AgoraVideoCallManager.shared.rtcEngineFirstRemoteVideoDecodedOfUidClosure = { _, uid in
+        //            AgoraVideoCallManager.shared.setRemoteView(self.fullView, uid: uid)
+        //        }
         
         AgoraRTMManager.shared.connectToSDK(user: user)
         AgoraRTMManager.shared.connectionStateClosure = { (state) in
@@ -48,4 +79,3 @@ class ViewController: UIViewController {
         }
     }
 }
-
