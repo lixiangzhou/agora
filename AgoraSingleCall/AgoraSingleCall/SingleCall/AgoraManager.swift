@@ -12,11 +12,29 @@ class AgoraManager {
     static let shared = AgoraManager()
     let appId = "b25c785c3d674b7990082d4855daa932"
     
+    var role: Role = .none
+    
     private init() {}
     
     func setup() {
         AgoraVideoCallManager.shared.setup()
         AgoraRTMManager.shared.setup()
+        
+        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.DidReceiveMessage, object: nil, queue: nil) { (note) in
+            if let box = note.object as? AgoraRTMManager.MessageBox {
+                if box.isConnectMessage {
+                    self.role = .receiver
+                } else {
+                    AgoraVideoCallManager.shared.callStatus = .hangupNormal
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UIApplication.willTerminateNotification, object: nil, queue: nil) { (_) in
+            if self.window != nil, self.callController != nil, !self.peerUsers.remote.isEmpty {
+                AgoraRTMManager.shared.askToLeaveChannel(self.peerUsers.remote)
+            }
+        }
     }
     
     var peerUsers = PeerUsers(local: "", remote: "")
@@ -180,7 +198,13 @@ extension AgoraManager {
 extension AgoraManager {
     /// 必须保证 local 和 remote 都有内容
     struct PeerUsers {
-        let local: String
-        let remote: String
+        var local: String
+        var remote: String
+    }
+    
+    enum Role {
+        case sender
+        case receiver
+        case none
     }
 }

@@ -17,7 +17,6 @@ class AgoraRTMManager: NSObject {
     
     func setup() {
         agoraRtmKit = AgoraRtmKit(appId: AgoraManager.shared.appId, delegate: self)
-        
     }
     
     /// 连接用户user 到SDK
@@ -29,6 +28,7 @@ class AgoraRTMManager: NSObject {
     
     /// 检查对方是否在线
     func checkOnline(for userId: String, completion: @escaping ((Bool) -> Void)) {
+        AgoraManager.shared.role = .sender
         agoraRtmKit.queryPeersOnlineStatus([userId]) { (status, code) in
             if let status = status, code == .ok {
                 for st in status {
@@ -54,19 +54,19 @@ class AgoraRTMManager: NSObject {
     
     /// 自己加入频道，并通知对方也加入相同的频道
     func askToJoinChannel(_ uid: String, channel: String, completion: ((AgoraRtmSendPeerMessageErrorCode) -> Void)? = nil) {
+        AgoraManager.shared.role = .sender
         agoraRtmKit.send(AgoraRtmMessage(text: channel), toPeer: uid, completion: completion)
     }
     
     func askToLeaveChannel(_ uid: String, completion: ((AgoraRtmSendPeerMessageErrorCode) -> Void)? = nil) {
+        AgoraManager.shared.role = .none
         agoraRtmKit.send(AgoraRtmMessage(text: ""), toPeer: uid, completion: completion)
     }
     
     var connectionState = AgoraRtmConnectionState.disconnected {
         didSet {
             if oldValue != connectionState {
-                if !AgoraManager.shared.peerUsers.remote.isEmpty {
-                    NotificationCenter.default.post(name: Notification.Name.YGXQ.RTMConnectionStateChanged, object: ConnectionStateBox(state: connectionState, remotePeer: AgoraManager.shared.peerUsers.remote))
-                }
+                NotificationCenter.default.post(name: Notification.Name.YGXQ.RTMConnectionStateChanged, object: ConnectionStateBox(state: connectionState, remotePeer: AgoraManager.shared.peerUsers.remote))
             }
         }
     }
@@ -96,8 +96,11 @@ extension AgoraRTMManager: AgoraRtmDelegate {
     
     func rtmKit(_ kit: AgoraRtmKit, messageReceived message: AgoraRtmMessage, fromPeer peerId: String) {
         print(#function, message, peerId)
-        NotificationCenter.default.post(name: Notification.Name.YGXQ.DidReceiveMessage, object: MessageBox(message: message, remotePeer: peerId), userInfo: nil)
+        var peers = AgoraManager.shared.peerUsers
+        peers.remote = peerId
+        AgoraManager.shared.peerUsers = peers
         
+        NotificationCenter.default.post(name: Notification.Name.YGXQ.DidReceiveMessage, object: MessageBox(message: message, remotePeer: peerId), userInfo: nil)
     }
 }
 

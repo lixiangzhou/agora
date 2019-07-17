@@ -14,7 +14,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
     
         NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.DidReceiveMessage, object: nil, queue: nil) { (note) in
-            if let box = note.object as? AgoraRTMManager.MessageBox {
+            if let box = note.object as? AgoraRTMManager.MessageBox, AgoraManager.shared.role == .receiver {
                 if box.isConnectMessage {
                     AgoraVideoCallManager.shared.callStatus = .incoming
                     let agoraVC = AgoraSingleCallController()
@@ -26,7 +26,7 @@ class ViewController: UIViewController {
         }
         
         NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.RTMConnectionStateChanged, object: nil, queue: nil) { (note) in
-            if let box = note.object as? AgoraRTMManager.ConnectionStateBox {
+            if let box = note.object as? AgoraRTMManager.ConnectionStateBox, AgoraManager.shared.role == .sender {
                 if box.state == .connected {    // 连接成功
                     print("连接成功 ", box.state.rawValue)
                     AgoraManager.shared.checkOnlineAndCall(to: box.remotePeer)
@@ -45,6 +45,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func senderLinkAction(_ sender: Any) {
+        AgoraManager.shared.role = .sender
         if AgoraRTMManager.shared.connectionState == .connected {
             print("目前连接状态")
             AgoraManager.shared.checkOnlineAndCall(to: AgoraManager.shared.peerUsers.remote)

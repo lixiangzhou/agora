@@ -345,7 +345,6 @@ extension AgoraSingleCallController {
 // MARK: - Observer
 extension AgoraSingleCallController {
     private func addObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(didReceiveMessage), name: Notification.Name.YGXQ.DidReceiveMessage, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(videoCallDurationChanged), name: Notification.Name.YGXQ.VideoCallDurationChanged, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didRegisteredLocalUser), name: Notification.Name.YGXQ.DidRegisteredLocalUser, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(firstRemoteVideoDecoded), name: Notification.Name.YGXQ.FirstRemoteVideoDecoded, object: nil)
@@ -354,12 +353,6 @@ extension AgoraSingleCallController {
     
     private func removeObservers() {
         NotificationCenter.default.removeObserver(self)
-    }
-    
-    @objc private func didReceiveMessage(_ note: Notification) {
-        if let box = note.object as? AgoraRTMManager.MessageBox, box.isDisConnectMessage {
-            hangup()
-        }
     }
     
     @objc private func videoCallDurationChanged(_ note: Notification) {
