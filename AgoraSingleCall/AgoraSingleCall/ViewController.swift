@@ -13,44 +13,18 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.DidReceiveMessage, object: nil, queue: nil) { (note) in
-            if let box = note.object as? AgoraRTMManager.MessageBox, AgoraManager.shared.role == .receiver {
-                if box.isConnectMessage {
-                    AgoraVideoCallManager.shared.callStatus = .incoming
-                    let agoraVC = AgoraSingleCallController()
-                    agoraVC.account = box.remotePeer
-                    agoraVC.channel = box.channel
-                    AgoraManager.shared.presentCallController(agoraVC)
-                }
-            }
-        }
-        
-        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.RTMConnectionStateChanged, object: nil, queue: nil) { (note) in
-            if let box = note.object as? AgoraRTMManager.ConnectionStateBox, AgoraManager.shared.role == .sender {
-                if box.state == .connected {    // 连接成功
-                    print("连接成功 ", box.state.rawValue)
-                    AgoraManager.shared.checkOnlineAndCall(to: box.remotePeer)
-                } else {
-                    print("连接失败，不能通知到对方加入 channel")
-                }
-            }
-        }
-        
+        // 发起端：第一步：设置通话的两端用户名
         AgoraManager.shared.peerUsers = AgoraManager.PeerUsers(local: "123", remote: "1062")
     }
     
     
     @IBAction func receiverLinkAction(_ sender: Any) {
+        // 接收端：连接到Agora
         AgoraRTMManager.shared.connectToSDK(user: AgoraManager.shared.peerUsers.remote)
     }
     
     @IBAction func senderLinkAction(_ sender: Any) {
-        AgoraManager.shared.role = .sender
-        if AgoraRTMManager.shared.connectionState == .connected {
-            print("目前连接状态")
-            AgoraManager.shared.checkOnlineAndCall(to: AgoraManager.shared.peerUsers.remote)
-        } else {
-            AgoraRTMManager.shared.connectToSDK(user: AgoraManager.shared.peerUsers.local)
-        }
+        // 发起端：第二步：开启通话
+        AgoraManager.shared.startCall()
     }
 }

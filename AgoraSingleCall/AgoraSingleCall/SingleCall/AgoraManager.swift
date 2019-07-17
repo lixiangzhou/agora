@@ -20,21 +20,7 @@ class AgoraManager {
         AgoraVideoCallManager.shared.setup()
         AgoraRTMManager.shared.setup()
         
-        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.DidReceiveMessage, object: nil, queue: nil) { (note) in
-            if let box = note.object as? AgoraRTMManager.MessageBox {
-                if box.isConnectMessage {
-                    self.role = .receiver
-                } else {
-                    AgoraVideoCallManager.shared.callStatus = .hangupNormal
-                }
-            }
-        }
         
-        NotificationCenter.default.addObserver(forName: UIApplication.willTerminateNotification, object: nil, queue: nil) { (_) in
-            if self.window != nil, self.callController != nil, !self.peerUsers.remote.isEmpty {
-                AgoraRTMManager.shared.askToLeaveChannel(self.peerUsers.remote)
-            }
-        }
     }
     
     var peerUsers = PeerUsers(local: "", remote: "")
@@ -122,6 +108,15 @@ extension AgoraManager {
         }
     }
     
+    func startCall() {
+        AgoraManager.shared.role = .sender
+        if AgoraRTMManager.shared.connectionState == .connected {
+            AgoraManager.shared.checkOnlineAndCall(to: AgoraManager.shared.peerUsers.remote)
+        } else {
+            AgoraRTMManager.shared.connectToSDK(user: AgoraManager.shared.peerUsers.local)
+        }
+    }
+    
     /// 检查对方是否在线，在线就请求一起加入channel
     func checkOnlineAndCall(to user: String) {
         print("检查对方是否在线")
@@ -191,6 +186,49 @@ extension AgoraManager {
             self.callController.toFull()
         }) { (_) in
             UIApplication.shared.endIgnoringInteractionEvents()
+        }
+    }
+}
+
+extension AgoraManager {
+    private func addObservers() {
+        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.DidReceiveMessage, object: nil, queue: nil) { (note) in
+            if let box = note.object as? AgoraRTMManager.MessageBox {
+                if box.isConnectMessage {
+                    self.role = .receiver
+                } else {
+                    AgoraVideoCallManager.shared.callStatus = .hangupNormal
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UIApplication.willTerminateNotification, object: nil, queue: nil) { (_) in
+            if self.window != nil, self.callController != nil, !self.peerUsers.remote.isEmpty {
+                AgoraRTMManager.shared.askToLeaveChannel(self.peerUsers.remote)
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.DidReceiveMessage, object: nil, queue: nil) { (note) in
+            if let box = note.object as? AgoraRTMManager.MessageBox, AgoraManager.shared.role == .receiver {
+                if box.isConnectMessage {
+                    AgoraVideoCallManager.shared.callStatus = .incoming
+                    let agoraVC = AgoraSingleCallController()
+                    agoraVC.account = box.remotePeer
+                    agoraVC.channel = box.channel
+                    AgoraManager.shared.presentCallController(agoraVC)
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.RTMConnectionStateChanged, object: nil, queue: nil) { (note) in
+            if let box = note.object as? AgoraRTMManager.ConnectionStateBox, AgoraManager.shared.role == .sender {
+                if box.state == .connected {    // 连接成功
+                    print("连接成功 ", box.state.rawValue)
+                    AgoraManager.shared.checkOnlineAndCall(to: box.remotePeer)
+                } else {
+                    print("连接失败，不能通知到对方加入 channel")
+                }
+            }
         }
     }
 }
