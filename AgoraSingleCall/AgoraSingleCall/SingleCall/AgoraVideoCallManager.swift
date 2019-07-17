@@ -11,36 +11,40 @@ import AgoraRtcEngineKit
 
 class AgoraVideoCallManager: NSObject {
     static let shared = AgoraVideoCallManager()
+    
     var agoraKit: AgoraRtcEngineKit!
     
     func setup() {
         agoraKit = AgoraRtcEngineKit.sharedEngine(withAppId:  AgoraManager.shared.appId, delegate: self)
     }
     
-    var rtcEngineFirstRemoteVideoDecodedOfUidClosure: ((AgoraRtcEngineKit, UInt) -> Void)?
-    var rtcEngineDidOfflineOfUidClosure: ((AgoraRtcEngineKit, Int, AgoraUserOfflineReason) -> Void)?
-    var rtcEnginedidVideoMutedClosure: ((AgoraRtcEngineKit, Bool, Int) -> Void)?
-    
-    var callStatusChangedClosure: ((AgoraCallStatus) -> Void)?
-    
     var callStatus = AgoraCallStatus.dialing {
         didSet {
             if oldValue != callStatus {
-                callStatusChangedClosure?(callStatus)
+                NotificationCenter.default.post(name: Notification.Name.YGXQ.VideoCallStatusChanged, object: callStatus)
             }
             
-            if callStatus == .hangupUnNormal || callStatus == .hangupNormal {
+            if callStatus == .hangupUnNormal || callStatus == .hangupNormal || callStatus == .active {
                 duration = 0
+            }
+            
+            if callStatus == .active {
+                startTimer()
+            } else {
+                stopTimer()
             }
         }
     }
     
-    var durationChangedClosure: ((Int) -> Void)?
     var duration: Int = 0 {
         didSet {
-            durationChangedClosure?(duration)
+            if oldValue != duration {
+                NotificationCenter.default.post(name: Notification.Name.YGXQ.VideoCallDurationChanged, object: duration)
+            }
         }
     }
+    
+    private var timer: Timer?
 }
 
 extension AgoraVideoCallManager {
@@ -105,6 +109,16 @@ extension AgoraVideoCallManager {
     @objc private func autoAddOneSecond() {
         duration += 1
     }
+    
+    private func startTimer() {
+        stopTimer()
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(autoAddOneSecond), userInfo: nil, repeats: true)
+    }
+    
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
 }
 
 extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
@@ -147,6 +161,7 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     /// 本地注册了一个用户
     func rtcEngine(_ engine: AgoraRtcEngineKit, didRegisteredLocalUser userAccount: String, withUid uid: UInt) {
         print(#function, userAccount, uid)
+        NotificationCenter.default.post(name: Notification.Name.YGXQ.DidRegisteredLocalUser, object: uid)
     }
     
     /// 获取远端用户和ID时调用
@@ -168,7 +183,11 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     /// 远端离开了 channel
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid:UInt, reason:AgoraUserOfflineReason) {
         print(#function, uid, reason.rawValue)
-        rtcEngineDidOfflineOfUidClosure?(engine, Int(uid), reason)
+        if reason == .quit {
+            callStatus = .hangupNormal
+        } else {
+            callStatus = .hangupUnNormal
+        }
     }
     
     /// 连接状态改变
@@ -235,7 +254,7 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     /// 第一帧远端视频解析时
     func rtcEngine(_ engine: AgoraRtcEngineKit, firstRemoteVideoDecodedOfUid uid:UInt, size:CGSize, elapsed:Int) {
         print(#function, uid, size, elapsed)
-        rtcEngineFirstRemoteVideoDecodedOfUidClosure?(engine, uid)
+        NotificationCenter.default.post(name: Notification.Name.YGXQ.FirstRemoteVideoDecoded, object: uid)
     }
     
     /// 第一帧远端视频渲染时
@@ -282,9 +301,6 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     // MARK: - Statistics Delegate Methods
     func rtcEngine(_ engine: AgoraRtcEngineKit, reportRtcStats stats: AgoraChannelStats) {
         print(#function, stats.duration)
-        duration = stats.duration
-        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(autoAddOneSecond), object: nil)
-        perform(#selector(autoAddOneSecond), with: nil, afterDelay: 1)
     }
     
     /// 在用户加入channel 前，用户最后1公里的网络质量，每2s一次

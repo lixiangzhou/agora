@@ -19,6 +19,8 @@ class AgoraManager {
         AgoraRTMManager.shared.setup()
     }
     
+    var peerUsers = PeerUsers(local: "", remote: "")
+    
     private(set) var window: UIWindow!
     let winWidth: CGFloat = 64
     let winHeight: CGFloat = 96
@@ -51,6 +53,16 @@ extension AgoraManager {
         callController = controller
     }
     
+    func dismissCallControllerWithAnimation() {
+        if window != nil {
+            UIView.animate(withDuration: 1, animations: {
+                self.window.alpha = 0
+            }) { (_) in
+                self.dismissCallController()
+            }
+        }
+    }
+    
     func dismissCallController() {
         if window != nil {
             window.resignKey()
@@ -59,6 +71,7 @@ extension AgoraManager {
                 window?.makeKeyAndVisible()
             }
         }
+        
         callController = nil
         window = nil
         lastX = nil
@@ -104,11 +117,11 @@ extension AgoraManager {
                     print("自己加入成功，请求对方加入channel，开始发送请求消息")
                     AgoraRTMManager.shared.askToJoinChannel(user, channel: channel, completion: { (code) in
                         if code == .ok {
-                            print("请求消息，发送成功，自己进入对话模式")
-                            AgoraVideoCallManager.shared.callStatus = .active
+                            print("请求消息，发送成功，等待自己进入对话模式")
                         } else {
                             print("请求消息，发送失败，自己进入挂断模式")
                             AgoraVideoCallManager.shared.callStatus = .hangupUnNormal
+                            AgoraVideoCallManager.shared.callStatus = .idle
                         }
                     })
                 })
@@ -161,5 +174,13 @@ extension AgoraManager {
         }) { (_) in
             UIApplication.shared.endIgnoringInteractionEvents()
         }
+    }
+}
+
+extension AgoraManager {
+    /// 必须保证 local 和 remote 都有内容
+    struct PeerUsers {
+        let local: String
+        let remote: String
     }
 }

@@ -12,70 +12,44 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-    }
     
-    @IBAction func receiverLinkAction(_ sender: Any) {
-        AgoraRTMManager.shared.connectToSDK(user: "1062")
-        AgoraRTMManager.shared.receiveMessageClosure = { msg, user in
-            let agoraVC = AgoraSingleCallController()
-            agoraVC.account = user
-            agoraVC.channel = msg.text
-            AgoraManager.shared.presentCallController(agoraVC)
+        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.DidReceiveMessage, object: nil, queue: nil) { (note) in
+            if let box = note.object as? AgoraRTMManager.MessageBox {
+                if box.isConnectMessage {
+                    AgoraVideoCallManager.shared.callStatus = .incoming
+                    let agoraVC = AgoraSingleCallController()
+                    agoraVC.account = box.remotePeer
+                    agoraVC.channel = box.channel
+                    AgoraManager.shared.presentCallController(agoraVC)
+                }
+            }
         }
-    }
-    
-    @IBAction func senderLinkAction(_ sender: Any) {
-        let user = "123"
-        let toUser = "1062"
         
-        if AgoraRTMManager.shared.connectionState == .connected {
-            print("目前连接状态")
-            AgoraManager.shared.checkOnlineAndCall(to: toUser)
-        } else {
-            AgoraRTMManager.shared.connectToSDK(user: user)
-            AgoraRTMManager.shared.connectionStateClosure = { (state) in
-                if state == .connected {    // 连接成功
-                    print("连接成功 connectionStateClosure", state.rawValue)
-                    AgoraManager.shared.checkOnlineAndCall(to: toUser)
+        NotificationCenter.default.addObserver(forName: Notification.Name.YGXQ.RTMConnectionStateChanged, object: nil, queue: nil) { (note) in
+            if let box = note.object as? AgoraRTMManager.ConnectionStateBox {
+                if box.state == .connected {    // 连接成功
+                    print("连接成功 ", box.state.rawValue)
+                    AgoraManager.shared.checkOnlineAndCall(to: box.remotePeer)
                 } else {
                     print("连接失败，不能通知到对方加入 channel")
                 }
             }
         }
+        
+        AgoraManager.shared.peerUsers = AgoraManager.PeerUsers(local: "123", remote: "1062")
     }
-}
-
-extension ViewController {
-    func test() {
-        //        AgoraManager.shared.presentCallController(AgoraSingleCallController())
-        let user = "ddd"
-        let toUser = "ppp"
-        
-        //        AgoraVideoCallManager.shared.prepare()
-        //        AgoraVideoCallManager.shared.setLocalView(self.smallView, uid: self.uid)
-        //        AgoraVideoCallManager.shared.rtcEngineFirstRemoteVideoDecodedOfUidClosure = { _, uid in
-        //            AgoraVideoCallManager.shared.setRemoteView(self.fullView, uid: uid)
-        //        }
-        
-        AgoraRTMManager.shared.connectToSDK(user: user)
-        AgoraRTMManager.shared.connectionStateClosure = { (state) in
-            if state == .connected {    // 连接成功，发起通话，开始响铃，加入 channel，通知对方加入 channel
-                AgoraVideoCallManager.shared.callStatus = .dialing
-                AgoraManager.shared.presentCallController(AgoraSingleCallController())
-                
-                AgoraVideoCallManager.shared.joinChannel(account: user, channel: randomString(), success: { (channel) in
-                    AgoraRTMManager.shared.askToJoinChannel(toUser, channel: channel, completion: { (code) in
-                        if code == .ok {
-                            
-                        } else {
-                            
-                        }
-                    })
-                })
-            } else {
-                // 连接失败，不能通知到对方加入 channel
-            }
+    
+    
+    @IBAction func receiverLinkAction(_ sender: Any) {
+        AgoraRTMManager.shared.connectToSDK(user: AgoraManager.shared.peerUsers.remote)
+    }
+    
+    @IBAction func senderLinkAction(_ sender: Any) {
+        if AgoraRTMManager.shared.connectionState == .connected {
+            print("目前连接状态")
+            AgoraManager.shared.checkOnlineAndCall(to: AgoraManager.shared.peerUsers.remote)
+        } else {
+            AgoraRTMManager.shared.connectToSDK(user: AgoraManager.shared.peerUsers.local)
         }
     }
 }

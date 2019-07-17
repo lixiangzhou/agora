@@ -17,19 +17,13 @@ class AgoraRTMManager: NSObject {
     
     func setup() {
         agoraRtmKit = AgoraRtmKit(appId: AgoraManager.shared.appId, delegate: self)
+        
     }
     
     /// 连接用户user 到SDK
     func connectToSDK(byToken token: String? = nil, user userId: String) {
         login(byToken: token, user: userId) { (code) in
             print("login code", code.rawValue)
-//            if code == .ok {
-//                self.connectionState = .connected
-//            } else if code == .alreadyLogin {
-//                self.connectionState = .connected
-//            } else {
-//                self.connectionState = .disconnected
-//            }
         }
     }
     
@@ -63,18 +57,21 @@ class AgoraRTMManager: NSObject {
         agoraRtmKit.send(AgoraRtmMessage(text: channel), toPeer: uid, completion: completion)
     }
     
-    var receiveMessageClosure: ((AgoraRtmMessage, String) -> Void)?
-    
-    var connectionStateClosure: ((AgoraRtmConnectionState) -> Void)?
+    func askToLeaveChannel(_ uid: String, completion: ((AgoraRtmSendPeerMessageErrorCode) -> Void)? = nil) {
+        agoraRtmKit.send(AgoraRtmMessage(text: ""), toPeer: uid, completion: completion)
+    }
     
     var connectionState = AgoraRtmConnectionState.disconnected {
         didSet {
             if oldValue != connectionState {
-                connectionStateClosure?(connectionState)
+                if !AgoraManager.shared.peerUsers.remote.isEmpty {
+                    NotificationCenter.default.post(name: Notification.Name.YGXQ.RTMConnectionStateChanged, object: ConnectionStateBox(state: connectionState, remotePeer: AgoraManager.shared.peerUsers.remote))
+                }
             }
         }
     }
 }
+
 extension AgoraRTMManager: AgoraRtmDelegate {
     func rtmKit(_ kit: AgoraRtmKit, connectionStateChanged state: AgoraRtmConnectionState, reason: AgoraRtmConnectionChangeReason) {
         print(#function, state.rawValue, reason.rawValue)
@@ -92,12 +89,40 @@ extension AgoraRTMManager: AgoraRtmDelegate {
             break
         case .aborted:
             logout()
+        @unknown default:
+            break
         }
     }
     
     func rtmKit(_ kit: AgoraRtmKit, messageReceived message: AgoraRtmMessage, fromPeer peerId: String) {
         print(#function, message, peerId)
+        NotificationCenter.default.post(name: Notification.Name.YGXQ.DidReceiveMessage, object: MessageBox(message: message, remotePeer: peerId), userInfo: nil)
         
-        receiveMessageClosure?(message, peerId)
     }
 }
+
+extension AgoraRTMManager {
+    struct MessageBox {
+        let message: AgoraRtmMessage
+        let remotePeer: String
+        
+        var isConnectMessage: Bool {
+            return !channel.isEmpty
+        }
+        
+        var isDisConnectMessage: Bool {
+            return channel.isEmpty
+        }
+        
+        var channel: String {
+            return message.text
+        }
+    }
+    
+    struct ConnectionStateBox {
+        let state: AgoraRtmConnectionState
+        let remotePeer: String
+    }
+}
+
+

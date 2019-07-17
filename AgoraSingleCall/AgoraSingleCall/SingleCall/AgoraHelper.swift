@@ -99,6 +99,8 @@ extension UIColor {
 }
 
 enum AgoraCallStatus: Equatable {
+    /// 闲置状态
+    case idle
     /// 正在呼叫
     case dialing
     /// 正在呼入
@@ -112,9 +114,20 @@ enum AgoraCallStatus: Equatable {
     case hangupUnNormal
 }
 
-enum AgoraCallHangupReason: Equatable {
-    /// 还没退出 channel
-    case stillInChannel
-    /// 未知原因
-    case unknown
+extension Notification.Name {
+    
+    struct YGXQ {
+        static let DidReceiveMessage = Notification.Name(rawValue: "com.ygxq.rtm.DidReceiveMessage")
+        
+        static let RTMConnectionStateChanged = Notification.Name(rawValue: "com.ygxq.rtm.RTMConnectionStateChanged")
+        
+        static let VideoCallDurationChanged = Notification.Name(rawValue: "com.ygxq.rtm.VideoCallDurationChanged")
+        
+        static let VideoCallStatusChanged = Notification.Name(rawValue: "com.ygxq.rtm.VideoCallStatusChanged")
+        
+        static let DidRegisteredLocalUser = Notification.Name(rawValue: "com.ygxq.rtm.DidRegisteredLocalUser")
+        
+        static let FirstRemoteVideoDecoded = Notification.Name(rawValue: "com.ygxq.rtm.FirstRemoteVideoDecoded")
+    }
 }
+

@@ -14,8 +14,8 @@ class AgoraSingleCallController: UIViewController {
     
     // MARK: - Life Cycle
     
-    var uid: UInt = 2
-    var targetId: UInt = 0
+    var localViewId: UInt = 10
+    var remoteViewId: UInt = 20
     
     var account: String = ""
     var channel: String = ""
@@ -25,9 +25,11 @@ class AgoraSingleCallController: UIViewController {
         
         view.backgroundColor = UIColor(hex: "0x262e42")
         setUI()
+        addObservers()
     }
     
     deinit {
+        removeObservers()
         print("AgoraSingleCallController deinit")
     }
     
@@ -78,15 +80,6 @@ extension AgoraSingleCallController {
             showDialing()
         } else if AgoraVideoCallManager.shared.callStatus == .incoming {
             showIncoming()
-        }
-        
-        AgoraVideoCallManager.shared.callStatusChangedClosure = { [weak self] status in
-            guard let self = self else { return }
-            if status == .hangupNormal || status == .hangupUnNormal {
-                self.hangup()
-            } else if status == .active {
-                self.showActive()
-            }
         }
     }
     
@@ -219,8 +212,8 @@ extension AgoraSingleCallController {
         portraitView.statusLabel.text = "正在等待对方接受邀请..."
         portraitView.nameLabel.text = "AAA"
         
-        AgoraVideoCallManager.shared.setLocalView(fullView, uid: self.uid)
-        AgoraVideoCallManager.shared.setRemoteView(nil, uid: uid)
+        AgoraVideoCallManager.shared.setLocalView(fullView, uid: localViewId)
+        AgoraVideoCallManager.shared.setRemoteView(nil, uid: remoteViewId)
         
         
         
@@ -242,8 +235,8 @@ extension AgoraSingleCallController {
         portraitView.statusLabel.text = "邀请您进行视频聊天"
         portraitView.nameLabel.text = "AAA"
         
-        AgoraVideoCallManager.shared.setLocalView(nil, uid: self.uid)
-        AgoraVideoCallManager.shared.setRemoteView(nil, uid: uid)
+        AgoraVideoCallManager.shared.setLocalView(nil, uid: localViewId)
+        AgoraVideoCallManager.shared.setRemoteView(nil, uid: remoteViewId)
         
         beCallView.isHidden = false
         callView.isHidden = true
@@ -256,18 +249,11 @@ extension AgoraSingleCallController {
         minimizeBtn.isHidden = false
         
         nameTimeView.isHidden = false
-        AgoraVideoCallManager.shared.durationChangedClosure = { [weak self] duration in
-            self?.nameTimeView.timeLabel.text = duration.timeFormSec()
-        }
         
         portraitView.isHidden = true
         
         AgoraVideoCallManager.shared.prepare()
-        AgoraVideoCallManager.shared.setLocalView(self.smallView, uid: self.uid)
-        AgoraVideoCallManager.shared.rtcEngineFirstRemoteVideoDecodedOfUidClosure = { [weak self] _, uid in
-            AgoraVideoCallManager.shared.setRemoteView(self?.fullView, uid: uid)
-            self?.targetId = uid
-        }
+        AgoraVideoCallManager.shared.setLocalView(smallView, uid: localViewId)
         
         beCallView.isHidden = true
         callView.isHidden = false
@@ -297,7 +283,26 @@ extension AgoraSingleCallController {
 // MARK: - Action
 extension AgoraSingleCallController {
     @objc func hangupAction() {
-        AgoraVideoCallManager.shared.callStatus = .hangupNormal
+        
+        let hangupClosure = {
+            AgoraVideoCallManager.shared.callStatus = .hangupNormal
+            AgoraVideoCallManager.shared.callStatus = .idle
+        }
+        
+        if AgoraVideoCallManager.shared.callStatus == .incoming || AgoraVideoCallManager.shared.callStatus == .dialing {
+            let remoteUser = AgoraManager.shared.peerUsers.remote
+            AgoraRTMManager.shared.askToLeaveChannel(remoteUser) { (code) in
+                if code != .ok {
+                    AgoraRTMManager.shared.askToLeaveChannel(remoteUser) { _ in
+                        hangupClosure()
+                    }
+                } else {
+                    hangupClosure()
+                }
+            }
+        } else {
+            hangupClosure()
+        }
     }
     
     @objc func acceptAction() {
@@ -328,73 +333,64 @@ extension AgoraSingleCallController {
     @objc func smallAction() {
         hasSwitchedView = !hasSwitchedView
         if hasSwitchedView {
-            AgoraVideoCallManager.shared.setLocalView(self.fullView, uid: self.uid)
-            AgoraVideoCallManager.shared.setRemoteView(self.smallView, uid: self.targetId)
+            AgoraVideoCallManager.shared.setLocalView(self.fullView, uid: self.localViewId)
+            AgoraVideoCallManager.shared.setRemoteView(self.smallView, uid: self.remoteViewId)
         } else {
-            AgoraVideoCallManager.shared.setLocalView(self.smallView, uid: self.uid)
-            AgoraVideoCallManager.shared.setRemoteView(self.fullView, uid: self.targetId)
+            AgoraVideoCallManager.shared.setLocalView(self.smallView, uid: self.localViewId)
+            AgoraVideoCallManager.shared.setRemoteView(self.fullView, uid: self.remoteViewId)
         }
     }
 }
 
-// MARK: - Network
+// MARK: - Observer
 extension AgoraSingleCallController {
-    
-}
-
-
-
-// MARK: - Delegate Internal
-
-// MARK: -
-
-// MARK: - Delegate External
-
-// MARK: -
-
-// MARK: - Helper
-extension AgoraSingleCallController {
-    func simpleCall() {
-        let cnl = "hello"//randomString()
-        let user = "ddd"
-
-        AgoraVideoCallManager.shared.prepare()
-        AgoraVideoCallManager.shared.setLocalView(smallView, uid: uid)
-        AgoraVideoCallManager.shared.joinChannel(account: user, channel: cnl, success: { (channel) in
-            print("joinChannel", channel)
-        })
+    private func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(didReceiveMessage), name: Notification.Name.YGXQ.DidReceiveMessage, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(videoCallDurationChanged), name: Notification.Name.YGXQ.VideoCallDurationChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didRegisteredLocalUser), name: Notification.Name.YGXQ.DidRegisteredLocalUser, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(firstRemoteVideoDecoded), name: Notification.Name.YGXQ.FirstRemoteVideoDecoded, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(videoCallStatusChanged), name: Notification.Name.YGXQ.VideoCallStatusChanged, object: nil)
     }
     
-    func rtmCall() {
-        let user = "ddd"
-        let toUser = "ppp"
-        
-        AgoraVideoCallManager.shared.prepare()
-        AgoraVideoCallManager.shared.setLocalView(self.smallView, uid: self.uid)
-        AgoraVideoCallManager.shared.rtcEngineFirstRemoteVideoDecodedOfUidClosure = { _, uid in
-            AgoraVideoCallManager.shared.setRemoteView(self.fullView, uid: uid)
+    private func removeObservers() {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func didReceiveMessage(_ note: Notification) {
+        if let box = note.object as? AgoraRTMManager.MessageBox, box.isDisConnectMessage {
+            hangup()
         }
-        
-        AgoraRTMManager.shared.connectToSDK(user: user)
-        AgoraRTMManager.shared.connectionStateClosure = { (state) in
-            if state == .connected {
-                AgoraVideoCallManager.shared.callStatus = .dialing
-                AgoraVideoCallManager.shared.joinChannel(account: user, channel: randomString(), success: { (channel) in
-                    AgoraRTMManager.shared.askToJoinChannel(toUser, channel: channel, completion: { (code) in
-                        if code == .ok {
-                            
-                        } else {
-                            
-                        }
-                    })
-                })
-            } else {
-                
+    }
+    
+    @objc private func videoCallDurationChanged(_ note: Notification) {
+        if let duration = note.object as? Int {
+            nameTimeView.timeLabel.text = duration.timeFormSec()
+        }
+    }
+    
+    @objc private func didRegisteredLocalUser(_ note: Notification) {
+        if let uid = note.object as? UInt {
+            localViewId = uid
+        }
+    }
+    
+    @objc private func firstRemoteVideoDecoded(_ note: Notification) {
+        if let uid = note.object as? UInt {
+            AgoraVideoCallManager.shared.setRemoteView(fullView, uid: uid)
+            remoteViewId = uid
+        }
+    }
+    
+    @objc private func videoCallStatusChanged(_ note: Notification) {
+        if let status = note.object as? AgoraCallStatus {
+            if status == .hangupNormal || status == .hangupUnNormal {
+                hangup()
+            } else if status == .active {
+                showActive()
             }
         }
     }
 }
-
 
 // MARK: - Other
 extension AgoraSingleCallController {
@@ -407,11 +403,6 @@ extension AgoraSingleCallController {
     func hangup() {
         AgoraVideoCallManager.shared.leaveChannel()
         AgoraAudioManager.shared.stop()
-        AgoraManager.shared.dismissCallController()
+        AgoraManager.shared.dismissCallControllerWithAnimation()
     }
-}
-
-// MARK: - Public
-extension AgoraSingleCallController {
-    
 }
