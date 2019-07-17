@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func receiverLinkAction(_ sender: Any) {
-        AgoraRTMManager.shared.connectToSDK(user: "ppp")
+        AgoraRTMManager.shared.connectToSDK(user: "1062")
         AgoraRTMManager.shared.receiveMessageClosure = { msg, user in
             let agoraVC = AgoraSingleCallController()
             agoraVC.account = user
@@ -26,8 +26,8 @@ class ViewController: UIViewController {
     }
     
     @IBAction func senderLinkAction(_ sender: Any) {
-        let user = "ddd"
-        let toUser = "ppp"
+        let user = "123"
+        let toUser = "1062"
         
         if AgoraRTMManager.shared.connectionState == .connected {
             print("目前连接状态")
