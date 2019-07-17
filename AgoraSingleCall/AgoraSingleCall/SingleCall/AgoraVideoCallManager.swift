@@ -14,7 +14,7 @@ class AgoraVideoCallManager: NSObject {
     var agoraKit: AgoraRtcEngineKit!
     
     func setup() {
-        agoraKit = AgoraRtcEngineKit.sharedEngine(withAppId: appId, delegate: self)
+        agoraKit = AgoraRtcEngineKit.sharedEngine(withAppId:  AgoraManager.shared.appId, delegate: self)
     }
     
     var rtcEngineFirstRemoteVideoDecodedOfUidClosure: ((AgoraRtcEngineKit, UInt) -> Void)?
@@ -114,6 +114,10 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     }
     
     /// 错误：无法忽略
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didApiCallExecute error: Int, api: String, result: String) {
+        print(#function, api, result, error)
+    }
+    
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurError errorCode: AgoraErrorCode) {
         print(#function, errorCode.rawValue)
         if errorCode != .noError {

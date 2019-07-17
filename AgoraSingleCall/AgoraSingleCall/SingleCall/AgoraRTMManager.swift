@@ -16,19 +16,20 @@ class AgoraRTMManager: NSObject {
     private var agoraRtmKit: AgoraRtmKit!
     
     func setup() {
-        agoraRtmKit = AgoraRtmKit(appId: appId, delegate: self)
+        agoraRtmKit = AgoraRtmKit(appId: AgoraManager.shared.appId, delegate: self)
     }
     
     /// 连接用户user 到SDK
     func connectToSDK(byToken token: String? = nil, user userId: String) {
         login(byToken: token, user: userId) { (code) in
-            if code == .ok {
-                self.connectionState = .connected
-            } else if code == .alreadyLogin {
-                self.connectionState = .connected
-            } else {
-                self.connectionState = .disconnected
-            }
+            print("login code", code.rawValue)
+//            if code == .ok {
+//                self.connectionState = .connected
+//            } else if code == .alreadyLogin {
+//                self.connectionState = .connected
+//            } else {
+//                self.connectionState = .disconnected
+//            }
         }
     }
     
@@ -59,7 +60,6 @@ class AgoraRTMManager: NSObject {
     
     /// 自己加入频道，并通知对方也加入相同的频道
     func askToJoinChannel(_ uid: String, channel: String, completion: ((AgoraRtmSendPeerMessageErrorCode) -> Void)? = nil) {
-        
         agoraRtmKit.send(AgoraRtmMessage(text: channel), toPeer: uid, completion: completion)
     }
     
@@ -67,9 +67,11 @@ class AgoraRTMManager: NSObject {
     
     var connectionStateClosure: ((AgoraRtmConnectionState) -> Void)?
     
-    private var connectionState = AgoraRtmConnectionState.disconnected {
+    var connectionState = AgoraRtmConnectionState.disconnected {
         didSet {
-            connectionStateClosure?(connectionState)
+            if oldValue != connectionState {
+                connectionStateClosure?(connectionState)
+            }
         }
     }
 }

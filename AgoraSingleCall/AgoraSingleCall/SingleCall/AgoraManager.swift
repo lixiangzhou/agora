@@ -8,10 +8,10 @@
 
 import UIKit
 
-let appId = "b25c785c3d674b7990082d4855daa932"
-
 class AgoraManager {
     static let shared = AgoraManager()
+    let appId = "b25c785c3d674b7990082d4855daa932"
+    
     private init() {}
     
     func setup() {
@@ -88,6 +88,33 @@ extension AgoraManager {
             self.window.frame = CGRect(x: x, y: y, width: self.winWidth, height: self.winHeight)
         }) { (_) in
             UIApplication.shared.endIgnoringInteractionEvents()
+        }
+    }
+    
+    /// 检查对方是否在线，在线就请求一起加入channel
+    func checkOnlineAndCall(to user: String) {
+        print("检查对方是否在线")
+        AgoraRTMManager.shared.checkOnline(for: user) { (online) in
+            if online {
+                print("对方在线，开始进入呼叫模式")
+                AgoraVideoCallManager.shared.callStatus = .dialing
+                AgoraManager.shared.presentCallController(AgoraSingleCallController())
+                print("自己加入channel")
+                AgoraVideoCallManager.shared.joinChannel(account: user, channel: randomString(), success: { (channel) in
+                    print("自己加入成功，请求对方加入channel，开始发送请求消息")
+                    AgoraRTMManager.shared.askToJoinChannel(user, channel: channel, completion: { (code) in
+                        if code == .ok {
+                            print("请求消息，发送成功，自己进入对话模式")
+                            AgoraVideoCallManager.shared.callStatus = .active
+                        } else {
+                            print("请求消息，发送失败，自己进入挂断模式")
+                            AgoraVideoCallManager.shared.callStatus = .hangupUnNormal
+                        }
+                    })
+                })
+            } else {
+                print("对方不在线")
+            }
         }
     }
 }
