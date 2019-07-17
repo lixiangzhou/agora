@@ -147,7 +147,7 @@ extension AgoraSingleCallController {
         
         callView.isHidden = true
         callingView.isHidden = true
-        beCallView.isHidden = false
+        beCallView.isHidden = true
         
         fullBgView.addSubview(fullView)
         fullBgView.addSubview(topView)
