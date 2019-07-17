@@ -294,7 +294,7 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     
     /// 每2s一次，报告每个用户的网络质量
     func rtcEngine(_ engine: AgoraRtcEngineKit, networkQuality uid: UInt, txQuality: AgoraNetworkQuality, rxQuality: AgoraNetworkQuality) {
-        print(#function, quality.rawValue, txQuality.rawValue, rxQuality.rawValue)
+        print(#function, uid, txQuality.rawValue, rxQuality.rawValue)
     }
     
     /// 30s一次
@@ -304,17 +304,17 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     
     /// 2s一次，本地视频流的统计
     func rtcEngine(_ engine: AgoraRtcEngineKit, localVideoStats stats: AgoraRtcLocalVideoStats) {
-        print(#function, stats.rawValue)
+        print(#function, stats)
     }
     
     /// 2s一次，远端视频流的统计
     func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStats stats: AgoraRtcRemoteVideoStats) {
-        print(#function, stats.rawValue)
+        print(#function, stats)
     }
     
     /// 2s一次，远端音频流的统计
     func rtcEngine(_ engine: AgoraRtcEngineKit, remoteAudioStats stats: AgoraRtcRemoteAudioStats) {
-        print(#function, stats.rawValue)
+        print(#function, stats)
     }
     
     /// 2s一次，远端音频流传输层的统计
@@ -361,7 +361,7 @@ extension AgoraVideoCallManager: AgoraRtcEngineDelegate {
     
     /// 5s内本地用户没有收到远端用户的数据流
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurStreamMessageErrorFromUid uid: UInt, streamId: Int, error: Int, missed: Int, cached: Int) {
-        print(#function, uid, streamId, error.rawValue, missed, cached)
+        print(#function, uid, streamId, error, missed, cached)
     }
     
     // MARK: - Miscellaneous Delegate Methods
