@@ -124,13 +124,14 @@ extension AgoraManager {
     /// 检查对方是否在线，在线就请求一起加入channel
     func checkOnlineAndCall(to user: String) {
         print("检查对方是否在线")
+        let local = peerUsers.local
         AgoraRTMManager.shared.checkOnline(for: user) { (online) in
             if online {
                 print("对方在线，开始进入呼叫模式")
                 AgoraVideoCallManager.shared.callStatus = .dialing
                 AgoraManager.shared.presentCallController(AgoraSingleCallController())
                 print("自己加入channel")
-                AgoraVideoCallManager.shared.joinChannel(account: user, channel: randomString(), success: { (channel) in
+                AgoraVideoCallManager.shared.joinChannel(account: local, channel: randomString(), success: { (channel) in
                     print("自己加入成功，请求对方加入channel，开始发送请求消息")
                     AgoraRTMManager.shared.askToJoinChannel(user, channel: channel, completion: { (code) in
                         if code == .ok {
