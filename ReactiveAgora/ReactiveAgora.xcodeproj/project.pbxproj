@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,9 +12,12 @@
 		100A902F22E0506300E8A242 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 100A902D22E0506300E8A242 /* Main.storyboard */; };
 		100A903122E0506600E8A242 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 100A903022E0506600E8A242 /* Assets.xcassets */; };
 		100A903422E0506600E8A242 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 100A903222E0506600E8A242 /* LaunchScreen.storyboard */; };
+		F94448D8B11A484AFACCF1CA /* Pods_ReactiveAgora.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00760B8167878B969F7B4504 /* Pods_ReactiveAgora.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		00760B8167878B969F7B4504 /* Pods_ReactiveAgora.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ReactiveAgora.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0449D81E704FD16D386C559C /* Pods-ReactiveAgora.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveAgora.release.xcconfig"; path = "Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora.release.xcconfig"; sourceTree = "<group>"; };
 		100A902622E0506300E8A242 /* ReactiveAgora.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReactiveAgora.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		100A902922E0506300E8A242 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		100A902B22E0506300E8A242 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -22,6 +25,7 @@
 		100A903022E0506600E8A242 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		100A903322E0506600E8A242 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		100A903522E0506600E8A242 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A54E9D5AC9564E45BA1B27A4 /* Pods-ReactiveAgora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveAgora.debug.xcconfig"; path = "Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F94448D8B11A484AFACCF1CA /* Pods_ReactiveAgora.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,6 +45,8 @@
 			children = (
 				100A902822E0506300E8A242 /* ReactiveAgora */,
 				100A902722E0506300E8A242 /* Products */,
+				3A78B5012D4BDB7BD7BF8C96 /* Pods */,
+				6F92C14F285DA89BA63106D4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -64,6 +71,23 @@
 			path = ReactiveAgora;
 			sourceTree = "<group>";
 		};
+		3A78B5012D4BDB7BD7BF8C96 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				A54E9D5AC9564E45BA1B27A4 /* Pods-ReactiveAgora.debug.xcconfig */,
+				0449D81E704FD16D386C559C /* Pods-ReactiveAgora.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		6F92C14F285DA89BA63106D4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				00760B8167878B969F7B4504 /* Pods_ReactiveAgora.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -71,9 +95,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 100A903822E0506600E8A242 /* Build configuration list for PBXNativeTarget "ReactiveAgora" */;
 			buildPhases = (
+				667D39C03487C471A3B1CCF6 /* [CP] Check Pods Manifest.lock */,
 				100A902222E0506300E8A242 /* Sources */,
 				100A902322E0506300E8A242 /* Frameworks */,
 				100A902422E0506300E8A242 /* Resources */,
+				50096C47E4EEC6C3B0CD247F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -129,6 +155,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		50096C47E4EEC6C3B0CD247F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		667D39C03487C471A3B1CCF6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ReactiveAgora-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		100A902222E0506300E8A242 /* Sources */ = {
@@ -280,11 +348,13 @@
 		};
 		100A903922E0506600E8A242 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A54E9D5AC9564E45BA1B27A4 /* Pods-ReactiveAgora.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = GG8NZVPWNG;
 				INFOPLIST_FILE = ReactiveAgora/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -298,11 +368,13 @@
 		};
 		100A903A22E0506600E8A242 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0449D81E704FD16D386C559C /* Pods-ReactiveAgora.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = GG8NZVPWNG;
 				INFOPLIST_FILE = ReactiveAgora/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
