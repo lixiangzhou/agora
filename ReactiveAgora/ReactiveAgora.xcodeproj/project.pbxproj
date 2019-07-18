@@ -12,6 +12,7 @@
 		100A902F22E0506300E8A242 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 100A902D22E0506300E8A242 /* Main.storyboard */; };
 		100A903122E0506600E8A242 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 100A903022E0506600E8A242 /* Assets.xcassets */; };
 		100A903422E0506600E8A242 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 100A903222E0506600E8A242 /* LaunchScreen.storyboard */; };
+		100A903E22E0568400E8A242 /* ReactiveHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A903D22E0568400E8A242 /* ReactiveHelper.swift */; };
 		F94448D8B11A484AFACCF1CA /* Pods_ReactiveAgora.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00760B8167878B969F7B4504 /* Pods_ReactiveAgora.framework */; };
 /* End PBXBuildFile section */
 
@@ -25,6 +26,7 @@
 		100A903022E0506600E8A242 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		100A903322E0506600E8A242 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		100A903522E0506600E8A242 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		100A903D22E0568400E8A242 /* ReactiveHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactiveHelper.swift; sourceTree = "<group>"; };
 		A54E9D5AC9564E45BA1B27A4 /* Pods-ReactiveAgora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveAgora.debug.xcconfig"; path = "Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -61,6 +63,7 @@
 		100A902822E0506300E8A242 /* ReactiveAgora */ = {
 			isa = PBXGroup;
 			children = (
+				100A903B22E0543200E8A242 /* ReactiveAgora */,
 				100A902922E0506300E8A242 /* AppDelegate.swift */,
 				100A902B22E0506300E8A242 /* ViewController.swift */,
 				100A902D22E0506300E8A242 /* Main.storyboard */,
@@ -69,6 +72,23 @@
 				100A903522E0506600E8A242 /* Info.plist */,
 			);
 			path = ReactiveAgora;
+			sourceTree = "<group>";
+		};
+		100A903B22E0543200E8A242 /* ReactiveAgora */ = {
+			isa = PBXGroup;
+			children = (
+				100A903C22E0565D00E8A242 /* Util */,
+			);
+			name = ReactiveAgora;
+			path = ../../Lib/ReactiveAgora;
+			sourceTree = "<group>";
+		};
+		100A903C22E0565D00E8A242 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				100A903D22E0568400E8A242 /* ReactiveHelper.swift */,
+			);
+			path = Util;
 			sourceTree = "<group>";
 		};
 		3A78B5012D4BDB7BD7BF8C96 /* Pods */ = {
@@ -204,6 +224,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				100A902C22E0506300E8A242 /* ViewController.swift in Sources */,
+				100A903E22E0568400E8A242 /* ReactiveHelper.swift in Sources */,
 				100A902A22E0506300E8A242 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

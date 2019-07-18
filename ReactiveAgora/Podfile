@@ -8,6 +8,6 @@ target 'ReactiveAgora' do
   # Pods for ReactiveAgora
     pod 'AgoraRtcEngine_iOS'
     pod 'AgoraRtm_iOS'
-    pod 'ReactiveSwift'
+    pod 'ReactiveCocoa'
 
 end
