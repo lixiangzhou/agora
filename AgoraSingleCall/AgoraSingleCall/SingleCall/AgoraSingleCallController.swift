@@ -29,6 +29,7 @@ class AgoraSingleCallController: UIViewController {
     }
     
     deinit {
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(hangup), object: nil)
         removeObservers()
         print("AgoraSingleCallController deinit")
     }
@@ -201,6 +202,8 @@ extension AgoraSingleCallController {
     }
     
     private func showDialing() {
+        perform(#selector(hangup), with: nil, afterDelay: 20)
+        
         AgoraAudioManager.shared.play()
         try? AVAudioSession.sharedInstance().setCategory(.playAndRecord)
         smallView.isHidden = true
@@ -215,14 +218,14 @@ extension AgoraSingleCallController {
         AgoraVideoCallManager.shared.setLocalView(fullView, uid: localViewId)
         AgoraVideoCallManager.shared.setRemoteView(nil, uid: remoteViewId)
         
-        
-        
         beCallView.isHidden = true
         callView.isHidden = true
         callingView.isHidden = false
     }
     
     private func showIncoming() {
+        perform(#selector(hangup), with: nil, afterDelay: 20)
+        
         AgoraAudioManager.shared.play()
         try? AVAudioSession.sharedInstance().setCategory(.soloAmbient)
         AgoraAudioManager.shared.triggerVibrate()
@@ -244,6 +247,8 @@ extension AgoraSingleCallController {
     }
     
     private func showActive() {
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(hangup), object: nil)
+        
         AgoraAudioManager.shared.stop()
         smallView.isHidden = false
         minimizeBtn.isHidden = false
@@ -283,25 +288,23 @@ extension AgoraSingleCallController {
 // MARK: - Action
 extension AgoraSingleCallController {
     @objc func hangupAction() {
-        
-        let hangupClosure = {
-            AgoraVideoCallManager.shared.callStatus = .hangupNormal
-            AgoraVideoCallManager.shared.callStatus = .idle
-        }
+        print(#function)
         
         if AgoraVideoCallManager.shared.callStatus == .incoming || AgoraVideoCallManager.shared.callStatus == .dialing {
+            print("askToLeaveChannel")
             let remoteUser = AgoraManager.shared.peerUsers.remote
-            AgoraRTMManager.shared.askToLeaveChannel(remoteUser) { (code) in
+            AgoraRTMManager.shared.askToLeaveChannel(remoteUser) { [weak self](code) in
+                print("askToLeaveChannel", code.rawValue)
                 if code != .ok {
                     AgoraRTMManager.shared.askToLeaveChannel(remoteUser) { _ in
-                        hangupClosure()
+                        self?.toHangupState()
                     }
                 } else {
-                    hangupClosure()
+                    self?.toHangupState()
                 }
             }
         } else {
-            hangupClosure()
+            toHangupState()
         }
     }
     
@@ -393,9 +396,15 @@ extension AgoraSingleCallController {
         self.resetSmallViewPosition()
     }
     
-    func hangup() {
+    @objc private func hangup() {
         AgoraVideoCallManager.shared.leaveChannel()
         AgoraAudioManager.shared.stop()
         AgoraManager.shared.dismissCallControllerWithAnimation()
+    }
+    
+    @objc private func toHangupState() {
+        print(#function)
+        AgoraVideoCallManager.shared.callStatus = .hangupNormal
+        AgoraVideoCallManager.shared.callStatus = .idle
     }
 }

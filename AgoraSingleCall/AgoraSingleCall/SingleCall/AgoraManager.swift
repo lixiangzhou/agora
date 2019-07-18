@@ -20,7 +20,7 @@ class AgoraManager {
         AgoraVideoCallManager.shared.setup()
         AgoraRTMManager.shared.setup()
         
-        
+        addObservers()
     }
     
     var peerUsers = PeerUsers(local: "", remote: "")
@@ -59,7 +59,7 @@ extension AgoraManager {
     
     func dismissCallControllerWithAnimation() {
         if window != nil {
-            UIView.animate(withDuration: 1, animations: {
+            UIView.animate(withDuration: 0.5, animations: {
                 self.window.alpha = 0
             }) { (_) in
                 self.dismissCallController()
@@ -108,7 +108,11 @@ extension AgoraManager {
         }
     }
     
-    func startCall() {
+    func startCall(_ remote: String) {
+        var peer = AgoraManager.shared.peerUsers
+        peer.remote = remote
+        AgoraManager.shared.peerUsers = peer
+        
         AgoraManager.shared.role = .sender
         if AgoraRTMManager.shared.connectionState == .connected {
             AgoraManager.shared.checkOnlineAndCall(to: AgoraManager.shared.peerUsers.remote)

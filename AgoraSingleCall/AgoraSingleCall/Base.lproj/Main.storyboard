@@ -35,7 +35,7 @@
                                     <constraint firstAttribute="width" constant="100" id="Es2-uu-uPu"/>
                                     <constraint firstAttribute="height" constant="40" id="X6R-Pu-ZBl"/>
                                 </constraints>
-                                <state key="normal" title="发起端连接"/>
+                                <state key="normal" title="发起端连接60"/>
                                 <connections>
                                     <action selector="senderLinkAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="uVx-KH-RhZ"/>
                                 </connections>
@@ -46,9 +46,9 @@
                                     <constraint firstAttribute="width" constant="100" id="NC5-g5-Vtv"/>
                                     <constraint firstAttribute="height" constant="40" id="koI-ga-C9d"/>
                                 </constraints>
-                                <state key="normal" title="发起端连接2"/>
+                                <state key="normal" title="发起端连接62"/>
                                 <connections>
-                                    <action selector="senderLinkAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fJz-cK-rN4"/>
+                                    <action selector="senderLinkAction2:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wM0-BH-11t"/>
                                 </connections>
                             </button>
                         </subviews>
