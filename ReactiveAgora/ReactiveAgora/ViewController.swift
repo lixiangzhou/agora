@@ -22,7 +22,7 @@ class ViewController: UIViewController {
         rtmProxy.setup()
         
         
-        rtmProxy.connectToSDK(user: "hello")
+        rtmProxy.login(user: "test")
         
         rtmProxy.connectionStateChangedSignal.observeValues { (kit, state, reason) in
             Agora.log("signal", kit, state, reason)
