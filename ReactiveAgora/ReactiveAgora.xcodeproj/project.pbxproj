@@ -13,6 +13,10 @@
 		100A903122E0506600E8A242 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 100A903022E0506600E8A242 /* Assets.xcassets */; };
 		100A903422E0506600E8A242 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 100A903222E0506600E8A242 /* LaunchScreen.storyboard */; };
 		100A903E22E0568400E8A242 /* ReactiveHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A903D22E0568400E8A242 /* ReactiveHelper.swift */; };
+		100A904222E05B7800E8A242 /* AgoraRTMProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904122E05B7800E8A242 /* AgoraRTMProxy.swift */; };
+		100A904522E05C0100E8A242 /* Agora.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904422E05C0100E8A242 /* Agora.swift */; };
+		100A904722E05CB100E8A242 /* LogUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904622E05CB100E8A242 /* LogUtil.swift */; };
+		100A904922E075A400E8A242 /* AgoraRTCProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904822E075A400E8A242 /* AgoraRTCProxy.swift */; };
 		F94448D8B11A484AFACCF1CA /* Pods_ReactiveAgora.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00760B8167878B969F7B4504 /* Pods_ReactiveAgora.framework */; };
 /* End PBXBuildFile section */
 
@@ -27,6 +31,10 @@
 		100A903322E0506600E8A242 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		100A903522E0506600E8A242 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		100A903D22E0568400E8A242 /* ReactiveHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactiveHelper.swift; sourceTree = "<group>"; };
+		100A904122E05B7800E8A242 /* AgoraRTMProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTMProxy.swift; sourceTree = "<group>"; };
+		100A904422E05C0100E8A242 /* Agora.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Agora.swift; sourceTree = "<group>"; };
+		100A904622E05CB100E8A242 /* LogUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogUtil.swift; sourceTree = "<group>"; };
+		100A904822E075A400E8A242 /* AgoraRTCProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTCProxy.swift; sourceTree = "<group>"; };
 		A54E9D5AC9564E45BA1B27A4 /* Pods-ReactiveAgora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveAgora.debug.xcconfig"; path = "Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -77,6 +85,9 @@
 		100A903B22E0543200E8A242 /* ReactiveAgora */ = {
 			isa = PBXGroup;
 			children = (
+				100A904322E05BC500E8A242 /* Agora */,
+				100A904022E05AF500E8A242 /* RTC */,
+				100A903F22E05AF000E8A242 /* RTM */,
 				100A903C22E0565D00E8A242 /* Util */,
 			);
 			name = ReactiveAgora;
@@ -87,8 +98,33 @@
 			isa = PBXGroup;
 			children = (
 				100A903D22E0568400E8A242 /* ReactiveHelper.swift */,
+				100A904622E05CB100E8A242 /* LogUtil.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		100A903F22E05AF000E8A242 /* RTM */ = {
+			isa = PBXGroup;
+			children = (
+				100A904122E05B7800E8A242 /* AgoraRTMProxy.swift */,
+			);
+			path = RTM;
+			sourceTree = "<group>";
+		};
+		100A904022E05AF500E8A242 /* RTC */ = {
+			isa = PBXGroup;
+			children = (
+				100A904822E075A400E8A242 /* AgoraRTCProxy.swift */,
+			);
+			path = RTC;
+			sourceTree = "<group>";
+		};
+		100A904322E05BC500E8A242 /* Agora */ = {
+			isa = PBXGroup;
+			children = (
+				100A904422E05C0100E8A242 /* Agora.swift */,
+			);
+			path = Agora;
 			sourceTree = "<group>";
 		};
 		3A78B5012D4BDB7BD7BF8C96 /* Pods */ = {
@@ -223,8 +259,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				100A904522E05C0100E8A242 /* Agora.swift in Sources */,
+				100A904922E075A400E8A242 /* AgoraRTCProxy.swift in Sources */,
 				100A902C22E0506300E8A242 /* ViewController.swift in Sources */,
+				100A904222E05B7800E8A242 /* AgoraRTMProxy.swift in Sources */,
 				100A903E22E0568400E8A242 /* ReactiveHelper.swift in Sources */,
+				100A904722E05CB100E8A242 /* LogUtil.swift in Sources */,
 				100A902A22E0506300E8A242 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

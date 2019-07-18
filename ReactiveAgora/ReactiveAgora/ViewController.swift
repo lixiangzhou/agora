@@ -7,14 +7,26 @@
 //
 
 import UIKit
+import ReactiveCocoa
+import ReactiveSwift
+import AgoraRtcEngineKit
+import AgoraRtmKit
 
 class ViewController: UIViewController {
+    
+    let rtmProxy = AgoraRTMProxy()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        rtmProxy.setup()
+        
+        
+        rtmProxy.connectToSDK(user: "hello")
+        
+        rtmProxy.connectionStateChangedSignal.observeValues { (kit, state, reason) in
+            Agora.log("signal", kit, state, reason)
+        }
     }
-
-
 }
 
