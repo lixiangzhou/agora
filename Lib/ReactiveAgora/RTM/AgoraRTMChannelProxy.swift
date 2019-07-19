@@ -11,6 +11,14 @@ import AgoraRtmKit
 import ReactiveSwift
 
 class AgoraRTMChannelProxy: NSObject {
+    
+    /// 创建频道代理
+    convenience init(channel: AgoraRtmChannel) {
+        self.init()
+        rtmChannel = channel
+        rtmChannel.channelDelegate = self
+    }
+    
     private(set) var rtmChannel: AgoraRtmChannel!
     
     var rtmKit: AgoraRtmKit {
@@ -23,32 +31,32 @@ class AgoraRTMChannelProxy: NSObject {
     }
     
     // MARK: - Delegate Signal
+    
     /// 成员离开代理方法信号量
     let (memberLeftSignal, memberLeftObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
+    
     /// 成员加入代理方法信号量
     let (memberJoinedSignal, memberJoinedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
+    
     /// 收到消息代理方法信号量
     let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMessage, AgoraRtmMember), Never>.pipe()
     
+    // MARK: - Method CallBack Signal
     /// 加入频道方法回调信号量
     let (joinSignal, joinObserver) = Signal<AgoraRtmJoinChannelErrorCode, Never>.pipe()
+    
     /// 离开频道方法回调信号量
     let (leaveSignal, leaveObserver) = Signal<AgoraRtmLeaveChannelErrorCode, Never>.pipe()
+    
     /// 发送消息方法回调信号量
     let (sendMsgSignal, sendMsgObserver) = Signal<((AgoraRtmMessage), AgoraRtmSendChannelMessageErrorCode), Never>.pipe()
+    
     /// 获取成员列表方法回调信号量
     let (getMembersSignal, getMembersObserver) = Signal<([AgoraRtmMember]?, AgoraRtmGetMembersErrorCode), Never>.pipe()
-    
-    /// 创建频道代理
-    convenience init(channel: AgoraRtmChannel) {
-        self.init()
-        rtmChannel = channel
-        rtmChannel.channelDelegate = self
-    }
 }
 
+// MARK: - Method Proxy
 extension AgoraRTMChannelProxy {
-    
     /// 加入频道
     ///
     /// - 成功：
@@ -111,6 +119,7 @@ extension AgoraRTMChannelProxy {
     }
 }
 
+// MARK: - AgoraRtmChannelDelegate
 extension AgoraRTMChannelProxy: AgoraRtmChannelDelegate {
     func channel(_ channel: AgoraRtmChannel, memberLeft member: AgoraRtmMember) {
         Agora.log(channel, member)

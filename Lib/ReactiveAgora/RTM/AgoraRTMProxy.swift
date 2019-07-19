@@ -85,6 +85,7 @@ extension AgoraRTMProxy {
     }
 }
 
+// MARK: - Method Proxy
 extension AgoraRTMProxy {
     
     /// 登录RTM系统
@@ -210,8 +211,7 @@ extension AgoraRTMProxy {
     }
 }
 
-
-// MARK: - 定制方法(技术预览)
+// MARK: 定制方法(技术预览)
 /// 通过使用JSON选项配置SDK，提供技术预览功能或特殊定制
 /// **注意：**
 extension AgoraRTMProxy {
@@ -269,6 +269,7 @@ extension AgoraRTMProxy {
     }
 }
 
+// MARK: - AgoraRtmDelegate
 extension AgoraRTMProxy: AgoraRtmDelegate {
     func rtmKit(_ kit: AgoraRtmKit, connectionStateChanged state: AgoraRtmConnectionState, reason: AgoraRtmConnectionChangeReason) {
         Agora.log(kit, state.rawValue, reason.rawValue)
