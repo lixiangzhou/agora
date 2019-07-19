@@ -15,6 +15,18 @@ class AgoraRTMProxy: NSObject {
     /// RTM 支持多个 AgoraRtmKit，AgoraRtmKit 中的所有方法都是异步的（除了 destroyChannel(withId: ) 方法）
     private(set) var rtmKit: AgoraRtmKit!
     
+    /// AgoraRtmCallKit
+    var rtmCallKit: AgoraRtmCallKit? {
+        set { rtmKit.rtmCallKit = newValue }
+        get { return rtmKit.rtmCallKit }
+    }
+    
+    /// AgoraRtmDelegate
+    var agoraRtmDelegate: AgoraRtmDelegate? {
+        set { rtmKit.agoraRtmDelegate = newValue }
+        get { return rtmKit.agoraRtmDelegate }
+    }
+    
     // MARK: - Delegate Signal
     /// 连接状态改变代理方法回调信号量
     let (connectionStateChangedSignal, connectionStateChangedObserver) = Signal<(AgoraRtmKit, AgoraRtmConnectionState, AgoraRtmConnectionChangeReason), Never>.pipe()
@@ -40,7 +52,7 @@ class AgoraRTMProxy: NSObject {
     let (sendMsgSignal, sendMsgObserver) = Signal<((AgoraRtmMessage, String, AgoraRtmSendMessageOptions?), AgoraRtmSendPeerMessageErrorCode), Never>.pipe()
     
     /// 创建频道方法回调信号量 <(channelId, delegate), AgoraRtmChannel?>
-    let (createChannelSignal, createChannelObserver) = Signal<((String, AgoraRtmChannelDelegate), AgoraRtmChannel?), Never>.pipe()
+    let (createChannelSignal, createChannelObserver) = Signal<((String, AgoraRtmChannelDelegate?), AgoraRtmChannel?), Never>.pipe()
     
     /// 销毁频道方法回调信号量 <(channelId), Bool>
     let (destroyChannelSignal, destroyChannelObserver) = Signal<((String), Bool), Never>.pipe()
@@ -164,8 +176,8 @@ extension AgoraRTMProxy {
     ///   - channelId: RTM中频道的唯一名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","。**注意：**不能设置userId为nil，也不能以空格开头
     ///   - delegate: AgoraRtmChannelDelegate
     /// - Returns: 成功时：返回AgoraRtmChannel；失败时：返回nil（可能的原因：channelId无效；已存在相同的channelId；频道数量超限）
-    func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate) -> AgoraRtmChannel? {
-        Agora.log(channelId, delegate)
+    func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate?) -> AgoraRtmChannel? {
+        Agora.log(channelId, delegate as Any)
         let channel = rtmKit.createChannel(withId: channelId, delegate: delegate)
         createChannelObserver.send(value: ((channelId, delegate), channel))
         return channel
@@ -254,14 +266,6 @@ extension AgoraRTMProxy {
             self.getUserAllAttributesObserver.send(value: ((userId), attributes, userID, code))
             completion?(attributes, userId, code)
         }
-    }
-}
-
-extension AgoraRTMProxy {
-    
-    /// AgoraRtmCallKit
-    var rtmCallKit: AgoraRtmCallKit? {
-        return rtmKit.rtmCallKit
     }
 }
 
