@@ -13,11 +13,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        let string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        let data = string.data(using: .utf8)!
-        print(string.count)
-        print(data.count)
-        print(NSData(data: data).length)
+        
+        AgoraRTMManager.shared.addLocal(name: "MY NAME", portrait: "http://image.baidu.com/search/detail?ct=503316480&z=undefined&tn=baiduimagedetail&ipn=d&word=图标&step_word=&ie=utf-8&in=&cl=2&lm=-1&st=undefined&hd=undefined&latest=undefined&copyright=undefined&cs=129764643,3625725045&os=1795269128,411523297&simid=4034654014,800824514&pn=35&rn=1&di=32340&ln=1235&fr=&fmq=1563518909963_R&fm=&ic=undefined&s=undefined&se=&sme=&tab=0&width=undefined&height=undefined&face=undefined&is=0,0&istype=0&ist=&jit=&bdtype=0&spn=0&pi=0&gsm=0&objurl=http%3A%2F%2Fdpic.tiankong.com%2Fzk%2Fnh%2FQJ8122580525.jpg&rpstart=0&rpnum=0&adpicid=0&force=undefined")
     }
     
     

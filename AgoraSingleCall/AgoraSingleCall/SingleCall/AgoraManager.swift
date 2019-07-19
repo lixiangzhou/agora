@@ -115,6 +115,7 @@ extension AgoraManager {
         
         AgoraManager.shared.role = .sender
         if AgoraRTMManager.shared.connectionState == .connected {
+            AgoraRTMManager.shared.addOrUpdateAttributes()
             AgoraManager.shared.checkOnlineAndCall(to: AgoraManager.shared.peerUsers.remote)
         } else {
             AgoraRTMManager.shared.connectToSDK(user: AgoraManager.shared.peerUsers.local)
@@ -229,6 +230,7 @@ extension AgoraManager {
             if let box = note.object as? AgoraRTMManager.ConnectionStateBox, AgoraManager.shared.role == .sender {
                 if box.state == .connected {    // 连接成功
                     print("连接成功 ", box.state.rawValue)
+                    AgoraRTMManager.shared.addOrUpdateAttributes()
                     AgoraManager.shared.checkOnlineAndCall(to: box.remotePeer)
                 } else {
                     print("连接失败，不能通知到对方加入 channel")
