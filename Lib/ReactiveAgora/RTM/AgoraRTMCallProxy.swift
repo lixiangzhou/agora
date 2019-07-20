@@ -90,8 +90,8 @@ extension AgoraRTMCallProxy {
     func send(_ localInvitation: AgoraRtmLocalInvitation, completion: AgoraRtmLocalInvitationSendBlock? = nil) {
         Agora.log(localInvitation)
         callKit.send(localInvitation) { [weak self] (code) in
-            self?.sendInvitationObserver.send(value: ((localInvitation), code))
             completion?(code)
+            self?.sendInvitationObserver.send(value: ((localInvitation), code))
         }
     }
     
@@ -108,8 +108,8 @@ extension AgoraRTMCallProxy {
     func cancel(_ localInvitation: AgoraRtmLocalInvitation, completion: AgoraRtmLocalInvitationCancelBlock? = nil) {
         Agora.log(localInvitation)
         callKit.cancel(localInvitation) { [weak self] (code) in
-            self?.cancelInvitationObserver.send(value: ((localInvitation), code))
             completion?(code)
+            self?.cancelInvitationObserver.send(value: ((localInvitation), code))
         }
     }
     
@@ -126,8 +126,8 @@ extension AgoraRTMCallProxy {
     func accept(_ remoteInvitation: AgoraRtmRemoteInvitation, completion: AgoraRtmRemoteInvitationAcceptBlock? = nil) {
         Agora.log(remoteInvitation)
         callKit.accept(remoteInvitation) { [weak self] (code) in
-            self?.acceptInvitationObserver.send(value: ((remoteInvitation), code))
             completion?(code)
+            self?.acceptInvitationObserver.send(value: ((remoteInvitation), code))
         }
     }
     
@@ -144,8 +144,8 @@ extension AgoraRTMCallProxy {
     func refuse(_ remoteInvitation: AgoraRtmRemoteInvitation, completion: AgoraRtmRemoteInvitationRefuseBlock? = nil) {
         Agora.log(remoteInvitation)
         callKit.refuse(remoteInvitation) { [weak self] (code) in
-            self?.refuseInvitationObserver.send(value: ((remoteInvitation), code))
             completion?(code)
+            self?.refuseInvitationObserver.send(value: ((remoteInvitation), code))
         }
     }
 }
@@ -173,7 +173,7 @@ extension AgoraRTMCallProxy: AgoraRtmCallDelegate {
     }
     
     func rtmCallKit(_ callKit: AgoraRtmCallKit, localInvitationFailure localInvitation: AgoraRtmLocalInvitation, errorCode: AgoraRtmLocalInvitationErrorCode) {
-        Agora.log(callKit, localInvitation, errorCode.rawValue)
+        Agora.log(callKit, localInvitation, errorCode, errorCode.rawValue)
         localInvitationFailureObserver.send(value: (callKit, localInvitation, errorCode))
     }
     
@@ -198,7 +198,7 @@ extension AgoraRTMCallProxy: AgoraRtmCallDelegate {
     }
     
     func rtmCallKit(_ callKit: AgoraRtmCallKit, remoteInvitationFailure remoteInvitation: AgoraRtmRemoteInvitation, errorCode: AgoraRtmRemoteInvitationErrorCode) {
-        Agora.log(callKit, remoteInvitation, errorCode.rawValue)
+        Agora.log(callKit, remoteInvitation, errorCode, errorCode.rawValue)
         remoteInvitationFailureObserver.send(value: (callKit, remoteInvitation, errorCode))
     }
 }

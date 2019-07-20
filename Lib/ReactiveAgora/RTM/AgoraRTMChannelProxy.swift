@@ -68,8 +68,8 @@ extension AgoraRTMChannelProxy {
     func join(completion: AgoraRtmJoinChannelBlock? = nil) {
         Agora.log()
         rtmChannel.join { [weak self] (code) in
-            self?.joinObserver.send(value: code)
             completion?(code)
+            self?.joinObserver.send(value: code)
         }
     }
     
@@ -83,8 +83,8 @@ extension AgoraRTMChannelProxy {
     func leave(completion: AgoraRtmLeaveChannelBlock? = nil) {
         Agora.log()
         rtmChannel.leave { [weak self] (code) in
-            self?.leaveObserver.send(value: code)
             completion?(code)
+            self?.leaveObserver.send(value: code)
         }
     }
     
@@ -102,8 +102,8 @@ extension AgoraRTMChannelProxy {
     func send(_ message: AgoraRtmMessage, completion: AgoraRtmSendChannelMessageBlock? = nil) {
         Agora.log(message)
         rtmChannel.send(message) { [weak self] (code) in
-            self?.sendMsgObserver.send(value: ((message), code))
             completion?(code)
+            self?.sendMsgObserver.send(value: ((message), code))
         }
     }
     
@@ -113,8 +113,8 @@ extension AgoraRTMChannelProxy {
     func getMembers(_ completion: AgoraRtmGetMembersBlock? = nil) {
         Agora.log()
         rtmChannel.getMembersWithCompletion { [weak self] (members, code) in
-            self?.getMembersObserver.send(value: (members, code))
             completion?(members, code)
+            self?.getMembersObserver.send(value: (members, code))
         }
     }
 }

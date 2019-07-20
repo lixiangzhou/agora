@@ -105,10 +105,9 @@ extension AgoraRTMProxy {
     ///   - completion: AgoraRtmLoginBlock 完成回调。查看 AgoraRtmLoginErrorCode 错误码
     func login(byToken token: String? = nil, user userId: String, completion: AgoraRtmLoginBlock? = nil) {
         Agora.log(token ?? "No Token", userId)
-        
         rtmKit.login(byToken: token, user: userId) { [weak self] in
-            self?.loginObserver.send(value: ((token, userId), $0))
             completion?($0)
+            self?.loginObserver.send(value: ((token, userId), $0))
         }
     }
     
@@ -120,8 +119,8 @@ extension AgoraRTMProxy {
     func logout(completion: AgoraRtmLogoutBlock? = nil) {
         Agora.log()
         rtmKit.logout { [weak self] in
-            self?.logoutObserver.send(value: $0)
             completion?($0)
+            self?.logoutObserver.send(value: $0)
         }
     }
     
@@ -135,8 +134,8 @@ extension AgoraRTMProxy {
     func renewToken(_ token: String, completion: AgoraRtmRenewTokenBlock? = nil) {
         Agora.log(token)
         rtmKit.renewToken(token) { [weak self] (token, code) in
-            self?.renewTokenObserver.send(value: (token, code))
             completion?(token, code)
+            self?.renewTokenObserver.send(value: (token, code))
         }
     }
     
@@ -156,16 +155,16 @@ extension AgoraRTMProxy {
     func send(_ message: AgoraRtmMessage, toPeer: String, options: AgoraRtmSendMessageOptions, completion: AgoraRtmSendPeerMessageBlock? = nil) {
         Agora.log(message, toPeer, options)
         rtmKit.send(message, toPeer: toPeer, sendMessageOptions: options) { [weak self] (code) in
-            self?.sendMsgObserver.send(value: ((message, toPeer, options), code))
             completion?(code)
+            self?.sendMsgObserver.send(value: ((message, toPeer, options), code))
         }
     }
     
     func send(_ message: AgoraRtmMessage, toPeer: String, completion: AgoraRtmSendPeerMessageBlock? = nil) {
         Agora.log(message, toPeer)
         rtmKit.send(message, toPeer: toPeer) { [weak self] (code) in
-            self?.sendMsgObserver.send(value: ((message, toPeer, nil), code))
             completion?(code)
+            self?.sendMsgObserver.send(value: ((message, toPeer, nil), code))
         }
     }
     
@@ -177,7 +176,7 @@ extension AgoraRTMProxy {
     ///   - channelId: RTM中频道的唯一名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","。**注意：**不能设置userId为nil，也不能以空格开头
     ///   - delegate: AgoraRtmChannelDelegate
     /// - Returns: 成功时：返回AgoraRtmChannel；失败时：返回nil（可能的原因：channelId无效；已存在相同的channelId；频道数量超限）
-    func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate?) -> AgoraRtmChannel? {
+    func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate? = nil) -> AgoraRtmChannel? {
         Agora.log(channelId, delegate as Any)
         let channel = rtmKit.createChannel(withId: channelId, delegate: delegate)
         createChannelObserver.send(value: ((channelId, delegate), channel))
@@ -205,8 +204,8 @@ extension AgoraRTMProxy {
     func queryPeersOnlineStatus(peerIds: [String], completion: AgoraRtmQueryPeersOnlineBlock? = nil) {
         Agora.log(peerIds)
         rtmKit.queryPeersOnlineStatus(peerIds) { [weak self] (statuses, code) in
-            self?.queryPeersOnlineStatusObserver.send(value: ((peerIds), statuses, code))
             completion?(statuses, code)
+            self?.queryPeersOnlineStatusObserver.send(value: ((peerIds), statuses, code))
         }
     }
 }
@@ -223,48 +222,48 @@ extension AgoraRTMProxy {
     func setLocalUserAttributes(_ attributes: [AgoraRtmAttribute]?, completion: AgoraRtmSetLocalUserAttributesBlock? = nil) {
         Agora.log(attributes as Any)
         rtmKit.setLocalUserAttributes(attributes) { [weak self] (code) in
-            self?.setLocalUserAttributesObserver.send(value: ((attributes), code))
             completion?(code)
+            self?.setLocalUserAttributesObserver.send(value: ((attributes), code))
         }
     }
     
     func addOrUpdateLocalUserAttributes(_ attributes: [AgoraRtmAttribute]?, completion: AgoraRtmAddOrUpdateLocalUserAttributesBlock? = nil) {
         Agora.log(attributes as Any)
         rtmKit.addOrUpdateLocalUserAttributes(attributes) { [weak self] (code) in
-            self?.addOrUpdateLocalUserAttributesObserver.send(value: ((attributes), code))
             completion?(code)
+            self?.addOrUpdateLocalUserAttributesObserver.send(value: ((attributes), code))
         }
     }
     
     func deleteLocalUserAttributes(byKeys: [String]?, completion: AgoraRtmDeleteLocalUserAttributesBlock? = nil) {
         Agora.log(byKeys as Any)
         rtmKit.deleteLocalUserAttributes(byKeys: byKeys) { [weak self] (code) in
-            self?.deleteLocalUserAttributesObserver.send(value: ((byKeys), code))
             completion?(code)
+            self?.deleteLocalUserAttributesObserver.send(value: ((byKeys), code))
         }
     }
     
     func clearLocalUserAttributes(completion: AgoraRtmClearLocalUserAttributesBlock? = nil) {
         Agora.log()
         rtmKit.clearLocalUserAttributes { [weak self] (code) in
-            self?.clearLocalUserAttributesObserver.send(value: code)
             completion?(code)
+            self?.clearLocalUserAttributesObserver.send(value: code)
         }
     }
     
     func getUserAttributes(_ userId: String, byKeys: [String]?, completion: AgoraRtmGetUserAttributesBlock? = nil) {
         Agora.log(userId, byKeys as Any)
         rtmKit.getUserAttributes(userId, byKeys: byKeys) { [weak self] (attributes, userID, code) in
-            self?.getUserAttributesObserver.send(value: ((userId, byKeys), attributes, userID, code))
             completion?(attributes, userId, code)
+            self?.getUserAttributesObserver.send(value: ((userId, byKeys), attributes, userID, code))
         }
     }
     
     func getUserAllAttributes(_ userId: String, completion: AgoraRtmGetUserAttributesBlock? = nil) {
         Agora.log(userId)
         rtmKit.getUserAllAttributes(userId) { (attributes, userID, code) in
-            self.getUserAllAttributesObserver.send(value: ((userId), attributes, userID, code))
             completion?(attributes, userId, code)
+            self.getUserAllAttributesObserver.send(value: ((userId), attributes, userID, code))
         }
     }
 }
@@ -272,7 +271,7 @@ extension AgoraRTMProxy {
 // MARK: - AgoraRtmDelegate
 extension AgoraRTMProxy: AgoraRtmDelegate {
     func rtmKit(_ kit: AgoraRtmKit, connectionStateChanged state: AgoraRtmConnectionState, reason: AgoraRtmConnectionChangeReason) {
-        Agora.log(kit, state.rawValue, reason.rawValue)
+        Agora.log(kit, state, state.rawValue, reason, reason.rawValue)
         connectionStateChangedObserver.send(value: (kit, state, reason))
     }
     

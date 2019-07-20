@@ -10,6 +10,20 @@ import Foundation
 
 private let rtcProxyName = simpleClassName(AgoraRTCProxy.classForCoder())
 private let rtmProxyName = simpleClassName(AgoraRTMProxy.classForCoder())
+private let rtmChannelProxyName = simpleClassName(AgoraRTMChannelProxy.classForCoder())
+private let rtmCallProxyName = simpleClassName(AgoraRTMCallProxy.classForCoder())
+
+struct LogEnableModel {
+    let name: String
+    let enalbed: Bool
+}
+
+private let logConfig = [
+    LogEnableModel(name: simpleClassName(AgoraRTMProxy.classForCoder()), enalbed: true),
+    LogEnableModel(name: simpleClassName(AgoraRTMChannelProxy.classForCoder()), enalbed: true),
+    LogEnableModel(name: simpleClassName(AgoraRTMCallProxy.classForCoder()), enalbed: true),
+    LogEnableModel(name: simpleClassName(AgoraRTCProxy.classForCoder()), enalbed: true)
+]
 
 extension Agora {
     static func log(_ items: Any..., line: Int = #line, file: String = #file, function: String = #function) {
@@ -24,18 +38,19 @@ extension Agora {
             result += "\(item) "
         }
         
-        if fileName == rtmProxyName {
-            if logRTMDelegateMethod {
+        func logIf(_ enabled: Bool) {
+            if enabled {
                 print(result)
             }
-        } else if fileName == rtcProxyName {
-            if logRTCDelegateMethod {
-                print(result)
-            }
+        }
+        
+        if let idx = logConfig.firstIndex(where: { $0.name == fileName }) {
+            logIf(logConfig[idx].enalbed)
         } else {
-            print(result)
+            logIf(true)
         }
     }
+    
 }
 
 private func simpleClassName(_ clazz: AnyClass) -> String {
