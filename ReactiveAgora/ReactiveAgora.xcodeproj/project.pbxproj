@@ -16,9 +16,9 @@
 		100A904222E05B7800E8A242 /* AgoraRTMProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904122E05B7800E8A242 /* AgoraRTMProxy.swift */; };
 		100A904522E05C0100E8A242 /* Agora.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904422E05C0100E8A242 /* Agora.swift */; };
 		100A904722E05CB100E8A242 /* LogUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904622E05CB100E8A242 /* LogUtil.swift */; };
-		100A904922E075A400E8A242 /* AgoraRTCProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904822E075A400E8A242 /* AgoraRTCProxy.swift */; };
 		100A904B22E19A2600E8A242 /* AgoraRTMChannelProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100A904A22E19A2600E8A242 /* AgoraRTMChannelProxy.swift */; };
 		1041311A22E1B3A300E11D47 /* AgoraRTMCallProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1041311922E1B3A300E11D47 /* AgoraRTMCallProxy.swift */; };
+		1041311C22E313A800E11D47 /* AgoraRTCEngineProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1041311B22E313A800E11D47 /* AgoraRTCEngineProxy.swift */; };
 		F94448D8B11A484AFACCF1CA /* Pods_ReactiveAgora.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00760B8167878B969F7B4504 /* Pods_ReactiveAgora.framework */; };
 /* End PBXBuildFile section */
 
@@ -36,9 +36,9 @@
 		100A904122E05B7800E8A242 /* AgoraRTMProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTMProxy.swift; sourceTree = "<group>"; };
 		100A904422E05C0100E8A242 /* Agora.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Agora.swift; sourceTree = "<group>"; };
 		100A904622E05CB100E8A242 /* LogUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogUtil.swift; sourceTree = "<group>"; };
-		100A904822E075A400E8A242 /* AgoraRTCProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTCProxy.swift; sourceTree = "<group>"; };
 		100A904A22E19A2600E8A242 /* AgoraRTMChannelProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTMChannelProxy.swift; sourceTree = "<group>"; };
 		1041311922E1B3A300E11D47 /* AgoraRTMCallProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTMCallProxy.swift; sourceTree = "<group>"; };
+		1041311B22E313A800E11D47 /* AgoraRTCEngineProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgoraRTCEngineProxy.swift; sourceTree = "<group>"; };
 		A54E9D5AC9564E45BA1B27A4 /* Pods-ReactiveAgora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveAgora.debug.xcconfig"; path = "Target Support Files/Pods-ReactiveAgora/Pods-ReactiveAgora.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -120,7 +120,7 @@
 		100A904022E05AF500E8A242 /* RTC */ = {
 			isa = PBXGroup;
 			children = (
-				100A904822E075A400E8A242 /* AgoraRTCProxy.swift */,
+				1041311B22E313A800E11D47 /* AgoraRTCEngineProxy.swift */,
 			);
 			path = RTC;
 			sourceTree = "<group>";
@@ -266,7 +266,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				100A904522E05C0100E8A242 /* Agora.swift in Sources */,
-				100A904922E075A400E8A242 /* AgoraRTCProxy.swift in Sources */,
+				1041311C22E313A800E11D47 /* AgoraRTCEngineProxy.swift in Sources */,
 				100A902C22E0506300E8A242 /* ViewController.swift in Sources */,
 				100A904222E05B7800E8A242 /* AgoraRTMProxy.swift in Sources */,
 				100A903E22E0568400E8A242 /* ReactiveHelper.swift in Sources */,

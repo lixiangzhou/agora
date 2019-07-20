@@ -12,7 +12,15 @@ import ReactiveSwift
 
 class AgoraRTMProxy: NSObject {
     
-    /// RTM 支持多个 AgoraRtmKit，AgoraRtmKit 中的所有方法都是异步的（除了 destroyChannel(withId: ) 方法）
+    /// 创建 AgoraRtmKit Proxy
+    ///
+    /// - Parameter delegate: AgoraRtmDelegate，如果为nil，则默认代理为自己
+    convenience init(delegate: AgoraRtmDelegate? = nil) {
+        self.init()  
+        rtmKit = AgoraRtmKit(appId: agoraAppID, delegate: delegate ?? self)
+    }
+    
+    /// AgoraRtmKit 是RTM的入口。RTM 支持多个 AgoraRtmKit，AgoraRtmKit 中的所有方法都是异步的（除了 destroyChannel(withId: ) 方法）
     private(set) var rtmKit: AgoraRtmKit!
     
     /// AgoraRtmCallKit
@@ -26,16 +34,6 @@ class AgoraRTMProxy: NSObject {
         set { rtmKit.agoraRtmDelegate = newValue }
         get { return rtmKit.agoraRtmDelegate }
     }
-    
-    // MARK: - Delegate Signal
-    /// 连接状态改变代理方法回调信号量
-    let (connectionStateChangedSignal, connectionStateChangedObserver) = Signal<(AgoraRtmKit, AgoraRtmConnectionState, AgoraRtmConnectionChangeReason), Never>.pipe()
-    
-    /// 接受远端消息代理方法回调信号量
-    let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmKit, String), Never>.pipe()
-    
-    /// token失效代理方法回调信号量
-    let (tokenDidExpireSignal, tokenDidExpireObserver) = Signal<AgoraRtmKit, Never>.pipe()
     
     // MARK: - Method CallBack Signal
     
@@ -56,7 +54,7 @@ class AgoraRTMProxy: NSObject {
     
     /// 销毁频道方法回调信号量 <(channelId), Bool>
     let (destroyChannelSignal, destroyChannelObserver) = Signal<((String), Bool), Never>.pipe()
-
+    
     /// 查询在线用户方法回调信号量 <([userId]), [AgoraRtmPeerOnlineStatus]?, AgoraRtmQueryPeersOnlineErrorCode>
     let (queryPeersOnlineStatusSignal, queryPeersOnlineStatusObserver) = Signal<(([String]), [AgoraRtmPeerOnlineStatus]?, AgoraRtmQueryPeersOnlineErrorCode), Never>.pipe()
     
@@ -77,12 +75,17 @@ class AgoraRTMProxy: NSObject {
     
     /// 获取用户属性方法回调信号量 <(userId, keys), [attrs]?, userID?, AgoraRtmProcessAttributeErrorCode>
     let (getUserAttributesSignal, getUserAttributesObserver) = Signal<((String, [String]?), [AgoraRtmAttribute]?, String?, AgoraRtmProcessAttributeErrorCode), Never>.pipe()
-}
-
-extension AgoraRTMProxy {
-    func setup() {
-        rtmKit = AgoraRtmKit(appId: agoraAppID, delegate: self)
-    }
+    
+    // MARK: - Delegate Signal
+    
+    /// 连接状态改变代理方法回调信号量
+    let (connectionStateChangedSignal, connectionStateChangedObserver) = Signal<(AgoraRtmKit, AgoraRtmConnectionState, AgoraRtmConnectionChangeReason), Never>.pipe()
+    
+    /// 接受远端消息代理方法回调信号量
+    let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmKit, String), Never>.pipe()
+    
+    /// token失效代理方法回调信号量
+    let (tokenDidExpireSignal, tokenDidExpireObserver) = Signal<AgoraRtmKit, Never>.pipe()
 }
 
 // MARK: - Method Proxy

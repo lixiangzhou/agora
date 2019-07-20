@@ -8,11 +8,6 @@
 
 import Foundation
 
-private let rtcProxyName = simpleClassName(AgoraRTCProxy.classForCoder())
-private let rtmProxyName = simpleClassName(AgoraRTMProxy.classForCoder())
-private let rtmChannelProxyName = simpleClassName(AgoraRTMChannelProxy.classForCoder())
-private let rtmCallProxyName = simpleClassName(AgoraRTMCallProxy.classForCoder())
-
 struct LogEnableModel {
     let name: String
     let enalbed: Bool
@@ -22,7 +17,7 @@ private let logConfig = [
     LogEnableModel(name: simpleClassName(AgoraRTMProxy.classForCoder()), enalbed: true),
     LogEnableModel(name: simpleClassName(AgoraRTMChannelProxy.classForCoder()), enalbed: true),
     LogEnableModel(name: simpleClassName(AgoraRTMCallProxy.classForCoder()), enalbed: true),
-    LogEnableModel(name: simpleClassName(AgoraRTCProxy.classForCoder()), enalbed: true)
+    LogEnableModel(name: simpleClassName(AgoraRTCEngineProxy.classForCoder()), enalbed: true)
 ]
 
 extension Agora {

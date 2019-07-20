@@ -15,17 +15,22 @@ import AgoraRtmKit
 class ViewController: UIViewController {
     
     let rtmProxy = AgoraRTMProxy()
-
+    let callProxy = AgoraRTMCallProxy()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        rtmProxy.setup()
-        
-        
+//        rtmProxy.rtmCallKit = callProxy.callKit
         rtmProxy.login(user: "test")
         
-        rtmProxy.connectionStateChangedSignal.observeValues { (kit, state, reason) in
-            Agora.log("signal", kit, state, reason)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let invitation = AgoraRtmLocalInvitation(calleeId: "KKKK")
+        invitation.channelId = "hahah"
+//        invitation.content = "Content"
+        callProxy.callKit.send(invitation) { code in
+            print(code, code.rawValue)
         }
     }
 }

@@ -6,26 +6,45 @@
 //Copyright © 2019 LXZ. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import AgoraRtmKit
 import ReactiveSwift
 
 class AgoraRTMCallProxy: NSObject {
     
+    /// 创建呼叫Proxy
     override init() {
         callKit = AgoraRtmCallKit()
         super.init()
     }
     
+    /// AgoraRtmCallKit
     var callKit: AgoraRtmCallKit
+    
+    /// AgoraRtmCallDelegate
     var callDelegate: AgoraRtmCallDelegate? {
         set { callKit.callDelegate = newValue }
         get { return callKit.callDelegate }
     }
     
+    /// AgoraRtmKit
     var rtmKit: AgoraRtmKit? {
         get { return callKit.rtmKit }
     }
+    
+    // MARK: - Method CallBack Signal
+    
+    /// 发送呼叫邀请方法信号量
+    let (sendInvitationSignal, sendInvitationObserver) = Signal<((AgoraRtmLocalInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
+    
+    /// 取消呼叫邀请方法信号量
+    let (cancelInvitationSignal, cancelInvitationObserver) = Signal<((AgoraRtmLocalInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
+    
+    /// 接收呼叫邀请方法信号量
+    let (acceptInvitationSignal, acceptInvitationObserver) = Signal<((AgoraRtmRemoteInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
+    
+    /// 拒绝呼叫邀请方法信号量
+    let (refuseInvitationSignal, refuseInvitationObserver) = Signal<((AgoraRtmRemoteInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
     
     // MARK: - Delegate Signal
     
@@ -58,24 +77,9 @@ class AgoraRTMCallProxy: NSObject {
     
     /// 呼叫生命周期结束的代理方法调用信号量（被叫者回调）
     let (remoteInvitationFailureSignal, remoteInvitationFailureObserver) = Signal<(AgoraRtmCallKit, AgoraRtmRemoteInvitation, AgoraRtmRemoteInvitationErrorCode), Never>.pipe()
-    
-    
-    // MARK: - Method CallBack Signal
-    
-    /// 发送呼叫邀请方法信号量
-    let (sendInvitationSignal, sendInvitationObserver) = Signal<((AgoraRtmLocalInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
-    
-    /// 取消呼叫邀请方法信号量
-    let (cancelInvitationSignal, cancelInvitationObserver) = Signal<((AgoraRtmLocalInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
-    
-    /// 接收呼叫邀请方法信号量
-    let (acceptInvitationSignal, acceptInvitationObserver) = Signal<((AgoraRtmRemoteInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
-    
-    /// 拒绝呼叫邀请方法信号量
-    let (refuseInvitationSignal, refuseInvitationObserver) = Signal<((AgoraRtmRemoteInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
 }
 
-// MARK: - Proxy Method
+// MARK: - Method Proxy
 extension AgoraRTMCallProxy {
     /// 呼叫者发送一个呼叫邀请给被叫者
     ///

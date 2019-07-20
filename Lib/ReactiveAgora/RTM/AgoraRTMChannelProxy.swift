@@ -12,36 +12,31 @@ import ReactiveSwift
 
 class AgoraRTMChannelProxy: NSObject {
     
-    /// 创建频道代理
+    /// 创建频道Proxy
+    ///
+    /// - Parameter channel: 频道
     convenience init(channel: AgoraRtmChannel) {
         self.init()
         rtmChannel = channel
         rtmChannel.channelDelegate = self
     }
     
+    /// AgoraRtmChannel
     private(set) var rtmChannel: AgoraRtmChannel!
     
+    /// AgoraRtmKit
     var rtmKit: AgoraRtmKit {
         return rtmChannel.kit
     }
     
+    /// AgoraRtmChannelDelegate
     var channelDelegate: AgoraRtmChannelDelegate? {
         set { rtmChannel.channelDelegate = newValue }
         get { return rtmChannel.channelDelegate }
     }
     
-    // MARK: - Delegate Signal
-    
-    /// 成员离开代理方法信号量
-    let (memberLeftSignal, memberLeftObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
-    
-    /// 成员加入代理方法信号量
-    let (memberJoinedSignal, memberJoinedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
-    
-    /// 收到消息代理方法信号量
-    let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMessage, AgoraRtmMember), Never>.pipe()
-    
     // MARK: - Method CallBack Signal
+    
     /// 加入频道方法回调信号量
     let (joinSignal, joinObserver) = Signal<AgoraRtmJoinChannelErrorCode, Never>.pipe()
     
@@ -53,10 +48,22 @@ class AgoraRTMChannelProxy: NSObject {
     
     /// 获取成员列表方法回调信号量
     let (getMembersSignal, getMembersObserver) = Signal<([AgoraRtmMember]?, AgoraRtmGetMembersErrorCode), Never>.pipe()
+    
+    // MARK: - Delegate Signal
+    
+    /// 成员离开代理方法信号量
+    let (memberLeftSignal, memberLeftObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
+    
+    /// 成员加入代理方法信号量
+    let (memberJoinedSignal, memberJoinedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
+    
+    /// 收到消息代理方法信号量
+    let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMessage, AgoraRtmMember), Never>.pipe()
 }
 
 // MARK: - Method Proxy
 extension AgoraRTMChannelProxy {
+    
     /// 加入频道
     ///
     /// - 成功：
