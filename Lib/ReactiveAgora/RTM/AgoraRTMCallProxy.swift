@@ -84,8 +84,8 @@ extension AgoraRTMCallProxy {
     /// 呼叫者发送一个呼叫邀请给被叫者
     ///
     /// - 成功：
-    ///     - 呼叫者收到 AgoraRtmLocalInvitationSendBlock 和 rtmCallKit(_:localInvitationReceivedByPeer:) 回调，code == AgoraRtmInvitationApiCallError.ok
-    ///     - 被叫者收到 rtmCallKit(_:remoteInvitationReceived:) 回调
+    ///     - 呼叫者收到 AgoraRtmLocalInvitationSendBlock 和 AgoraRtmCallDelegate.rtmCallKit(_:localInvitationReceivedByPeer:) 回调，code == AgoraRtmInvitationApiCallError.ok
+    ///     - 被叫者收到 AgoraRtmCallDelegate.rtmCallKit(_:remoteInvitationReceived:) 回调
     /// - 失败：呼叫者收到 AgoraRtmLocalInvitationSendBlock 回调，查看 AgoraRtmInvitationApiCallErrorCode 错误码
     ///
     /// - Parameters:
@@ -102,8 +102,8 @@ extension AgoraRTMCallProxy {
     /// 呼叫者取消呼叫邀请
     ///
     /// - 成功：
-    ///     - 呼叫者收到 AgoraRtmLocalInvitationCancelBlock 和 rtmCallKit(_:localInvitationCanceled:) 回调，code == AgoraRtmInvitationApiCallError.ok
-    ///     - 被叫者收到 rtmCallKit(_:remoteInvitationCanceled:) 回调
+    ///     - 呼叫者收到 AgoraRtmLocalInvitationCancelBlock 和 AgoraRtmCallDelegate.rtmCallKit(_:localInvitationCanceled:) 回调，code == AgoraRtmInvitationApiCallError.ok
+    ///     - 被叫者收到 AgoraRtmCallDelegate.rtmCallKit(_:remoteInvitationCanceled:) 回调
     /// - 失败：呼叫者收到 AgoraRtmLocalInvitationCancelBlock 回调，查看 AgoraRtmInvitationApiCallErrorCode 错误码
     ///
     /// - Parameters:
@@ -120,8 +120,8 @@ extension AgoraRTMCallProxy {
     /// 被叫者接受呼叫邀请
     ///
     /// - 成功：
-    ///     - 呼叫者收到 AgoraRtmRemoteInvitationAcceptBlock 和 rtmCallKit(_:localInvitationAccepted:withResponse:) 回调，code == AgoraRtmInvitationApiCallError.ok
-    ///     - 被叫者收到 rtmCallKit(_:remoteInvitationAccepted:) 回调
+    ///     - 呼叫者收到 AgoraRtmRemoteInvitationAcceptBlock 和 AgoraRtmCallDelegate.rtmCallKit(_:localInvitationAccepted:withResponse:) 回调，code == AgoraRtmInvitationApiCallError.ok
+    ///     - 被叫者收到 AgoraRtmCallDelegate.rtmCallKit(_:remoteInvitationAccepted:) 回调
     /// - 失败：呼叫者收到 AgoraRtmLocalInvitationCancelBlock 回调，查看 AgoraRtmInvitationApiCallErrorCode 错误码
     ///
     /// - Parameters:
@@ -138,8 +138,8 @@ extension AgoraRTMCallProxy {
     /// 被叫者拒绝呼叫邀请
     ///
     /// - 成功：
-    ///     - 呼叫者收到 AgoraRtmRemoteInvitationRefuseBlock 和 rtmCallKit(_:localInvitationRefused:withResponse:) 回调，code == AgoraRtmInvitationApiCallError.ok
-    ///     - 被叫者收到 rtmCallKit(_:remoteInvitationRefused:) 回调
+    ///     - 呼叫者收到 AgoraRtmRemoteInvitationRefuseBlock 和 AgoraRtmCallDelegate.rtmCallKit(_:localInvitationRefused:withResponse:) 回调，code == AgoraRtmInvitationApiCallError.ok
+    ///     - 被叫者收到 AgoraRtmCallDelegate.rtmCallKit(_:remoteInvitationRefused:) 回调
     /// - 失败：呼叫者收到 AgoraRtmRemoteInvitationRefuseBlock 回调，查看 AgoraRtmInvitationApiCallErrorCode 错误码
     ///
     /// - Parameters:
@@ -156,51 +156,62 @@ extension AgoraRTMCallProxy {
 
 // MARK: - AgoraRtmCallDelegate
 extension AgoraRTMCallProxy: AgoraRtmCallDelegate {
+    
+    /// 呼叫者的回调：当被叫者收到呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, localInvitationReceivedByPeer localInvitation: AgoraRtmLocalInvitation) {
         Agora.log(callKit, localInvitation)
         localInvitationReceivedObserver.send(value: (callKit, localInvitation))
     }
     
+    /// 呼叫者的回调：当被叫者接受呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, localInvitationAccepted localInvitation: AgoraRtmLocalInvitation, withResponse response: String?) {
         Agora.log(callKit, localInvitation, response as Any)
         localInvitationAcceptedObserver.send(value: (callKit, localInvitation, response))
     }
     
+    /// 呼叫者的回调：当被叫者拒绝呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, localInvitationRefused localInvitation: AgoraRtmLocalInvitation, withResponse response: String?) {
         Agora.log(callKit, localInvitation, response as Any)
         localInvitationRefusedObserver.send(value: (callKit, localInvitation, response))
     }
     
+    /// 呼叫者的回调：当被叫者取消呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, localInvitationCanceled localInvitation: AgoraRtmLocalInvitation) {
         Agora.log(callKit, localInvitation)
         localInvitationCanceledObserver.send(value: (callKit, localInvitation))
     }
     
+    /// 呼叫者的回调：当发出的呼叫邀请的生命周期以失败而结束时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, localInvitationFailure localInvitation: AgoraRtmLocalInvitation, errorCode: AgoraRtmLocalInvitationErrorCode) {
         Agora.log(callKit, localInvitation, errorCode, errorCode.rawValue)
         localInvitationFailureObserver.send(value: (callKit, localInvitation, errorCode))
     }
     
+    /// 被叫者的回调：当被叫者收到呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, remoteInvitationReceived remoteInvitation: AgoraRtmRemoteInvitation) {
         Agora.log(callKit, remoteInvitation)
         remoteInvitationReceivedObserver.send(value: (callKit, remoteInvitation))
     }
     
+    /// 被叫者的回调：当被叫者拒绝呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, remoteInvitationRefused remoteInvitation: AgoraRtmRemoteInvitation) {
         Agora.log(callKit, remoteInvitation)
         remoteInvitationRefusedObserver.send(value: (callKit, remoteInvitation))
     }
     
+    /// 被叫者的回调：当被叫者接受呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, remoteInvitationAccepted remoteInvitation: AgoraRtmRemoteInvitation) {
         Agora.log(callKit, remoteInvitation)
         remoteInvitationAcceptedObserver.send(value: (callKit, remoteInvitation))
     }
     
+    /// 被叫者的回调：当被叫者取消呼叫邀请时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, remoteInvitationCanceled remoteInvitation: AgoraRtmRemoteInvitation) {
         Agora.log(callKit, remoteInvitation)
         remoteInvitationCanceledObserver.send(value: (callKit, remoteInvitation))
     }
     
+    /// 被叫者的回调：当收到的呼叫邀请的生命周期以失败而结束时调用
     func rtmCallKit(_ callKit: AgoraRtmCallKit, remoteInvitationFailure remoteInvitation: AgoraRtmRemoteInvitation, errorCode: AgoraRtmRemoteInvitationErrorCode) {
         Agora.log(callKit, remoteInvitation, errorCode, errorCode.rawValue)
         remoteInvitationFailureObserver.send(value: (callKit, remoteInvitation, errorCode))

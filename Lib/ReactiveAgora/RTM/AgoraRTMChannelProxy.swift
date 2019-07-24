@@ -68,7 +68,7 @@ extension AgoraRTMChannelProxy {
     ///
     /// - 成功：
     ///     - 本地用户收到 AgoraRtmJoinChannelBlock 回调，code == AgoraRtmJoinChannelError.ok
-    ///     - 所有远端用户收到 channel(_:memberJoined:) 回调【触发 memberJoinedSignal】
+    ///     - 所有远端用户收到 AgoraRtmChannelDelegate.channel(_:memberJoined:) 回调
     /// - 失败：本地用户收到 AgoraRtmJoinChannelBlock 回调
     ///
     /// - Parameter completion: AgoraRtmJoinChannelBlock 完成回调，查看 AgoraRtmJoinChannelErrorCode 错误码
@@ -84,7 +84,7 @@ extension AgoraRTMChannelProxy {
     ///
     /// - 成功：
     ///     - 本地用户收到 AgoraRtmLeaveChannelBlock 回调，code == AgoraRtmLeaveChannelError.ok
-    ///     - 所有远端用户收到 channel(_:memberLeft:) 回调【触发 memberLeftSignal】
+    ///     - 所有远端用户收到 AgoraRtmChannelDelegate.channel(_:memberLeft:) 回调
     /// - 失败：本地用户收到 AgoraRtmLeaveChannelBlock 回调
     /// - Parameter completion: AgoraRtmLeaveChannelBlock 完成回调，查看 AgoraRtmLeaveChannelErrorCode 错误码
     func leave(completion: AgoraRtmLeaveChannelBlock? = nil) {
@@ -100,7 +100,7 @@ extension AgoraRTMChannelProxy {
     /// **注意：** 每秒最多发送60条频道消息
     /// - 成功：
     ///     - 本地用户收到 AgoraRtmSendChannelMessageBlock 回调，code == AgoraRtmSendChannelMessageError.ok
-    ///     - 所有远端用户收到 channel(_:messageReceived:) 回调
+    ///     - 所有远端用户收到 AgoraRtmChannelDelegate.channel(_:messageReceived:) 回调
     /// - 失败：本地用户收到 AgoraRtmSendChannelMessageBlock 回调
     ///
     /// - Parameters:
@@ -128,16 +128,24 @@ extension AgoraRTMChannelProxy {
 
 // MARK: - AgoraRtmChannelDelegate
 extension AgoraRTMChannelProxy: AgoraRtmChannelDelegate {
+    
+    /// 远端用户离开了频道时调用
+    ///
+    /// **注意：** 当该频道用户超过512时，该方法无效
     func channel(_ channel: AgoraRtmChannel, memberLeft member: AgoraRtmMember) {
         Agora.log(channel, member)
         memberLeftObserver.send(value: (channel, member))
     }
     
+    /// 远端用户加入了频道时调用
+    ///
+    /// **注意：** 当该频道用户超过512时，该方法无效
     func channel(_ channel: AgoraRtmChannel, memberJoined member: AgoraRtmMember) {
         Agora.log(channel, member)
         memberJoinedObserver.send(value: (channel, member))
     }
     
+    /// 当本地用户收到频道消息时调用
     func channel(_ channel: AgoraRtmChannel, messageReceived message: AgoraRtmMessage, from member: AgoraRtmMember) {
         Agora.log(channel, message, member)
         messageReceivedObserver.send(value: (channel, message, member))

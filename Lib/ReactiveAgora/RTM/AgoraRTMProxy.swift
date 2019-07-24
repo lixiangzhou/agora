@@ -20,7 +20,7 @@ class AgoraRTMProxy: NSObject {
         rtmKit = AgoraRtmKit(appId: agoraAppID, delegate: delegate ?? self)
     }
     
-    /// AgoraRtmKit 是RTM的入口。RTM 支持多个 AgoraRtmKit，AgoraRtmKit 中的所有方法都是异步的（除了 destroyChannel(withId: ) 方法）
+    /// AgoraRtmKit 是RTM的入口。RTM 支持多个 AgoraRtmKit，AgoraRtmKit 中的所有方法都是异步的（除了 AgoraRtmKit.destroyChannel(withId: ) 方法）
     private(set) var rtmKit: AgoraRtmKit!
     
     /// AgoraRtmCallKit
@@ -95,7 +95,7 @@ extension AgoraRTMProxy {
     ///
     /// **注意：** 如果您在不同实例中以相同用户ID登录，您将被踢出以前的登录并从以前连接的通道中移除
     ///
-    /// 调用此方法后，本地用户会收到 AgoraRtmLoginBlock 和 rtmKit(_:connectionStateChanged:reason:) 回调【触发 loginSignal 和 connectionStateChangedSignal】，连接状态会转换为 AgoraRtmConnectionState.connecting
+    /// 调用此方法后，本地用户会收到 AgoraRtmLoginBlock 和 AgoraRtmDelegate.rtmKit(_:connectionStateChanged:reason:) 回调，连接状态会转换为 AgoraRtmConnectionState.connecting
     ///
     /// - 成功：连接状态会转换为 AgoraRtmConnectionState.connected
     /// - 失败：连接状态会转换为 AgoraRtmConnectionState.disconnected
@@ -116,8 +116,8 @@ extension AgoraRTMProxy {
     
     /// 登出RTM系统
     ///
-    /// - 成功：本地用户会收到 AgoraRtmLogoutBlock 和 rtmKit(_:connectionStateChanged:reason:) 回调【触发 logoutSignal 和 connectionStateChangedSignal】，连接状态会转换为 AgoraRtmConnectionState.disconnected
-    /// - 失败：本地用户会收到 AgoraRtmLogoutBlock 【触发 logoutSignal】
+    /// - 成功：本地用户会收到 AgoraRtmLogoutBlock 和 AgoraRtmDelegate.rtmKit(_:connectionStateChanged:reason:) 回调，连接状态会转换为 AgoraRtmConnectionState.disconnected
+    /// - 失败：本地用户会收到 AgoraRtmLogoutBlock
     /// - Parameter completion: AgoraRtmLogoutBlock 完成回调。查看 AgoraRtmLogoutErrorCode 错误码
     func logout(completion: AgoraRtmLogoutBlock? = nil) {
         Agora.log()
@@ -128,8 +128,6 @@ extension AgoraRTMProxy {
     }
     
     /// 重新生成token
-    ///
-    /// AgoraRtmRenewTokenBlock 完成回调会触发 renewTokenSignal
     ///
     /// - Parameters:
     ///   - token: 新token
@@ -144,11 +142,11 @@ extension AgoraRTMProxy {
     
     /// 给指定的用户发送P2P消息
     ///
-    /// **注意：** 可以最多每秒发送60次P2P消息和channel消息
+    /// **注意：** 可以最多每秒发送60次P2P消息和频道消息
     ///
     /// - 成功：
     ///     - 本地会用户收到 AgoraRtmSendPeerMessageBlock 回调
-    ///     - 指定的远端用户会收到 rtmKit(_:messageReceived:fromPeer:)) 回调【触发 messageReceivedSignal】
+    ///     - 指定的远端用户会收到 AgoraRtmDelegate.rtmKit(_:messageReceived:fromPeer:)) 回调
     ///
     /// - Parameters:
     ///   - message: 要发送的消息
@@ -273,16 +271,23 @@ extension AgoraRTMProxy {
 
 // MARK: - AgoraRtmDelegate
 extension AgoraRTMProxy: AgoraRtmDelegate {
+    
+    /// 当SDK与RTM系统之间的连接变化时调用
     func rtmKit(_ kit: AgoraRtmKit, connectionStateChanged state: AgoraRtmConnectionState, reason: AgoraRtmConnectionChangeReason) {
         Agora.log(kit, state, state.rawValue, reason, reason.rawValue)
         connectionStateChangedObserver.send(value: (kit, state, reason))
     }
     
+    /// 本地用户收到p2p消息时调用
+    ///
+    /// - Parameters:
+    ///   - peerId: 远端发送消息用户的ID
     func rtmKit(_ kit: AgoraRtmKit, messageReceived message: AgoraRtmMessage, fromPeer peerId: String) {
         Agora.log(kit, message, peerId)
         messageReceivedObserver.send(value: (kit, peerId))
     }
     
+    /// token过期时调用
     func rtmKitTokenDidExpire(_ kit: AgoraRtmKit) {
         Agora.log(kit)
         tokenDidExpireObserver.send(value: kit)
