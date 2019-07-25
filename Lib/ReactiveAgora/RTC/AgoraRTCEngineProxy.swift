@@ -136,7 +136,7 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
         Agora.log(engine, oldRole, newRole)
     }
     
-    /// 当远程用户或主机加入通道时发生
+    /// 当远端用户或主机加入通道时发生
     ///
     /// - 通讯配置文件：此回调通知app另一个用户加入了频道，如果其他用户已经在频道中，SDK也会通知app现有用户
     /// - 直播配置文件：此回调通知app一个主机加入了频道。如果其他主机已经在频道中，SDK也会通知app现有主机。声网建议限制主机数为17
@@ -213,10 +213,172 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     
     // MARK: - Media Delegate Methods
     
+    /// 当本地用户通过调用 AgoraRtcEngineKit.enableLocalAudio(_:) 方法恢复或停止捕获本地音频流时，SDK触发这个回调
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didMicrophoneEnabled enabled: Bool) {
+        Agora.log(engine, enabled)
+    }
+    
+    /// 报告哪些用户正在说话，以及说话者当前的音量。此回调函数报告当前频道中音量最大的说话者的ID和音量。此回调函数中返回的音频音量是远端用户的语音音量和音频音量的总和。此回调默认是禁用的，可以通过 AgoraRtcEngineKit.enableAudioVolumeIndication(_:smooth:) 开启。
+    ///
+    /// 以不同的回调报告给本地用户和远端说话者：
+    /// - 本地用户回调中 speakers 包含 uid = 0、volume = totalVolume 不管本地用户是否说话
+    /// - 远端说话者回调中，speakers 包含每个说话者的UID和音量
+    ///
+    /// **注意：**
+    /// - 调用 AgoraRtcEngineKit.muteLocalAudioStream(_:) 影响SDK的行为：
+    ///     - 如果本地用户调用了 AgoraRtcEngineKit.muteLocalAudioStream(_:)，SDK立刻停止返回本地用户的回调
+    ///     - 在远端说话者调用 AgoraRtcEngineKit.muteLocalAudioStream(_:)15秒后，远端说话者的回调会排除该用户的信息；在所有远端用户调用 AgoraRtcEngineKit.muteLocalAudioStream(_:)15秒后，SDK停止触发远端扬声器的回调
+    /// - speakers为空时，表示当前没有远端用户在说话
+    ///
+    /// - Parameters:
+    ///   - speakers: 所有的说话者
+    ///   - totalVolume: 所有说话者的音量之和（0~255）
+    func rtcEngine(_ engine: AgoraRtcEngineKit, reportAudioVolumeIndicationOfSpeakers speakers: [AgoraRtcAudioVolumeInfo], totalVolume: Int) {
+        Agora.log(engine, speakers, totalVolume)
+    }
+    
+    /// 报告一段时间内哪个用户是最大的说话者。如果用户通过调用 AgoraRtcEngineKit.enableAudioVolumeIndication(_:smooth:) 方法启用音频音量指示，这个回调函数将返回活动说话者的UID，该活动说话者的声音由SDK的音频音量检测模块检测到
+    ///
+    /// **注意：**
+    /// - 调用 AgoraRtcEngineKit.enableAudioVolumeIndication(_:smooth:)才会触发此回调
+    /// - 回调返回的是一段时间内最大的说话者的UID，而不是临时的
+    /// - Parameters:
+    ///   - speakerUid: 一段时间内最大的说话者的UID
+    func rtcEngine(_ engine: AgoraRtcEngineKit, activeSpeaker speakerUid: UInt) {
+        Agora.log(engine, speakerUid)
+    }
+    
+    /// 当引擎发送第一帧本地音频时调用
+    ///
+    /// - Parameters:
+    ///   - elapsed: 用户调用 AgoraRtcEngineKit.joinChannel 到调用此方法所花的时间（毫秒）
+    func rtcEngine(_ engine: AgoraRtcEngineKit, firstLocalAudioFrame elapsed: Int) {
+        Agora.log(engine, elapsed)
+    }
+    
+    /// 当引擎从指定的远端用户接收到第一个音频帧时调用
+    ///
+    /// 下面场景会触发此回调：
+    /// - 远端用户加入并发送音频流时
+    /// - 远端停止发送音频流并在之后15s后重新发送，可能的原因如下：
+    ///     - 远端用户离开了频道
+    ///     - 远端用户掉线
+    ///     - 远端用户调用了 AgoraRtcEngineKit.muteLocalAudioStream(_:)
+    ///     - 远端用户调用了 AgoraRtcEngineKit.disableAudio
+    ///
+    /// - Parameters:
+    ///   - uid: 远端用户的UID
+    ///   - elapsed: 本地用户调用 AgoraRtcEngineKit.joinChannel 到调用此方法所花的时间（毫秒）
+    func rtcEngine(_ engine: AgoraRtcEngineKit, firstRemoteAudioFrameOfUid uid: UInt, elapsed: Int) {
+        Agora.log(engine, uid, elapsed)
+    }
+    
+    /// 当SDK解码第一个远端音频帧以进行回放时调用
+    ///
+    /// - Parameters:
+    ///   - elapsed: 本地用户调用 AgoraRtcEngineKit.joinChannel 到调用此方法所花的时间（毫秒）
+    func rtcEngine(_ engine: AgoraRtcEngineKit, firstRemoteAudioFrameDecodedOfUid uid: UInt, elapsed: Int) {
+        Agora.log(engine, uid, elapsed)
+    }
+    
+    /// 当引擎发送第一帧本地视频时调用
+    ///
+    /// - Parameters:
+    ///   - size: 第一帧视频的大小
+    ///   - elapsed: 本地用户调用 AgoraRtcEngineKit.joinChannel 到调用此方法所花的时间（毫秒）；如果 AgoraRtcEngineKit.startPreview 先于 AgoraRtcEngineKit.joinChannel 调用，则elapsed 表示 AgoraRtcEngineKit.startPreview 到调用此方法所花的时间（毫秒）
+    func rtcEngine(_ engine: AgoraRtcEngineKit, firstLocalVideoFrameWith size: CGSize, elapsed: Int) {
+        Agora.log(engine, size, elapsed)
+    }
+    
+    /// 当接收和解码第一个远端视频帧时调用
+    ///
+    /// 在以下情况下会触发此回调：
+    /// - 远端用户加入频道并发送视频流时
+    /// - 远端用户停止发送视频流15s后重新发送。可能的原因如下：
+    ///     - 远端用户离开了频道
+    ///     - 远端用户掉线
+    ///     - 远端用户调用了 AgoraRtcEngineKit.muteLocalVideoStream(_:)
+    ///     - 远端用户调用了 AgoraRtcEngineKit.disableVideo
+    ///
+    /// - Parameters:
+    ///   - size: 视频帧的大小
+    ///   - elapsed: 本地用户调用 AgoraRtcEngineKit.joinChannel 到调用此方法所花的时间（毫秒）
+    func rtcEngine(_ engine: AgoraRtcEngineKit, firstRemoteVideoDecodedOfUid uid: UInt, size: CGSize, elapsed: Int) {
+        Agora.log(engine, uid, size, elapsed)
+    }
+    
+    /// 当第一帧远端视频帧渲染时调用
+    ///
+    /// - Parameters:
+    ///   - size: 视频帧的大小
+    ///   - elapsed: 本地用户调用 AgoraRtcEngineKit.joinChannel 到调用此方法所花的时间（毫秒）
+    func rtcEngine(_ engine: AgoraRtcEngineKit, firstRemoteVideoFrameOfUid uid: UInt, size: CGSize, elapsed: Int) {
+        Agora.log(engine, uid, size, elapsed)
+    }
+    
+    /// 当远程用户的音频流被静音/非静音时调用
+    ///
+    /// - Parameters:
+    ///   - muted: 是否静音
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioMuted muted: Bool, byUid uid: UInt) {
+        Agora.log(engine, muted, uid)
+    }
+    
+    /// 当远端用户的视频流回放暂停/恢复时调用
+    ///
+    /// 当远端用户通过调用 AgoraRtcEngineKit.muteLocalVideoStream(_:) 停止/恢复发送视频流时触发此回调
+    ///
+    /// **注意：** 当频道中的用户或广播者数量超过20时，此回调无效
+    ///
+    /// - Parameters:
+    ///   - muted: 远端用户视频流播放停止/恢复。true：停止；false：恢复
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didVideoMuted muted: Bool, byUid uid: UInt) {
+        Agora.log(engine, muted, uid)
+    }
+    
+    /// 当远端用户开启/警用视频模块时调用
+    ///
+    /// 一旦视频模块禁用了，远端用户只能使用音频呼叫。远端用户不能发送或接受来自其他用户的视频
+    ///
+    /// 当远端用户通过调用 AgoraRtcEngineKit.disableVideo 开启或禁用视频模块时触发此回调
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didVideoEnabled enabled: Bool, byUid uid: UInt) {
+        Agora.log(engine, enabled, uid)
+    }
+    
+    /// 当远端用户开启/警用本地视频捕获方法时调用
+    ///
+    /// 此回调仅适用于当用户只想观看远程视频而不向其他用户发送任何视频流时的场景
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didLocalVideoEnabled enabled: Bool, byUid uid: UInt) {
+        Agora.log(engine, enabled, uid)
+    }
+    
+    /// 当远端用户的视频大小或方向改变时调用
+    ///
+    /// - Parameters:
+    ///   - rotation: 视频的方向，值范围：0~360
+    func rtcEngine(_ engine: AgoraRtcEngineKit, videoSizeChangedOfUid uid: UInt, size: CGSize, rotation: Int) {
+        Agora.log(engine, uid, size, rotation)
+    }
+    
+    /// 当远端视频流状态改变时调用
+    ///
+    /// 当两个远端视频帧的时间间隔 >= 600ms 时触发此回调
+    func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStateChangedOfUid uid: UInt, state: AgoraVideoRemoteState) {
+        Agora.log(engine, uid, state, state.rawValue)
+    }
+    
+    /// 本地用户视频流状态改变时调用
+    ///
+    /// - Parameters:
+    ///   - state: AgoraLocalVideoStreamState，当state == AgoraLocalVideoStreamState.failed时，查看AgoraLocalVideoStreamError
+    ///   - error: AgoraLocalVideoStreamError
+    func rtcEngine(_ engine: AgoraRtcEngineKit, localVideoStateChange state: AgoraLocalVideoStreamState, error: AgoraLocalVideoStreamError) {
+        Agora.log(engine, state, state.rawValue, error, error.rawValue)
+    }
 }
 
 extension AgoraRTCEngineProxy {
     func a() {
-        #selector(AgoraRtcEngineKit.renewToken(_:))
+        #selector(AgoraRtcEngineKit.disableVideo)
     }
 }
