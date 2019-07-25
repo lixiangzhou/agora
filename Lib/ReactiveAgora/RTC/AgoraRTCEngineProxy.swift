@@ -400,11 +400,43 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, didRemoteSubscribeFallbackToAudioOnly isFallbackOrRecover: Bool, byUid uid: UInt) {
         Agora.log(engine, isFallbackOrRecover, uid)
     }
+    
+    // MARK: - Device Delegate Methods
+    
+    /// 当本地音频路由发生更改时调用
+    ///
+    /// SDK在本地音频路由切换到耳机、扬声器、头戴式耳机或蓝牙设备时触发此回调
+    ///
+    /// - Parameters:
+    ///   - routing: 音频路由 AgoraAudioOutputRouting
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioRouteChanged routing: AgoraAudioOutputRouting) {
+        Agora.log(engine, routing)
+    }
+    
+    /// 相机焦点区域改变时调用
+    ///
+    /// 当本地用于调用 AgoraRtcEngineKit.setCameraFocusPositionInPreview(_:) 改变相机焦点时触发此回调
+    ///
+    /// - Parameters:
+    ///   - rect: 在相机缩放指定焦点区域的矩形区域
+    func rtcEngine(_ engine: AgoraRtcEngineKit, cameraFocusDidChangedTo rect: CGRect) {
+        Agora.log(engine, rect)
+    }
+    
+    /// 当相机曝光区域发生变化时调用
+    ///
+    /// 当本地用于调用 AgoraRtcEngineKit.setCameraExposurePosition(_:) 改变相机曝光区域时触发此回调
+    ///
+    /// - Parameters:
+    ///   - rect: 在相机变焦指定曝光面积的矩形区域
+    func rtcEngine(_ engine: AgoraRtcEngineKit, cameraExposureDidChangedTo rect: CGRect) {
+        Agora.log(engine, rect)
+    }
 }
 
 extension AgoraRTCEngineProxy {
     func a() {
-        #selector(AgoraRtcEngineKit.setRemoteSubscribeFallbackOption(_:))
+        #selector(AgoraRtcEngineKit.setCameraExposurePosition(_:))
         #selector(AgoraRtcEngineDelegate.rtcEngine(_:remoteVideoStats:))
     }
 }
