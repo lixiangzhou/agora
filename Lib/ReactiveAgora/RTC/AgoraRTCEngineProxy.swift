@@ -375,10 +375,36 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, localVideoStateChange state: AgoraLocalVideoStreamState, error: AgoraLocalVideoStreamError) {
         Agora.log(engine, state, state.rawValue, error, error.rawValue)
     }
+    
+    // MARK: - Fallback Delegate Methods
+    
+    /// 当已发布的视频流由于不可靠的网络条件而返回到只包含音频的流，或在网络条件改善时切换回视频流时调用
+    ///
+    /// 如果调用 AgoraRtcEngineKit.setLocalPublishFallbackOption(_:) 时 option == AgoraStreamFallbackOptions.audioOnly，SDK在已发布的视频流由于不可靠的网络条件而返回到只包含音频的流，或在网络条件改善时切换回视频流时触发此回调
+    ///
+    /// **注意：** 一旦发布的流返回到只有音频时，远端app收到 AgoraRtcEngineDelegate.rtcEngine(_:didVideoMuted:byUid:) 回调
+    ///
+    /// - Parameters:
+    ///   - isFallbackOrRecover: true：发布的流由于不可靠的网络条件返回到只包含音频的流；false：发布的流在网络条件改善时切回视频流
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didLocalPublishFallbackToAudioOnly isFallbackOrRecover: Bool) {
+        Agora.log(engine, isFallbackOrRecover)
+    }
+    
+    /// 当远端视频流由于不可靠的网络条件而退回到音频流或在网络条件改善后切换回视频时调用
+    ///
+    /// 如果调用 AgoraRtcEngineKit.setRemoteSubscribeFallbackOption(_:) 时 option == AgoraStreamFallbackOptions.audioOnly, SDK在远端媒体流由于不可靠的网络条件返回到只包含音频，或在网络条件改善后切换回视频时触发这个回调
+    ///
+    /// - **注意：** 一旦远端媒体流由于不可靠的网络条件切到低流时，可以通过 AgoraRtcEngineDelegate.rtcEngine(_:remoteVideoStats:) 监测流的高低切换
+    /// - Parameters:
+    ///   - isFallbackOrRecover: true：远端媒体流由于不可靠的网络条件返回到只包含音频的流；false：媒体流在网络条件改善时切回视频流
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didRemoteSubscribeFallbackToAudioOnly isFallbackOrRecover: Bool, byUid uid: UInt) {
+        Agora.log(engine, isFallbackOrRecover, uid)
+    }
 }
 
 extension AgoraRTCEngineProxy {
     func a() {
-        #selector(AgoraRtcEngineKit.disableVideo)
+        #selector(AgoraRtcEngineKit.setRemoteSubscribeFallbackOption(_:))
+        #selector(AgoraRtcEngineDelegate.rtcEngine(_:remoteVideoStats:))
     }
 }
