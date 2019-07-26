@@ -592,6 +592,13 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     func rtcEngineTranscodingUpdated(_ engine: AgoraRtcEngineKit) {
         Agora.log(engine)
     }
+    
+    // MARK: - Inject Stream URL Delegate Methods
+    
+    /// 报告向直播注入在线流的状态
+    func rtcEngine(_ engine: AgoraRtcEngineKit, streamInjectedStatusOfUrl url: String, uid: UInt, status: AgoraInjectStreamStatus) {
+        Agora.log(engine, url, uid, status)
+    }
 }
 
 extension AgoraRTCEngineProxy {
