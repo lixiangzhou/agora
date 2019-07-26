@@ -432,11 +432,139 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, cameraExposureDidChangedTo rect: CGRect) {
         Agora.log(engine, rect)
     }
+    
+    // MARK: - Statistics Delegate Methods
+    
+    /// 每两秒报告一次当前调用会话的统计信息时调用
+    ///
+    /// - Parameters:
+    ///   - stats: AgoraChannelStats 统计信息
+    func rtcEngine(_ engine: AgoraRtcEngineKit, reportRtcStats stats: AgoraChannelStats) {
+        Agora.log(engine, stats)
+    }
+    
+    /// 在用户加入通道之前，每两秒报告一次本地用户的最后一英里网络质量时调用
+    ///
+    /// 最后一英里是指本地设备和Agora的边缘服务器之间的连接。在应用程序调用 AgoraRtcEngineKit.enableLastmileTest方法之后，在用户加入通道之前，SDK每两秒钟触发一次回调报告本地用户的上行和下行最后一英里网络状况
+    ///
+    /// - Parameters:
+    ///   - quality: 最后一英里网络质量基于上行链路和下行链路的丢包率和抖动
+    func rtcEngine(_ engine: AgoraRtcEngineKit, lastmileQuality quality: AgoraNetworkQuality) {
+        Agora.log(engine, quality, quality.rawValue)
+    }
+    
+    /// 每两秒报告一次通道中每个用户的最后一英里网络质量时调用
+    ///
+    /// 最后一英里是指本地设备和Agora的边缘服务器之间的连接。SDK每两秒触发此回调一次，以报告通道中每个用户的最后一英里网络状况。如果一个通道包含多个用户，SDK会多次触发这个回调
+    ///
+    /// - Parameters:
+    ///   - uid: 频道中用户的UID。如果UID == 0，表示本地用户
+    ///   - txQuality: 上行链路的传输质量，包括上行网络的传输比特率、丢包率、平均RTT(往返时间)和抖动。“txQuality”是一个质量评级，帮助您了解当前上行网络条件如何支持所选的AgoraVideoEncoderConfiguration。例如，对于分辨率为640 * 480 的视频帧和帧率为15fps直播配置文件，1000-Kbps上行链路网络就足够了；但可对于高于1280×720分辨率就不能满足了
+    ///   - rxQuality: 根据数据包丢失率、平均RTT和下行网络抖动对用户的下行网络质量进行评级
+    func rtcEngine(_ engine: AgoraRtcEngineKit, networkQuality uid: UInt, txQuality: AgoraNetworkQuality, rxQuality: AgoraNetworkQuality) {
+        Agora.log(engine, uid, txQuality, txQuality.rawValue, rxQuality, rxQuality.rawValue)
+    }
+    
+    /// 报告最后一英里网络探测结果时调用
+    ///
+    /// SDK在app调用 AgoraRtcEngineKit.startLastmileProbeTest(_:) 后30秒内触发此回调
+    ///
+    /// - Parameters:
+    ///   - result: 上行链路和下行链路最后一英里网络探针测试结果
+    func rtcEngine(_ engine: AgoraRtcEngineKit, lastmileProbeTest result: AgoraLastmileProbeResult) {
+        Agora.log(engine, result)
+    }
+    
+    /// 每2s报告本地视频流的统计数据时调用
+    ///
+    /// - Parameters:
+    ///   - stats: 上传本地视频流的统计信息
+    func rtcEngine(_ engine: AgoraRtcEngineKit, localVideoStats stats: AgoraRtcLocalVideoStats) {
+        Agora.log(engine, stats)
+    }
+    
+    /// 报告来自每个远端用户/主机的视频流的统计数据时调用
+    ///
+    /// SDK每两秒为每个远端用户/主机触发一次回调。如果一个频道包含多个远端用户，SDK会多次触发这个回调
+    ///
+    /// - Parameters:
+    ///   - stats: 收到的远端视频流的统计信息
+    func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStats stats: AgoraRtcRemoteVideoStats) {
+        Agora.log(engine, stats)
+    }
+    
+    /// 报告来自每个远端用户/主机的音频流的统计数据时调用
+    ///
+    /// 此方法替换了 AgoraRtcEngineDelegate.rtcEngine(_:audioQualityOfUid:quality:delay:lost:)
+    ///
+    /// SDK每两秒为每个远端用户/主机触发一次回调。如果一个频道包含多个远端用户，SDK会多次触发这个回调
+    ///
+    /// 与 AgoraRtcEngineDelegate.rtcEngine(_:audioTransportStatsOfUid:delay:lost:rxKBitRate:) 回调报告的统计数据相比，该回调报告的统计数据更接近于音频传输质量的实际用户体验。这个回调函数更多地报告媒体层统计信息，比如帧丢失率，而 AgoraRtcEngineDelegate.rtcEngine(_:audioTransportStatsOfUid:delay:lost:rxKBitRate:) 回调函数更多地报告传输层统计信息，比如包丢失率
+    ///
+    /// 如FEC(前向纠错)或重传等方案可以抵消帧丢失率。因此，即使丢包率很高，用户也可能发现整体音频质量是可以接受的
+    ///
+    /// - Parameters:
+    ///   - stats: 收到的远端视频流的统计信息
+    func rtcEngine(_ engine: AgoraRtcEngineKit, remoteAudioStats stats: AgoraRtcRemoteAudioStats) {
+        Agora.log(engine, stats)
+    }
+    
+    /// 报告每个音频流传输层的统计信息时调用
+    ///
+    /// 这个回调函数在本地用户从远端用户接收到音频包后每两秒报告传输层统计信息，例如包丢失率和网络时间延迟
+    func rtcEngine(_ engine: AgoraRtcEngineKit, audioTransportStatsOfUid uid: UInt, delay: UInt, lost: UInt, rxKBitRate: UInt) {
+        Agora.log(engine, uid, delay, lost, rxKBitRate)
+    }
+    
+    /// 报告每个视频流传输层的统计信息时调用
+    ///
+    /// 这个回调函数在本地用户从远端用户接收到视频包后每两秒报告传输层统计信息，例如包丢失率和网络时间延迟
+    func rtcEngine(_ engine: AgoraRtcEngineKit, videoTransportStatsOfUid uid: UInt, delay: UInt, lost: UInt, rxKBitRate: UInt) {
+        Agora.log(engine, uid, delay, lost, rxKBitRate)
+    }
+    
+    // MARK: - Audio Player Delegate Methods
+    
+    /// 当音频混合文件播放结束时调用
+    ///
+    /// 可以通过调用 AgoraRtcEngineKit.startAudioMixing(_:loopback:replace:cycle:) 方法来启动音频混合文件播放。SDK在音频混合文件回放结束时触发此回调。如果 AgoraRtcEngineKit.startAudioMixing(_:loopback:replace:cycle:) 调用失败，通过 AgoraRtcEngineDelegate.rtcEngine(_:didOccurWarning:) 返回 AgoraWarningCode.audioMixingOpenError 警告码
+    func rtcEngineLocalAudioMixingDidFinish(_ engine: AgoraRtcEngineKit) {
+        Agora.log(engine)
+    }
+    
+    /// 当本地用户的音频混合文件的状态发生更改时调用
+    ///
+    /// 如果本地音频混合文件不存在，或者SDK不支持文件格式或无法访问音乐文件URL, SDK返回 errorCode == AgoraAudioMixingErrorCode.canNotOpen
+    func rtcEngine(_ engine: AgoraRtcEngineKit, localAudioMixingStateDidChanged state: AgoraAudioMixingStateCode, errorCode: AgoraAudioMixingErrorCode) {
+        Agora.log(engine, state, state.rawValue, errorCode, errorCode.rawValue)
+    }
+    
+    /// 当远程用户启动音频混合时调用
+    ///
+    /// 当远程用户调用 AgoraRtcEngineKit.startAudioMixing(_:loopback:replace:cycle:) 方法时SDK触发这个回调
+    func rtcEngineRemoteAudioMixingDidStart(_ engine: AgoraRtcEngineKit) {
+        Agora.log(engine)
+    }
+    
+    /// 当远程用户结束音频混合时调用
+    func rtcEngineRemoteAudioMixingDidFinish(_ engine: AgoraRtcEngineKit) {
+        Agora.log(engine)
+    }
+    
+    /// 当本地音频效果回放结束时调用
+    ///
+    /// 您可以通过调用 AgoraRtcEngineKit.playEffect(_:filePath:loopCount:pitch:pan:gain:publish:) 方法来启动本地音频效果播放。SDK在本地音频效果文件回放完成时触发此回调
+    ///
+    /// - Parameters:
+    ///   - soundId: 本地音效的ID
+    func rtcEngineDidAudioEffectFinish(_ engine: AgoraRtcEngineKit, soundId: Int) {
+        Agora.log(engine, soundId)
+    }
 }
 
 extension AgoraRTCEngineProxy {
     func a() {
-        #selector(AgoraRtcEngineKit.setCameraExposurePosition(_:))
-        #selector(AgoraRtcEngineDelegate.rtcEngine(_:remoteVideoStats:))
+        #selector(AgoraRtcEngineKit.playEffect(_:filePath:loopCount:pitch:pan:gain:publish:))
+        #selector(AgoraRtcEngineDelegate.rtcEngine(_:didOccurWarning:))
     }
 }
