@@ -560,11 +560,43 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     func rtcEngineDidAudioEffectFinish(_ engine: AgoraRtcEngineKit, soundId: Int) {
         Agora.log(engine, soundId)
     }
+    
+    
+    // MARK: - CDN Publisher Delegate Methods
+    
+    /// 当RTMP流的状态发生更改时调用
+    ///
+    /// SDK触发这个回调来报告本地用户调用 AgoraRtcEngineKit.addPublishStreamUrl(_:transcodingEnabled:) 或 AgoraRtcEngineKit.removePublishStreamUrl(_:) 方法的结果
+    /// - Parameters:
+    /// - url: RTMP url
+    func rtcEngine(_ engine: AgoraRtcEngineKit, rtmpStreamingChangedToState url: String, state: AgoraRtmpStreamingState, errorCode: AgoraRtmpStreamingErrorCode) {
+        Agora.log(engine, url, state, state.rawValue, errorCode, errorCode.rawValue)
+    }
+    
+    /// 报告调用 AgoraRtcEngineKit.addPublishStreamUrl(_:transcodingEnabled:) 的结果时调用
+    /// - Parameters:
+    /// - url: RTMP url
+    func rtcEngine(_ engine: AgoraRtcEngineKit, streamPublishedWithUrl url: String, errorCode: AgoraErrorCode) {
+        Agora.log(engine, url, errorCode, errorCode.rawValue)
+    }
+    
+    /// 报告调用 AgoraRtcEngineKit.removePublishStreamUrl(_:) 的结果时调用
+    ///
+    /// - Parameters:
+    /// - url: RTMP url
+    func rtcEngine(_ engine: AgoraRtcEngineKit, streamUnpublishedWithUrl url: String) {
+        Agora.log(engine, url)
+    }
+    
+    /// 当更新CDN实时流媒体设置时调用
+    func rtcEngineTranscodingUpdated(_ engine: AgoraRtcEngineKit) {
+        Agora.log(engine)
+    }
 }
 
 extension AgoraRTCEngineProxy {
     func a() {
-        #selector(AgoraRtcEngineKit.playEffect(_:filePath:loopCount:pitch:pan:gain:publish:))
+        #selector(AgoraRtcEngineKit.removePublishStreamUrl(_:))
         #selector(AgoraRtcEngineDelegate.rtcEngine(_:didOccurWarning:))
     }
 }
