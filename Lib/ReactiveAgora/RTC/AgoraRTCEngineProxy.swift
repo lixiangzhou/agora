@@ -599,11 +599,30 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, streamInjectedStatusOfUrl url: String, uid: UInt, status: AgoraInjectStreamStatus) {
         Agora.log(engine, url, uid, status)
     }
+    
+    // MARK: - Stream Message Delegate Methods
+    
+    /// 当本地用户在5秒内从远程用户接收到数据流时调用
+    ///
+    /// SDK在本地用户接收到远程用户通过调用 AgoraRtcEngineKit.sendStreamMessage(_:data:) 方法发送的流消息时触发此回调
+    func rtcEngine(_ engine: AgoraRtcEngineKit, receiveStreamMessageFromUid uid: UInt, streamId: Int, data: Data) {
+        Agora.log(engine, uid, streamId, data)
+    }
+    
+    /// 当本地用户在5秒内没有接收到来自远程用户的数据流时调用
+    ///
+    /// - Parameters:
+    ///   - error: 错误ID，查看 AgoraErrorCode
+    ///   - missed: 丢失信息的数量
+    ///   - cached: 数据流中断时缓存的传入消息数
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurStreamMessageErrorFromUid uid: UInt, streamId: Int, error: Int, missed: Int, cached: Int) {
+        Agora.log(engine, uid, streamId, error, missed, cached)
+    }
 }
 
 extension AgoraRTCEngineProxy {
     func a() {
-        #selector(AgoraRtcEngineKit.removePublishStreamUrl(_:))
+        #selector(AgoraRtcEngineKit.sendStreamMessage(_:data:))
         #selector(AgoraRtcEngineDelegate.rtcEngine(_:didOccurWarning:))
     }
 }
