@@ -618,6 +618,18 @@ extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurStreamMessageErrorFromUid uid: UInt, streamId: Int, error: Int, missed: Int, cached: Int) {
         Agora.log(engine, uid, streamId, error, missed, cached)
     }
+    
+    // MARK: - Miscellaneous Delegate Methods
+    
+    /// 媒体引擎加载时调用
+    func rtcEngineMediaEngineDidLoaded(_ engine: AgoraRtcEngineKit) {
+        Agora.log(engine)
+    }
+    
+    /// 媒体引擎调用启动时调用
+    func rtcEngineMediaEngineDidStartCall(_ engine: AgoraRtcEngineKit) {
+        Agora.log(engine)
+    }
 }
 
 extension AgoraRTCEngineProxy {
