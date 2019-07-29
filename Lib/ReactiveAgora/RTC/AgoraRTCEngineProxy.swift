@@ -133,6 +133,11 @@ class AgoraRTCEngineProxy: NSObject {
     
     // MARK: - Fallback Delegate Methods Signal
     
+    /// 当已发布的视频流由于不可靠的网络条件而返回到只包含音频的流，或在网络条件改善时切换回视频流时调用
+    let (didLocalPublishFallbackToAudioOnlySignal, didLocalPublishFallbackToAudioOnlyObserver) = Signal<(AgoraRtcEngineKit, Bool), Never>.pipe()
+    
+    /// 当远端视频流由于不可靠的网络条件而退回到音频流或在网络条件改善后切换回视频时调用
+    let (didRemoteSubscribeFallbackToAudioOnlySignal, didRemoteSubscribeFallbackToAudioOnlyObserver) = Signal<(AgoraRtcEngineKit, Bool, UInt), Never>.pipe()
     
     // MARK: - Device Delegate Methods Signal
     
@@ -552,6 +557,7 @@ extension AgoraRTCEngineProxy {
     ///   - isFallbackOrRecover: true：发布的流由于不可靠的网络条件返回到只包含音频的流；false：发布的流在网络条件改善时切回视频流
     func rtcEngine(_ engine: AgoraRtcEngineKit, didLocalPublishFallbackToAudioOnly isFallbackOrRecover: Bool) {
         Agora.log(engine, isFallbackOrRecover)
+        didLocalPublishFallbackToAudioOnlyObserver.send(value: (engine, isFallbackOrRecover))
     }
     
     /// 当远端视频流由于不可靠的网络条件而退回到音频流或在网络条件改善后切换回视频时调用
@@ -563,6 +569,7 @@ extension AgoraRTCEngineProxy {
     ///   - isFallbackOrRecover: true：远端媒体流由于不可靠的网络条件返回到只包含音频的流；false：媒体流在网络条件改善时切回视频流
     func rtcEngine(_ engine: AgoraRtcEngineKit, didRemoteSubscribeFallbackToAudioOnly isFallbackOrRecover: Bool, byUid uid: UInt) {
         Agora.log(engine, isFallbackOrRecover, uid)
+        didRemoteSubscribeFallbackToAudioOnlyObserver.send(value: (engine, isFallbackOrRecover, uid))
     }
 }
 
