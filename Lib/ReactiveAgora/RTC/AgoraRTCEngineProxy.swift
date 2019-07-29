@@ -194,6 +194,20 @@ class AgoraRTCEngineProxy: NSObject {
     // ------------------------------------------------------------------------------------
     // MARK: - Audio Player Delegate Methods Signal
     
+    /// 当音频混合文件播放结束 代理方法信号量
+    let (localAudioMixingDidFinishSignal, localAudioMixingDidFinishObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
+    
+    /// 当本地用户的音频混合文件的状态发生更改 代理方法信号量
+    let (localAudioMixingStateDidChangedSignal, localAudioMixingStateDidChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraAudioMixingStateCode, AgoraAudioMixingErrorCode), Never>.pipe()
+    
+    /// 当远程用户启动音频混合 代理方法信号量
+    let (remoteAudioMixingDidStartSignal, remoteAudioMixingDidStartObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
+    
+    /// 当远程用户结束音频混合 代理方法信号量
+    let (remoteAudioMixingDidFinishSignal, remoteAudioMixingDidFinishObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
+    
+    /// 当本地音频效果回放结束 代理方法信号量
+    let (didAudioEffectFinishSignal, didAudioEffectFinishObserver) = Signal<(AgoraRtcEngineKit, Int), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
@@ -774,6 +788,7 @@ extension AgoraRTCEngineProxy {
     /// 可以通过调用 AgoraRtcEngineKit.startAudioMixing(_:loopback:replace:cycle:) 方法来启动音频混合文件播放。SDK在音频混合文件回放结束时触发此回调。如果 AgoraRtcEngineKit.startAudioMixing(_:loopback:replace:cycle:) 调用失败，通过 AgoraRtcEngineDelegate.rtcEngine(_:didOccurWarning:) 返回 AgoraWarningCode.audioMixingOpenError 警告码
     func rtcEngineLocalAudioMixingDidFinish(_ engine: AgoraRtcEngineKit) {
         Agora.log(engine)
+        localAudioMixingDidFinishObserver.send(value: engine)
     }
     
     /// 当本地用户的音频混合文件的状态发生更改时调用
@@ -781,6 +796,7 @@ extension AgoraRTCEngineProxy {
     /// 如果本地音频混合文件不存在，或者SDK不支持文件格式或无法访问音乐文件URL, SDK返回 errorCode == AgoraAudioMixingErrorCode.canNotOpen
     func rtcEngine(_ engine: AgoraRtcEngineKit, localAudioMixingStateDidChanged state: AgoraAudioMixingStateCode, errorCode: AgoraAudioMixingErrorCode) {
         Agora.log(engine, state, state.rawValue, errorCode, errorCode.rawValue)
+        localAudioMixingStateDidChangedObserver.send(value: (engine, state, errorCode))
     }
     
     /// 当远程用户启动音频混合时调用
@@ -788,11 +804,13 @@ extension AgoraRTCEngineProxy {
     /// 当远程用户调用 AgoraRtcEngineKit.startAudioMixing(_:loopback:replace:cycle:) 方法时SDK触发这个回调
     func rtcEngineRemoteAudioMixingDidStart(_ engine: AgoraRtcEngineKit) {
         Agora.log(engine)
+        remoteAudioMixingDidStartObserver.send(value: engine)
     }
     
     /// 当远程用户结束音频混合时调用
     func rtcEngineRemoteAudioMixingDidFinish(_ engine: AgoraRtcEngineKit) {
         Agora.log(engine)
+        remoteAudioMixingDidFinishObserver.send(value: engine)
     }
     
     /// 当本地音频效果回放结束时调用
@@ -803,6 +821,7 @@ extension AgoraRTCEngineProxy {
     ///   - soundId: 本地音效的ID
     func rtcEngineDidAudioEffectFinish(_ engine: AgoraRtcEngineKit, soundId: Int) {
         Agora.log(engine, soundId)
+        didAudioEffectFinishObserver.send(value: (engine, soundId))
     }
 }
 
