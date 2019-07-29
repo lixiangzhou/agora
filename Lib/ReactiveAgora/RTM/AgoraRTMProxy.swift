@@ -37,54 +37,88 @@ class AgoraRTMProxy: NSObject {
     
     // MARK: - Method CallBack Signal
     
-    /// 登录方法 信号量 <(token?, userId), AgoraRtmLoginErrorCode>
+    /// 登录方法 信号量
+    ///
+    /// func login(byToken token: String? = nil, user userId: String, completion: AgoraRtmLoginBlock? = nil)
     let (loginSignal, loginObserver) = Signal<((String?, String), AgoraRtmLoginErrorCode), Never>.pipe()
     
     /// 登出方法 信号量
+    ///
+    /// func logout(completion: AgoraRtmLogoutBlock? = nil)
     let (logoutSignal, logoutObserver) = Signal<AgoraRtmLogoutErrorCode, Never>.pipe()
     
-    /// 重新生成token方法 信号量 <token?, AgoraRtmRenewTokenErrorCode>
+    /// 重新生成token方法 信号量
+    ///
+    /// func renewToken(_ token: String, completion: AgoraRtmRenewTokenBlock? = nil)
     let (renewTokenSignal, renewTokenObserver) = Signal<(String?, AgoraRtmRenewTokenErrorCode), Never>.pipe()
     
-    /// 发送消息方法 信号量 <(msg, userId, options?), AgoraRtmSendPeerMessageErrorCode>
+    /// 发送消息方法 信号量
+    ///
+    /// func send(_ message: AgoraRtmMessage, toPeer: String, options: AgoraRtmSendMessageOptions, completion: AgoraRtmSendPeerMessageBlock? = nil)
+    ///
+    /// func send(_ message: AgoraRtmMessage, toPeer: String, completion: AgoraRtmSendPeerMessageBlock? = nil)
     let (sendMsgSignal, sendMsgObserver) = Signal<((AgoraRtmMessage, String, AgoraRtmSendMessageOptions?), AgoraRtmSendPeerMessageErrorCode), Never>.pipe()
     
-    /// 创建频道方法 信号量 <(channelId, delegate), AgoraRtmChannel?>
+    /// 创建频道方法 信号量
+    ///
+    /// func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate? = nil) -> AgoraRtmChannel?
     let (createChannelSignal, createChannelObserver) = Signal<((String, AgoraRtmChannelDelegate?), AgoraRtmChannel?), Never>.pipe()
     
-    /// 销毁频道方法 信号量 <(channelId), Bool>
+    /// 销毁频道方法 信号量
+    ///
+    /// func destroyChannelWithId(_ channelId: String) -> Bool
     let (destroyChannelSignal, destroyChannelObserver) = Signal<((String), Bool), Never>.pipe()
     
-    /// 查询在线用户方法 信号量 <([userId]), [AgoraRtmPeerOnlineStatus]?, AgoraRtmQueryPeersOnlineErrorCode>
+    /// 查询在线用户方法 信号量
+    ///
+    /// func queryPeersOnlineStatus(peerIds: [String], completion: AgoraRtmQueryPeersOnlineBlock? = nil)
     let (queryPeersOnlineStatusSignal, queryPeersOnlineStatusObserver) = Signal<(([String]), [AgoraRtmPeerOnlineStatus]?, AgoraRtmQueryPeersOnlineErrorCode), Never>.pipe()
     
-    /// 设置本地用户属性方法 信号量 <([attrs]), AgoraRtmProcessAttributeErrorCode>
+    /// 设置本地用户属性方法 信号量
+    ///
+    /// func setLocalUserAttributes(_ attributes: [AgoraRtmAttribute]?, completion: AgoraRtmSetLocalUserAttributesBlock? = nil)
     let (setLocalUserAttributesSignal, setLocalUserAttributesObserver) = Signal<(([AgoraRtmAttribute]?), AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
-    /// 添加或更新本地用户属性方法 信号量 <([attrs]), AgoraRtmProcessAttributeErrorCode>
+    /// 添加或更新本地用户属性方法 信号量
+    ///
+    /// func addOrUpdateLocalUserAttributes(_ attributes: [AgoraRtmAttribute]?, completion: AgoraRtmAddOrUpdateLocalUserAttributesBlock? = nil)
     let (addOrUpdateLocalUserAttributesSignal, addOrUpdateLocalUserAttributesObserver) = Signal<(([AgoraRtmAttribute]?), AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
-    /// 删除本地用户属性方法 信号量 <([keys]?), AgoraRtmProcessAttributeErrorCode>
+    /// 删除本地用户属性方法 信号量
+    ///
+    /// func deleteLocalUserAttributes(byKeys: [String]?, completion: AgoraRtmDeleteLocalUserAttributesBlock? = nil)
     let (deleteLocalUserAttributesSignal, deleteLocalUserAttributesObserver) = Signal<(([String]?), AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
     /// 清空本地用户属性方法 信号量
+    ///
+    /// func clearLocalUserAttributes(completion: AgoraRtmClearLocalUserAttributesBlock? = nil)
     let (clearLocalUserAttributesSignal, clearLocalUserAttributesObserver) = Signal<AgoraRtmProcessAttributeErrorCode, Never>.pipe()
     
-    /// 获取用户所有属性方法 信号量 <(userId), [attrs]?, userID?, AgoraRtmProcessAttributeErrorCode>
+    /// 获取用户所有属性方法 信号量
+    ///
+    /// func getUserAllAttributes(_ userId: String, completion: AgoraRtmGetUserAttributesBlock? = nil)
     let (getUserAllAttributesSignal, getUserAllAttributesObserver) = Signal<((String), [AgoraRtmAttribute]?, String?, AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
-    /// 获取用户属性方法 信号量 <(userId, keys), [attrs]?, userID?, AgoraRtmProcessAttributeErrorCode>
+    /// 获取用户属性方法 信号量
+    ///
+    /// getUserAttributes(_ userId: String, byKeys: [String]?, completion: AgoraRtmGetUserAttributesBlock? = nil)
     let (getUserAttributesSignal, getUserAttributesObserver) = Signal<((String, [String]?), [AgoraRtmAttribute]?, String?, AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
     // MARK: - Delegate Signal
     
     /// 连接状态改变 代理方法信号量
+    ///
+    /// func rtmKit(_ kit: AgoraRtmKit, connectionStateChanged state: AgoraRtmConnectionState, reason: AgoraRtmConnectionChangeReason)
     let (connectionStateChangedSignal, connectionStateChangedObserver) = Signal<(AgoraRtmKit, AgoraRtmConnectionState, AgoraRtmConnectionChangeReason), Never>.pipe()
     
     /// 接受远端消息 代理方法信号量
+    ///
+    /// func rtmKit(_ kit: AgoraRtmKit, messageReceived message: AgoraRtmMessage, fromPeer peerId: String)
     let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmKit, String), Never>.pipe()
     
     /// token失效 代理方法信号量
+    ///
+    /// func rtmKitTokenDidExpire(_ kit: AgoraRtmKit)
     let (tokenDidExpireSignal, tokenDidExpireObserver) = Signal<AgoraRtmKit, Never>.pipe()
 }
 

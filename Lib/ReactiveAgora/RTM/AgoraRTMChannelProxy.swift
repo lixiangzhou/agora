@@ -38,26 +38,40 @@ class AgoraRTMChannelProxy: NSObject {
     // MARK: - Method CallBack Signal
     
     /// 加入频道方法 信号量
+    ///
+    /// func join(completion: AgoraRtmJoinChannelBlock? = nil)
     let (joinSignal, joinObserver) = Signal<AgoraRtmJoinChannelErrorCode, Never>.pipe()
     
     /// 离开频道方法 信号量
+    ///
+    /// func leave(completion: AgoraRtmLeaveChannelBlock? = nil)
     let (leaveSignal, leaveObserver) = Signal<AgoraRtmLeaveChannelErrorCode, Never>.pipe()
     
     /// 发送消息方法 信号量
+    ///
+    /// func send(_ message: AgoraRtmMessage, completion: AgoraRtmSendChannelMessageBlock? = nil)
     let (sendMsgSignal, sendMsgObserver) = Signal<((AgoraRtmMessage), AgoraRtmSendChannelMessageErrorCode), Never>.pipe()
     
     /// 获取成员列表方法 信号量
+    ///
+    /// func getMembers(_ completion: AgoraRtmGetMembersBlock? = nil)
     let (getMembersSignal, getMembersObserver) = Signal<([AgoraRtmMember]?, AgoraRtmGetMembersErrorCode), Never>.pipe()
     
     // MARK: - Delegate Signal
     
     /// 成员离开 代理方法信号量
+    ///
+    /// func channel(_ channel: AgoraRtmChannel, memberLeft member: AgoraRtmMember)
     let (memberLeftSignal, memberLeftObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
     
     /// 成员加入 代理方法信号量
+    ///
+    /// func channel(_ channel: AgoraRtmChannel, memberJoined member: AgoraRtmMember)
     let (memberJoinedSignal, memberJoinedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
     
     /// 收到消息 代理方法信号量
+    ///
+    /// func channel(_ channel: AgoraRtmChannel, messageReceived message: AgoraRtmMessage, from member: AgoraRtmMember)
     let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMessage, AgoraRtmMember), Never>.pipe()
 }
 
