@@ -34,48 +34,48 @@ class AgoraRTMCallProxy: NSObject {
     
     // MARK: - Method CallBack Signal
     
-    /// 发送呼叫邀请方法信号量
+    /// 发送呼叫邀请方法 信号量
     let (sendInvitationSignal, sendInvitationObserver) = Signal<((AgoraRtmLocalInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
     
-    /// 取消呼叫邀请方法信号量
+    /// 取消呼叫邀请方法 信号量
     let (cancelInvitationSignal, cancelInvitationObserver) = Signal<((AgoraRtmLocalInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
     
-    /// 接收呼叫邀请方法信号量
+    /// 接收呼叫邀请方法 信号量
     let (acceptInvitationSignal, acceptInvitationObserver) = Signal<((AgoraRtmRemoteInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
     
-    /// 拒绝呼叫邀请方法信号量
+    /// 拒绝呼叫邀请方法 信号量
     let (refuseInvitationSignal, refuseInvitationObserver) = Signal<((AgoraRtmRemoteInvitation), AgoraRtmInvitationApiCallErrorCode), Never>.pipe()
     
     // MARK: - Delegate Signal
     
-    /// 被叫者收到呼叫的代理方法调用信号量（呼叫者回调）
+    /// 被叫者收到呼叫的 代理方法信号量（呼叫者回调）
     let (localInvitationReceivedSignal, localInvitationReceivedObserver) = Signal<(AgoraRtmCallKit, AgoraRtmLocalInvitation), Never>.pipe()
     
-    /// 被叫者接听的代理方法调用信号量（呼叫者回调）
+    /// 被叫者接听的 代理方法信号量（呼叫者回调）
     let (localInvitationAcceptedSignal, localInvitationAcceptedObserver) = Signal<(AgoraRtmCallKit, AgoraRtmLocalInvitation, String?), Never>.pipe()
     
-    /// 被叫者拒绝的代理方法调用信号量（呼叫者回调）（呼叫者回调）
+    /// 被叫者拒绝的 代理方法信号量（呼叫者回调）
     let (localInvitationRefusedSignal, localInvitationRefusedObserver) = Signal<(AgoraRtmCallKit, AgoraRtmLocalInvitation, String?), Never>.pipe()
     
-    /// 呼叫者取消的代理方法调用信号量（呼叫者回调）
+    /// 呼叫者取消的 代理方法信号量（呼叫者回调）
     let (localInvitationCanceledSignal, localInvitationCanceledObserver) = Signal<(AgoraRtmCallKit, AgoraRtmLocalInvitation), Never>.pipe()
     
-    /// 呼叫生命周期结束的代理方法调用信号量（呼叫者回调）
+    /// 呼叫生命周期结束的 代理方法信号量（呼叫者回调）
     let (localInvitationFailureSignal, localInvitationFailureObserver) = Signal<(AgoraRtmCallKit, AgoraRtmLocalInvitation, AgoraRtmLocalInvitationErrorCode), Never>.pipe()
     
-    /// 被叫者收到呼叫的代理方法调用信号量（被叫者回调）
+    /// 被叫者收到呼叫的 代理方法信号量（被叫者回调）
     let (remoteInvitationReceivedSignal, remoteInvitationReceivedObserver) = Signal<(AgoraRtmCallKit, AgoraRtmRemoteInvitation), Never>.pipe()
     
-    /// 被叫者接听的代理方法调用信号量（被叫者回调）
+    /// 被叫者接听的 代理方法信号量（被叫者回调）
     let (remoteInvitationAcceptedSignal, remoteInvitationAcceptedObserver) = Signal<(AgoraRtmCallKit, AgoraRtmRemoteInvitation), Never>.pipe()
     
-    /// 被叫者拒绝的代理方法调用信号量（被叫者回调）
+    /// 被叫者拒绝的 代理方法信号量（被叫者回调）
     let (remoteInvitationRefusedSignal, remoteInvitationRefusedObserver) = Signal<(AgoraRtmCallKit, AgoraRtmRemoteInvitation), Never>.pipe()
     
-    /// 呼叫者取消的代理方法调用信号量（被叫者回调）
+    /// 呼叫者取消的 代理方法信号量（被叫者回调）
     let (remoteInvitationCanceledSignal, remoteInvitationCanceledObserver) = Signal<(AgoraRtmCallKit, AgoraRtmRemoteInvitation), Never>.pipe()
     
-    /// 呼叫生命周期结束的代理方法调用信号量（被叫者回调）
+    /// 呼叫生命周期结束的 代理方法信号量（被叫者回调）
     let (remoteInvitationFailureSignal, remoteInvitationFailureObserver) = Signal<(AgoraRtmCallKit, AgoraRtmRemoteInvitation, AgoraRtmRemoteInvitationErrorCode), Never>.pipe()
 }
 

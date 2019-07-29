@@ -37,54 +37,54 @@ class AgoraRTMProxy: NSObject {
     
     // MARK: - Method CallBack Signal
     
-    /// 登录方法回调信号量 <(token?, userId), AgoraRtmLoginErrorCode>
+    /// 登录方法 信号量 <(token?, userId), AgoraRtmLoginErrorCode>
     let (loginSignal, loginObserver) = Signal<((String?, String), AgoraRtmLoginErrorCode), Never>.pipe()
     
-    /// 登出方法回调信号量
+    /// 登出方法 信号量
     let (logoutSignal, logoutObserver) = Signal<AgoraRtmLogoutErrorCode, Never>.pipe()
     
-    /// 重新生成token方法回调信号量 <token?, AgoraRtmRenewTokenErrorCode>
+    /// 重新生成token方法 信号量 <token?, AgoraRtmRenewTokenErrorCode>
     let (renewTokenSignal, renewTokenObserver) = Signal<(String?, AgoraRtmRenewTokenErrorCode), Never>.pipe()
     
-    /// 发送消息方法回调信号量 <(msg, userId, options?), AgoraRtmSendPeerMessageErrorCode>
+    /// 发送消息方法 信号量 <(msg, userId, options?), AgoraRtmSendPeerMessageErrorCode>
     let (sendMsgSignal, sendMsgObserver) = Signal<((AgoraRtmMessage, String, AgoraRtmSendMessageOptions?), AgoraRtmSendPeerMessageErrorCode), Never>.pipe()
     
-    /// 创建频道方法回调信号量 <(channelId, delegate), AgoraRtmChannel?>
+    /// 创建频道方法 信号量 <(channelId, delegate), AgoraRtmChannel?>
     let (createChannelSignal, createChannelObserver) = Signal<((String, AgoraRtmChannelDelegate?), AgoraRtmChannel?), Never>.pipe()
     
-    /// 销毁频道方法回调信号量 <(channelId), Bool>
+    /// 销毁频道方法 信号量 <(channelId), Bool>
     let (destroyChannelSignal, destroyChannelObserver) = Signal<((String), Bool), Never>.pipe()
     
-    /// 查询在线用户方法回调信号量 <([userId]), [AgoraRtmPeerOnlineStatus]?, AgoraRtmQueryPeersOnlineErrorCode>
+    /// 查询在线用户方法 信号量 <([userId]), [AgoraRtmPeerOnlineStatus]?, AgoraRtmQueryPeersOnlineErrorCode>
     let (queryPeersOnlineStatusSignal, queryPeersOnlineStatusObserver) = Signal<(([String]), [AgoraRtmPeerOnlineStatus]?, AgoraRtmQueryPeersOnlineErrorCode), Never>.pipe()
     
-    /// 设置本地用户属性方法回调信号量 <([attrs]), AgoraRtmProcessAttributeErrorCode>
+    /// 设置本地用户属性方法 信号量 <([attrs]), AgoraRtmProcessAttributeErrorCode>
     let (setLocalUserAttributesSignal, setLocalUserAttributesObserver) = Signal<(([AgoraRtmAttribute]?), AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
-    /// 添加或更新本地用户属性方法回调信号量 <([attrs]), AgoraRtmProcessAttributeErrorCode>
+    /// 添加或更新本地用户属性方法 信号量 <([attrs]), AgoraRtmProcessAttributeErrorCode>
     let (addOrUpdateLocalUserAttributesSignal, addOrUpdateLocalUserAttributesObserver) = Signal<(([AgoraRtmAttribute]?), AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
-    /// 删除本地用户属性方法回调信号量 <([keys]?), AgoraRtmProcessAttributeErrorCode>
+    /// 删除本地用户属性方法 信号量 <([keys]?), AgoraRtmProcessAttributeErrorCode>
     let (deleteLocalUserAttributesSignal, deleteLocalUserAttributesObserver) = Signal<(([String]?), AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
-    /// 清空本地用户属性方法回调信号量
+    /// 清空本地用户属性方法 信号量
     let (clearLocalUserAttributesSignal, clearLocalUserAttributesObserver) = Signal<AgoraRtmProcessAttributeErrorCode, Never>.pipe()
     
-    /// 获取用户所有属性方法回调信号量 <(userId), [attrs]?, userID?, AgoraRtmProcessAttributeErrorCode>
+    /// 获取用户所有属性方法 信号量 <(userId), [attrs]?, userID?, AgoraRtmProcessAttributeErrorCode>
     let (getUserAllAttributesSignal, getUserAllAttributesObserver) = Signal<((String), [AgoraRtmAttribute]?, String?, AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
-    /// 获取用户属性方法回调信号量 <(userId, keys), [attrs]?, userID?, AgoraRtmProcessAttributeErrorCode>
+    /// 获取用户属性方法 信号量 <(userId, keys), [attrs]?, userID?, AgoraRtmProcessAttributeErrorCode>
     let (getUserAttributesSignal, getUserAttributesObserver) = Signal<((String, [String]?), [AgoraRtmAttribute]?, String?, AgoraRtmProcessAttributeErrorCode), Never>.pipe()
     
     // MARK: - Delegate Signal
     
-    /// 连接状态改变代理方法回调信号量
+    /// 连接状态改变 代理方法信号量
     let (connectionStateChangedSignal, connectionStateChangedObserver) = Signal<(AgoraRtmKit, AgoraRtmConnectionState, AgoraRtmConnectionChangeReason), Never>.pipe()
     
-    /// 接受远端消息代理方法回调信号量
+    /// 接受远端消息 代理方法信号量
     let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmKit, String), Never>.pipe()
     
-    /// token失效代理方法回调信号量
+    /// token失效 代理方法信号量
     let (tokenDidExpireSignal, tokenDidExpireObserver) = Signal<AgoraRtmKit, Never>.pipe()
 }
 

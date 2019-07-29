@@ -37,27 +37,27 @@ class AgoraRTMChannelProxy: NSObject {
     
     // MARK: - Method CallBack Signal
     
-    /// 加入频道方法回调信号量
+    /// 加入频道方法 信号量
     let (joinSignal, joinObserver) = Signal<AgoraRtmJoinChannelErrorCode, Never>.pipe()
     
-    /// 离开频道方法回调信号量
+    /// 离开频道方法 信号量
     let (leaveSignal, leaveObserver) = Signal<AgoraRtmLeaveChannelErrorCode, Never>.pipe()
     
-    /// 发送消息方法回调信号量
+    /// 发送消息方法 信号量
     let (sendMsgSignal, sendMsgObserver) = Signal<((AgoraRtmMessage), AgoraRtmSendChannelMessageErrorCode), Never>.pipe()
     
-    /// 获取成员列表方法回调信号量
+    /// 获取成员列表方法 信号量
     let (getMembersSignal, getMembersObserver) = Signal<([AgoraRtmMember]?, AgoraRtmGetMembersErrorCode), Never>.pipe()
     
     // MARK: - Delegate Signal
     
-    /// 成员离开代理方法信号量
+    /// 成员离开 代理方法信号量
     let (memberLeftSignal, memberLeftObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
     
-    /// 成员加入代理方法信号量
+    /// 成员加入 代理方法信号量
     let (memberJoinedSignal, memberJoinedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMember), Never>.pipe()
     
-    /// 收到消息代理方法信号量
+    /// 收到消息 代理方法信号量
     let (messageReceivedSignal, messageReceivedObserver) = Signal<(AgoraRtmChannel, AgoraRtmMessage, AgoraRtmMember), Never>.pipe()
 }
 
