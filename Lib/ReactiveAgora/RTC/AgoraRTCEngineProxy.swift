@@ -36,184 +36,184 @@ class AgoraRTCEngineProxy: NSObject {
     
     // MARK: - Core Delegate Methods Signal
     
-    /// 报告SDK运行时警告 代理方法信号量
+    /// 报告SDK运行时警告时 代理方法信号量
     let (didOccurWarningSignal, didOccurWarningObserver) = Signal<(AgoraRtcEngineKit, AgoraWarningCode), Never>.pipe()
 
-    /// 报告SDK运行时错误 代理方法信号量
+    /// 报告SDK运行时错误时 代理方法信号量
     let (didOccurErrorSignal, didOccurErrorObserver) = Signal<(AgoraRtcEngineKit, AgoraErrorCode), Never>.pipe()
     
-    /// SDK执行了一个方法 代理方法信号量
+    /// SDK执行了一个方法时 代理方法信号量
     let (didApiCallExecuteSignal, didApiCallExecuteObserver) = Signal<(AgoraRtcEngineKit, Int, String, String), Never>.pipe()
     
-    /// 本地用户加入一个频道 代理方法信号量
+    /// 本地用户加入一个频道时 代理方法信号量
     let (didJoinChannelSignal, didJoinChannelObserver) = Signal<(AgoraRtcEngineKit, String, UInt, Int), Never>.pipe()
     
-    /// 本地用户重新加入一个频道 代理方法信号量
+    /// 本地用户重新加入一个频道时 代理方法信号量
     let (didRejoinChannelSignal, didRejoinChannelObserver) = Signal<(AgoraRtcEngineKit, String, UInt, Int), Never>.pipe()
     
-    /// 本地用户离开一个频道 代理方法信号量
+    /// 本地用户离开一个频道时 代理方法信号量
     let (didLeaveChannelSignal, didLeaveChannelObserver) = Signal<(AgoraRtcEngineKit, AgoraChannelStats), Never>.pipe()
     
     /// 本地用户调用 AgoraRtcEngineKit.registerLocalUserAccount(_:appId:) 或 AgoraRtcEngineKit.joinChannel(byUserAccount:token:channelId:joinSuccess:) 成功时 代理方法信号量
     let (didRegisteredLocalUserSignal, didRegisteredLocalUserObserver) = Signal<(AgoraRtcEngineKit, String, UInt), Never>.pipe()
     
-    /// 远端用户加入了频道后，SDK获取到远端用户的UID和account缓存到表对象userInfo中 代理方法信号量
+    /// 远端用户加入了频道后，SDK获取到远端用户的UID和account缓存到表对象userInfo中时 代理方法信号量
     let (didUpdatedUserInfoSignal, didUpdatedUserInfoObserver) = Signal<(AgoraRtcEngineKit, AgoraUserInfo, UInt), Never>.pipe()
     
     ///  在本地用户加入频道并转换角色后 AgoraRtcEngineKit.setClientRole(_:) 会触发此方法【直播频道配置文件下】 代理方法信号量
     let (didClientRoleChangedSignal, didClientRoleChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraClientRole, AgoraClientRole), Never>.pipe()
     
-    /// 远端用户或主机加入通道 代理方法信号量
+    /// 远端用户或主机加入通道时 代理方法信号量
     let (didJoinedSignal, didJoinedObserver) = Signal<(AgoraRtcEngineKit, UInt, Int), Never>.pipe()
     
-    /// 远端用户(通讯)/主机(直播)离开频道 代理方法信号量
+    /// 远端用户(通讯)/主机(直播)离开频道时 代理方法信号量
     let (didOfflineSignal, didOfflineObserver) = Signal<(AgoraRtcEngineKit, UInt, AgoraUserOfflineReason), Never>.pipe()
     
-    /// 网络连接状态改变 代理方法信号量
+    /// 网络连接状态改变时 代理方法信号量
     let (connectionChangedSignal, connectionChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraConnectionStateType, AgoraConnectionChangedReason), Never>.pipe()
     
-    /// 本地网络类型改变 代理方法信号量
+    /// 本地网络类型改变时 代理方法信号量
     let (networkTypeChangedSignal, networkTypeChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraNetworkType), Never>.pipe()
     
-    /// 当SDK到服务器的连接中断10秒后，SDK无法重新连接到Agora的edge服务器 代理方法信号量
+    /// 当SDK到服务器的连接中断10秒后，SDK无法重新连接到Agora的edge服务器时 代理方法信号量
     let (connectionDidLostSignal, connectionDidLostObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
-    /// token在30秒内过期 代理方法信号量
+    /// token在30秒内过期时 代理方法信号量
     let (tokenPrivilegeWillExpireSignal, tokenPrivilegeWillExpireObserver) = Signal<(AgoraRtcEngineKit, String), Never>.pipe()
     
-    /// token过期 代理方法信号量
+    /// token过期时 代理方法信号量
     let (requestTokenSignal, requestTokenObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Media Delegate Methods Signal
     
-    /// 本地用户通过调用 AgoraRtcEngineKit.enableLocalAudio(_:) 方法恢复或停止捕获本地音频流 代理方法信号量
+    /// 本地用户通过调用 AgoraRtcEngineKit.enableLocalAudio(_:) 方法恢复或停止捕获本地音频流时 代理方法信号量
     let (didMicrophoneEnabledSignal, didMicrophoneEnabledObserver) = Signal<(AgoraRtcEngineKit, Bool), Never>.pipe()
     
-    /// 报告哪些用户正在说话，以及说话者当前的音量 代理方法信号量
+    /// 报告哪些用户正在说话，以及说话者当前的音量时 代理方法信号量
     let (reportAudioVolumeIndicationOfSpeakersSignal, reportAudioVolumeIndicationOfSpeakersObserver) = Signal<(AgoraRtcEngineKit, [AgoraRtcAudioVolumeInfo], Int), Never>.pipe()
     
-    /// 报告一段时间内哪个用户是最大的说话者 代理方法信号量
+    /// 报告一段时间内哪个用户是最大的说话者时 代理方法信号量
     let (activeSpeakerSignal, activeSpeakerObserver) = Signal<(AgoraRtcEngineKit, UInt), Never>.pipe()
     
-    /// 引擎发送第一帧本地音频 代理方法信号量
+    /// 引擎发送第一帧本地音频时 代理方法信号量
     let (firstLocalAudioFrameSignal, firstLocalAudioFrameObserver) = Signal<(AgoraRtcEngineKit, Int), Never>.pipe()
     
-    /// 引擎从指定的远端用户接收到第一个音频帧 代理方法信号量
+    /// 引擎从指定的远端用户接收到第一个音频帧时 代理方法信号量
     let (firstRemoteAudioFrameSignal, firstRemoteAudioFrameObserver) = Signal<(AgoraRtcEngineKit, UInt, Int), Never>.pipe()
     
-    /// SDK解码第一个远端音频帧以进行回放 代理方法信号量
+    /// SDK解码第一个远端音频帧以进行回放时 代理方法信号量
     let (firstRemoteAudioFrameDecodedSignal, firstRemoteAudioFrameDecodedObserver) = Signal<(AgoraRtcEngineKit, UInt, Int), Never>.pipe()
     
-    /// 引擎发送第一帧本地视频 代理方法信号量
+    /// 引擎发送第一帧本地视频时 代理方法信号量
     let (firstLocalVideoFrameSignal, firstLocalVideoFrameObserver) = Signal<(AgoraRtcEngineKit, CGSize, Int), Never>.pipe()
     
-    /// 接收和解码第一个远端视频帧 代理方法信号量
+    /// 接收和解码第一个远端视频帧时 代理方法信号量
     let (firstRemoteVideoDecodedSignal, firstRemoteVideoDecodedObserver) = Signal<(AgoraRtcEngineKit, UInt, CGSize, Int), Never>.pipe()
     
-    /// 第一帧远端视频帧渲染 代理方法信号量
+    /// 第一帧远端视频帧渲染时 代理方法信号量
     let (firstRemoteVideoFrameSignal, firstRemoteVideoFrameObserver) = Signal<(AgoraRtcEngineKit, UInt, CGSize, Int), Never>.pipe()
 
-    /// 远程用户的音频流被静音/非静音 代理方法信号量
+    /// 远程用户的音频流被静音/非静音时 代理方法信号量
     let (didAudioMutedSignal, didAudioMutedObserver) = Signal<(AgoraRtcEngineKit, Bool, UInt), Never>.pipe()
     
-    /// 远端用户的视频流回放暂停/恢复 代理方法信号量
+    /// 远端用户的视频流回放暂停/恢复时 代理方法信号量
     let (didVideoMutedSignal, didVideoMutedObserver) = Signal<(AgoraRtcEngineKit, Bool, UInt), Never>.pipe()
     
-    /// 远端用户开启/禁用视频模块 代理方法信号量
+    /// 远端用户开启/禁用视频模块时 代理方法信号量
     let (didVideoEnabledSignal, didVideoEnabledObserver) = Signal<(AgoraRtcEngineKit, Bool, UInt), Never>.pipe()
     
-    /// 远端用户开启/禁用本地视频捕获方法 代理方法信号量
+    /// 远端用户开启/禁用本地视频捕获方法时 代理方法信号量
     let (didLocalVideoEnabledSignal, didLocalVideoEnabledObserver) = Signal<(AgoraRtcEngineKit, Bool, UInt), Never>.pipe()
     
-    /// 远端用户的视频大小或方向改变 代理方法信号量
+    /// 远端用户的视频大小或方向改变时 代理方法信号量
     let (videoSizeChangedSignal, videoSizeChangedObserver) = Signal<(AgoraRtcEngineKit, UInt, CGSize, Int), Never>.pipe()
     
-    /// 远端视频流状态改变 代理方法信号量
+    /// 远端视频流状态改变时 代理方法信号量
     let (remoteVideoStateChangedSignal, remoteVideoStateChangedObserver) = Signal<(AgoraRtcEngineKit, UInt, AgoraVideoRemoteState), Never>.pipe()
     
-    /// 本地用户视频流状态改变 代理方法信号量
+    /// 本地用户视频流状态改变时 代理方法信号量
     let (localVideoStateChangeSignal, localVideoStateChangeObserver) = Signal<(AgoraRtcEngineKit, AgoraLocalVideoStreamState, AgoraLocalVideoStreamError), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Fallback Delegate Methods Signal
     
-    /// 当已发布的视频流由于不可靠的网络条件而返回到只包含音频的流，或在网络条件改善时切换回视频流时调用 代理方法信号量
+    /// 当已发布的视频流由于不可靠的网络条件而返回到只包含音频的流，或在网络条件改善时切换回视频流时调用时 代理方法信号量
     let (didLocalPublishFallbackToAudioOnlySignal, didLocalPublishFallbackToAudioOnlyObserver) = Signal<(AgoraRtcEngineKit, Bool), Never>.pipe()
     
-    /// 当远端视频流由于不可靠的网络条件而退回到音频流或在网络条件改善后切换回视频时调用 代理方法信号量
+    /// 当远端视频流由于不可靠的网络条件而退回到音频流或在网络条件改善后切换回视频时调用时 代理方法信号量
     let (didRemoteSubscribeFallbackToAudioOnlySignal, didRemoteSubscribeFallbackToAudioOnlyObserver) = Signal<(AgoraRtcEngineKit, Bool, UInt), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Device Delegate Methods Signal
     
-    /// 当本地音频路由发生更改 代理方法信号量
+    /// 当本地音频路由发生更改时 代理方法信号量
     let (didAudioRouteChangedSignal, didAudioRouteChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraAudioOutputRouting), Never>.pipe()
     
-    /// 相机焦点区域改变 代理方法信号量
+    /// 相机焦点区域改变时 代理方法信号量
     let (cameraFocusDidChangedSignal, cameraFocusDidChangedObserver) = Signal<(AgoraRtcEngineKit, CGRect), Never>.pipe()
     
-    /// 当相机曝光区域发生变化 代理方法信号量
+    /// 当相机曝光区域发生变化时 代理方法信号量
     let (cameraExposureDidChangedSignal, cameraExposureDidChangedObserver) = Signal<(AgoraRtcEngineKit, CGRect), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Statistics Delegate Methods Signal
     
-    /// 每两秒报告一次当前调用会话的统计信息 代理方法信号量
+    /// 每两秒报告一次当前调用会话的统计信息时 代理方法信号量
     let (reportRtcStatsSignal, reportRtcStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraChannelStats), Never>.pipe()
     
-    /// 在用户加入通道之前，每两秒报告一次本地用户的最后一英里网络质量 代理方法信号量
+    /// 在用户加入通道之前，每两秒报告一次本地用户的最后一英里网络质量时 代理方法信号量
     let (lastmileQualitySignal, lastmileQualityObserver) = Signal<(AgoraRtcEngineKit, AgoraNetworkQuality), Never>.pipe()
     
-    /// 每两秒报告一次通道中每个用户的最后一英里网络质量 代理方法信号量
+    /// 每两秒报告一次通道中每个用户的最后一英里网络质量时 代理方法信号量
     let (networkQualitySignal, networkQualityObserver) = Signal<(AgoraRtcEngineKit, UInt, AgoraNetworkQuality, AgoraNetworkQuality), Never>.pipe()
     
-    /// 报告最后一英里网络探测结果 代理方法信号量
+    /// 报告最后一英里网络探测结果时 代理方法信号量
     let (lastmileProbeTestSignal, lastmileProbeTestObserver) = Signal<(AgoraRtcEngineKit, AgoraLastmileProbeResult), Never>.pipe()
     
-    /// 每2s报告本地视频流的统计数据 代理方法信号量
+    /// 每2s报告本地视频流的统计数据时 代理方法信号量
     let (localVideoStatsSignal, localVideoStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraRtcLocalVideoStats), Never>.pipe()
     
-    /// 报告来自每个远端用户/主机的视频流的统计数据 代理方法信号量
+    /// 报告来自每个远端用户/主机的视频流的统计数据时 代理方法信号量
     let (remoteVideoStatsSignal, remoteVideoStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraRtcRemoteVideoStats), Never>.pipe()
     
-    /// 报告来自每个远端用户/主机的音频流的统计数据 代理方法信号量
+    /// 报告来自每个远端用户/主机的音频流的统计数据时 代理方法信号量
     let (remoteAudioStatsSignal, remoteAudioStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraRtcRemoteAudioStats), Never>.pipe()
     
-    /// 报告每个音频流传输层的统计信息 代理方法信号量
+    /// 报告每个音频流传输层的统计信息时 代理方法信号量
     let (audioTransportStatsSignal, audioTransportStatsObserver) = Signal<(AgoraRtcEngineKit, UInt, UInt, UInt, UInt), Never>.pipe()
     
-    /// 报告每个视频流传输层的统计信息 代理方法信号量
+    /// 报告每个视频流传输层的统计信息时 代理方法信号量
     let (videoTransportStatsSignal, videoTransportStatsObserver) = Signal<(AgoraRtcEngineKit, UInt, UInt, UInt, UInt), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Audio Player Delegate Methods Signal
     
-    /// 当音频混合文件播放结束 代理方法信号量
+    /// 当音频混合文件播放结束时 代理方法信号量
     let (localAudioMixingDidFinishSignal, localAudioMixingDidFinishObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
-    /// 当本地用户的音频混合文件的状态发生更改 代理方法信号量
+    /// 当本地用户的音频混合文件的状态发生更改时 代理方法信号量
     let (localAudioMixingStateDidChangedSignal, localAudioMixingStateDidChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraAudioMixingStateCode, AgoraAudioMixingErrorCode), Never>.pipe()
     
-    /// 当远程用户启动音频混合 代理方法信号量
+    /// 当远程用户启动音频混合时 代理方法信号量
     let (remoteAudioMixingDidStartSignal, remoteAudioMixingDidStartObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
-    /// 当远程用户结束音频混合 代理方法信号量
+    /// 当远程用户结束音频混合时 代理方法信号量
     let (remoteAudioMixingDidFinishSignal, remoteAudioMixingDidFinishObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
-    /// 当本地音频效果回放结束 代理方法信号量
+    /// 当本地音频效果回放结束时 代理方法信号量
     let (didAudioEffectFinishSignal, didAudioEffectFinishObserver) = Signal<(AgoraRtcEngineKit, Int), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - CDN Publisher Delegate Methods Signal
     
-    /// 当RTMP流的状态发生更改 代理方法信号量
+    /// 当RTMP流的状态发生更改时 代理方法信号量
     let (rtmpStreamingChangedToStateSignal, rtmpStreamingChangedToStateObserver) = Signal<(AgoraRtcEngineKit, String, AgoraRtmpStreamingState, AgoraRtmpStreamingErrorCode), Never>.pipe()
     
     /// 报告调用 AgoraRtcEngineKit.addPublishStreamUrl(_:transcodingEnabled:) 的结果 代理方法信号量
@@ -222,22 +222,36 @@ class AgoraRTCEngineProxy: NSObject {
     /// 报告调用 AgoraRtcEngineKit.removePublishStreamUrl(_:) 的结果 代理方法信号量
     let (streamUnpublishedWithUrlSignal, streamUnpublishedWithUrlObserver) = Signal<(AgoraRtcEngineKit, String), Never>.pipe()
     
-    /// 当更新CDN实时流媒体设置 代理方法信号量
+    /// 当更新CDN实时流媒体设置时 代理方法信号量
     let (transcodingUpdatedSignal, transcodingUpdatedObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Inject Stream URL Delegate Methods Signal
     
+    /// 报告向直播注入在线流的状态时 代理方法信号量
+    let (streamInjectedStatusOfUrlSignal, streamInjectedStatusOfUrlObserver) = Signal<(AgoraRtcEngineKit, String, UInt, AgoraInjectStreamStatus), Never>.pipe()
+    
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Stream Message Delegate Methods Signal
     
+    /// 当本地用户在5秒内从远程用户接收到数据流时 代理方法信号量
+    let (receiveStreamMessageSignal, receiveStreamMessageObserver) = Signal<(AgoraRtcEngineKit, UInt, Int, Data), Never>.pipe()
+    
+    /// 当本地用户在5秒内没有接收到来自远程用户的数据流时 代理方法信号量
+    let (didOccurStreamMessageErrorSignal, didOccurStreamMessageErrorObserver) = Signal<(AgoraRtcEngineKit, UInt, Int, Int, Int, Int), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     // MARK: - Miscellaneous Delegate Methods Signal
+    
+    /// 媒体引擎加载时 代理方法信号量
+    let (mediaEngineDidLoadedSignal, mediaEngineDidLoadedObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
+    
+    /// 媒体引擎调用启动时 代理方法信号量
+    let (mediaEngineDidStartCallSignal, mediaEngineDidStartCallObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
 }
 
 // MARK: - Method Proxy
@@ -879,6 +893,7 @@ extension AgoraRTCEngineProxy {
     /// 报告向直播注入在线流的状态
     func rtcEngine(_ engine: AgoraRtcEngineKit, streamInjectedStatusOfUrl url: String, uid: UInt, status: AgoraInjectStreamStatus) {
         Agora.log(engine, url, uid, status)
+        streamInjectedStatusOfUrlObserver.send(value: (engine, url, uid, status))
     }
 }
 
@@ -890,6 +905,7 @@ extension AgoraRTCEngineProxy {
     /// SDK在本地用户接收到远程用户通过调用 AgoraRtcEngineKit.sendStreamMessage(_:data:) 方法发送的流消息时触发此回调
     func rtcEngine(_ engine: AgoraRtcEngineKit, receiveStreamMessageFromUid uid: UInt, streamId: Int, data: Data) {
         Agora.log(engine, uid, streamId, data)
+        receiveStreamMessageObserver.send(value: (engine, uid, streamId, data))
     }
     
     /// 当本地用户在5秒内没有接收到来自远程用户的数据流时调用
@@ -900,6 +916,7 @@ extension AgoraRTCEngineProxy {
     ///   - cached: 数据流中断时缓存的传入消息数
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurStreamMessageErrorFromUid uid: UInt, streamId: Int, error: Int, missed: Int, cached: Int) {
         Agora.log(engine, uid, streamId, error, missed, cached)
+        didOccurStreamMessageErrorObserver.send(value: (engine, uid, streamId, error, missed, cached))
     }
 }
 
@@ -909,10 +926,12 @@ extension AgoraRTCEngineProxy {
     /// 媒体引擎加载时调用
     func rtcEngineMediaEngineDidLoaded(_ engine: AgoraRtcEngineKit) {
         Agora.log(engine)
+        mediaEngineDidLoadedObserver.send(value: engine)
     }
     
     /// 媒体引擎调用启动时调用
     func rtcEngineMediaEngineDidStartCall(_ engine: AgoraRtcEngineKit) {
         Agora.log(engine)
+        mediaEngineDidStartCallObserver.send(value: engine)
     }
 }
