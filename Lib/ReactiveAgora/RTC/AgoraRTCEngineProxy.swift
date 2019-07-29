@@ -25,9 +25,13 @@ class AgoraRTCEngineProxy: NSObject {
 
     var rtcEngineKit: AgoraRtcEngineKit!
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Method CallBack Signal
     
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Delegate Signal
     
     // MARK: - Core Delegate Methods Signal
@@ -80,7 +84,8 @@ class AgoraRTCEngineProxy: NSObject {
     /// token过期 代理方法信号量
     let (requestTokenSignal, requestTokenObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
-    
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Media Delegate Methods Signal
     
     /// 本地用户通过调用 AgoraRtcEngineKit.enableLocalAudio(_:) 方法恢复或停止捕获本地音频流 代理方法信号量
@@ -131,40 +136,82 @@ class AgoraRTCEngineProxy: NSObject {
     /// 本地用户视频流状态改变 代理方法信号量
     let (localVideoStateChangeSignal, localVideoStateChangeObserver) = Signal<(AgoraRtcEngineKit, AgoraLocalVideoStreamState, AgoraLocalVideoStreamError), Never>.pipe()
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Fallback Delegate Methods Signal
     
-    /// 当已发布的视频流由于不可靠的网络条件而返回到只包含音频的流，或在网络条件改善时切换回视频流时调用
+    /// 当已发布的视频流由于不可靠的网络条件而返回到只包含音频的流，或在网络条件改善时切换回视频流时调用 代理方法信号量
     let (didLocalPublishFallbackToAudioOnlySignal, didLocalPublishFallbackToAudioOnlyObserver) = Signal<(AgoraRtcEngineKit, Bool), Never>.pipe()
     
-    /// 当远端视频流由于不可靠的网络条件而退回到音频流或在网络条件改善后切换回视频时调用
+    /// 当远端视频流由于不可靠的网络条件而退回到音频流或在网络条件改善后切换回视频时调用 代理方法信号量
     let (didRemoteSubscribeFallbackToAudioOnlySignal, didRemoteSubscribeFallbackToAudioOnlyObserver) = Signal<(AgoraRtcEngineKit, Bool, UInt), Never>.pipe()
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Device Delegate Methods Signal
     
-    /// 当本地音频路由发生更改时调用
+    /// 当本地音频路由发生更改 代理方法信号量
     let (didAudioRouteChangedSignal, didAudioRouteChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraAudioOutputRouting), Never>.pipe()
     
-    /// 相机焦点区域改变时调用
+    /// 相机焦点区域改变 代理方法信号量
     let (cameraFocusDidChangedSignal, cameraFocusDidChangedObserver) = Signal<(AgoraRtcEngineKit, CGRect), Never>.pipe()
     
-    /// 当相机曝光区域发生变化时调用
+    /// 当相机曝光区域发生变化 代理方法信号量
     let (cameraExposureDidChangedSignal, cameraExposureDidChangedObserver) = Signal<(AgoraRtcEngineKit, CGRect), Never>.pipe()
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Statistics Delegate Methods Signal
     
+    /// 每两秒报告一次当前调用会话的统计信息 代理方法信号量
+    let (reportRtcStatsSignal, reportRtcStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraChannelStats), Never>.pipe()
     
+    /// 在用户加入通道之前，每两秒报告一次本地用户的最后一英里网络质量 代理方法信号量
+    let (lastmileQualitySignal, lastmileQualityObserver) = Signal<(AgoraRtcEngineKit, AgoraNetworkQuality), Never>.pipe()
+    
+    /// 每两秒报告一次通道中每个用户的最后一英里网络质量 代理方法信号量
+    let (networkQualitySignal, networkQualityObserver) = Signal<(AgoraRtcEngineKit, UInt, AgoraNetworkQuality, AgoraNetworkQuality), Never>.pipe()
+    
+    /// 报告最后一英里网络探测结果 代理方法信号量
+    let (lastmileProbeTestSignal, lastmileProbeTestObserver) = Signal<(AgoraRtcEngineKit, AgoraLastmileProbeResult), Never>.pipe()
+    
+    /// 每2s报告本地视频流的统计数据 代理方法信号量
+    let (localVideoStatsSignal, localVideoStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraRtcLocalVideoStats), Never>.pipe()
+    
+    /// 报告来自每个远端用户/主机的视频流的统计数据 代理方法信号量
+    let (remoteVideoStatsSignal, remoteVideoStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraRtcRemoteVideoStats), Never>.pipe()
+    
+    /// 报告来自每个远端用户/主机的音频流的统计数据 代理方法信号量
+    let (remoteAudioStatsSignal, remoteAudioStatsObserver) = Signal<(AgoraRtcEngineKit, AgoraRtcRemoteAudioStats), Never>.pipe()
+    
+    /// 报告每个音频流传输层的统计信息 代理方法信号量
+    let (audioTransportStatsSignal, audioTransportStatsObserver) = Signal<(AgoraRtcEngineKit, UInt, UInt, UInt, UInt), Never>.pipe()
+    
+    /// 报告每个视频流传输层的统计信息 代理方法信号量
+    let (videoTransportStatsSignal, videoTransportStatsObserver) = Signal<(AgoraRtcEngineKit, UInt, UInt, UInt, UInt), Never>.pipe()
+    
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Audio Player Delegate Methods Signal
     
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - CDN Publisher Delegate Methods Signal
     
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Inject Stream URL Delegate Methods Signal
     
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Stream Message Delegate Methods Signal
     
     
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
     // MARK: - Miscellaneous Delegate Methods Signal
 }
 
@@ -627,6 +674,7 @@ extension AgoraRTCEngineProxy {
     ///   - stats: AgoraChannelStats 统计信息
     func rtcEngine(_ engine: AgoraRtcEngineKit, reportRtcStats stats: AgoraChannelStats) {
         Agora.log(engine, stats)
+        reportRtcStatsObserver.send(value: (engine, stats))
     }
     
     /// 在用户加入通道之前，每两秒报告一次本地用户的最后一英里网络质量时调用
@@ -637,6 +685,7 @@ extension AgoraRTCEngineProxy {
     ///   - quality: 最后一英里网络质量基于上行链路和下行链路的丢包率和抖动
     func rtcEngine(_ engine: AgoraRtcEngineKit, lastmileQuality quality: AgoraNetworkQuality) {
         Agora.log(engine, quality, quality.rawValue)
+        lastmileQualityObserver.send(value: (engine, quality))
     }
     
     /// 每两秒报告一次通道中每个用户的最后一英里网络质量时调用
@@ -649,6 +698,7 @@ extension AgoraRTCEngineProxy {
     ///   - rxQuality: 根据数据包丢失率、平均RTT和下行网络抖动对用户的下行网络质量进行评级
     func rtcEngine(_ engine: AgoraRtcEngineKit, networkQuality uid: UInt, txQuality: AgoraNetworkQuality, rxQuality: AgoraNetworkQuality) {
         Agora.log(engine, uid, txQuality, txQuality.rawValue, rxQuality, rxQuality.rawValue)
+        networkQualityObserver.send(value: (engine, uid, txQuality, rxQuality))
     }
     
     /// 报告最后一英里网络探测结果时调用
@@ -659,6 +709,7 @@ extension AgoraRTCEngineProxy {
     ///   - result: 上行链路和下行链路最后一英里网络探针测试结果
     func rtcEngine(_ engine: AgoraRtcEngineKit, lastmileProbeTest result: AgoraLastmileProbeResult) {
         Agora.log(engine, result)
+        lastmileProbeTestObserver.send(value: (engine, result))
     }
     
     /// 每2s报告本地视频流的统计数据时调用
@@ -667,6 +718,7 @@ extension AgoraRTCEngineProxy {
     ///   - stats: 上传本地视频流的统计信息
     func rtcEngine(_ engine: AgoraRtcEngineKit, localVideoStats stats: AgoraRtcLocalVideoStats) {
         Agora.log(engine, stats)
+        localVideoStatsObserver.send(value: (engine, stats))
     }
     
     /// 报告来自每个远端用户/主机的视频流的统计数据时调用
@@ -677,6 +729,7 @@ extension AgoraRTCEngineProxy {
     ///   - stats: 收到的远端视频流的统计信息
     func rtcEngine(_ engine: AgoraRtcEngineKit, remoteVideoStats stats: AgoraRtcRemoteVideoStats) {
         Agora.log(engine, stats)
+        remoteVideoStatsObserver.send(value: (engine, stats))
     }
     
     /// 报告来自每个远端用户/主机的音频流的统计数据时调用
@@ -693,6 +746,7 @@ extension AgoraRTCEngineProxy {
     ///   - stats: 收到的远端视频流的统计信息
     func rtcEngine(_ engine: AgoraRtcEngineKit, remoteAudioStats stats: AgoraRtcRemoteAudioStats) {
         Agora.log(engine, stats)
+        remoteAudioStatsObserver.send(value: (engine, stats))
     }
     
     /// 报告每个音频流传输层的统计信息时调用
@@ -700,6 +754,7 @@ extension AgoraRTCEngineProxy {
     /// 这个回调函数在本地用户从远端用户接收到音频包后每两秒报告传输层统计信息，例如包丢失率和网络时间延迟
     func rtcEngine(_ engine: AgoraRtcEngineKit, audioTransportStatsOfUid uid: UInt, delay: UInt, lost: UInt, rxKBitRate: UInt) {
         Agora.log(engine, uid, delay, lost, rxKBitRate)
+        audioTransportStatsObserver.send(value: (engine, uid, delay, lost, rxKBitRate))
     }
     
     /// 报告每个视频流传输层的统计信息时调用
@@ -707,6 +762,7 @@ extension AgoraRTCEngineProxy {
     /// 这个回调函数在本地用户从远端用户接收到视频包后每两秒报告传输层统计信息，例如包丢失率和网络时间延迟
     func rtcEngine(_ engine: AgoraRtcEngineKit, videoTransportStatsOfUid uid: UInt, delay: UInt, lost: UInt, rxKBitRate: UInt) {
         Agora.log(engine, uid, delay, lost, rxKBitRate)
+        videoTransportStatsObserver.send(value: (engine, uid, delay, lost, rxKBitRate))
     }
 }
 
