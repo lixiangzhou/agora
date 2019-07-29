@@ -141,6 +141,14 @@ class AgoraRTCEngineProxy: NSObject {
     
     // MARK: - Device Delegate Methods Signal
     
+    /// 当本地音频路由发生更改时调用
+    let (didAudioRouteChangedSignal, didAudioRouteChangedObserver) = Signal<(AgoraRtcEngineKit, AgoraAudioOutputRouting), Never>.pipe()
+    
+    /// 相机焦点区域改变时调用
+    let (cameraFocusDidChangedSignal, cameraFocusDidChangedObserver) = Signal<(AgoraRtcEngineKit, CGRect), Never>.pipe()
+    
+    /// 当相机曝光区域发生变化时调用
+    let (cameraExposureDidChangedSignal, cameraExposureDidChangedObserver) = Signal<(AgoraRtcEngineKit, CGRect), Never>.pipe()
     
     // MARK: - Statistics Delegate Methods Signal
     
@@ -584,6 +592,7 @@ extension AgoraRTCEngineProxy {
     ///   - routing: 音频路由 AgoraAudioOutputRouting
     func rtcEngine(_ engine: AgoraRtcEngineKit, didAudioRouteChanged routing: AgoraAudioOutputRouting) {
         Agora.log(engine, routing)
+        didAudioRouteChangedObserver.send(value: (engine, routing))
     }
     
     /// 相机焦点区域改变时调用
@@ -594,6 +603,7 @@ extension AgoraRTCEngineProxy {
     ///   - rect: 在相机缩放指定焦点区域的矩形区域
     func rtcEngine(_ engine: AgoraRtcEngineKit, cameraFocusDidChangedTo rect: CGRect) {
         Agora.log(engine, rect)
+        cameraFocusDidChangedObserver.send(value: (engine, rect))
     }
     
     /// 当相机曝光区域发生变化时调用
@@ -604,6 +614,7 @@ extension AgoraRTCEngineProxy {
     ///   - rect: 在相机变焦指定曝光面积的矩形区域
     func rtcEngine(_ engine: AgoraRtcEngineKit, cameraExposureDidChangedTo rect: CGRect) {
         Agora.log(engine, rect)
+        cameraExposureDidChangedObserver.send(value: (engine, rect))
     }
 }
 
