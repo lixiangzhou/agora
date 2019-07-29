@@ -375,6 +375,7 @@ class AgoraRTCEngineProxy: NSObject {
 }
 
 // MARK: - Method Proxy
+// MARK: - Core Service
 extension AgoraRTCEngineProxy {
     
     /// 销毁RtcEngine实例，并释放SDK使用的所有资源。该方法对于偶尔进行视频、语音通话很有用，可以在不通话时为其他操作释放资源。一旦调用该方法，该实例的所有回调和代理都不会被调用。为了再次重启通信，调用 AgoraRtcEngineKit.sharedEngine(withAppId:delegate:) 创建一个新的AgoraRtcEngineKit实例。**注意：在子线程调用改方法；该方法是同步的，不能在该SDK的回调中调用，否则会造成死锁**
@@ -412,6 +413,436 @@ extension AgoraRTCEngineProxy {
         let result = rtcEngineKit.setClientRole(role)
         return Int(result)
     }
+    
+    /// 用户加入频道
+    ///
+    /// 同一频道中的用户可以相互交谈，同一频道中的多个用户可以开始群组聊天。使用不同应用app id的用户不能相互呼叫，即使他们加入了相同的通道
+    ///
+    /// 在进入另一个通道之前，必须调用 AgoraRtcEngineKit.leaveChannel(_:) 方法退出当前调用。这个方法调用是异步的，因此，您可以在主用户界面线程中调用此方法
+    ///
+    /// SDK使用iOS的AVAudioSession共享对象进行音频录制和回放。使用此对象可能会影响SDK的音频功能
+    ///
+    /// 如果 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 调用成功，会触发 joinSuccess 回调。如果同时实现了 joinSuccess 和 AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)，joinSuccess 的优先级更高。推荐设置 joinSuccess = nil， 使用AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)
+    ///
+    /// AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 调用成功会触发：
+    /// - 本地用户 AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)
+    /// - 远端用户 AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:)【在通讯配置文件和直播配置文件】
+    ///
+    /// 当客户和Agora服务器之间的连接由于网络条件不好而中断时，SDK会尝试重新连接到服务器。当本地客户端成功地重新加入频道时，SDK将在本地客户端上触发AgoraRtcEngineDelegate.rtcEngine(_:didRejoinChannel:withUid:elapsed:)回调
+    ///
+    /// **注意：**
+    /// - 频道不接受重复的uid。如果您将 uid 设置为0，系统将自动分配一个 uid。如果希望在不同的设备上连接相同的频道，请确保为每个设备使用不同的uid。
+    /// - 加入频道时，SDK调用 AVAudioSession.setCategory(_:) 设置为 AVAudioSession.Category.playAndRecord  模式，此时，播放的声音(例如铃声)将被中断。应用程序不应将 AVAudioSession 设置为任何其他模式
+    ///
+    /// - Parameters:
+    ///   - byToken: 服务器生成的token，在大多数情况下，静态app id 就足够了。为了增加安全性，使用token（静态app id，token是可选的，可以设置为nil；使用token，Agora发出一个附加的应用程序证书，让您根据算法生成一个token，并为服务器上的用户身份验证提供应用程序证书；确保用于创建 token 的 app id 与用于初始化RTC引擎的 AgoraRtcEngineKit.sharedEngine(withAppId:delegate:) 使用的 app id相同。否则，CDN直播可能会失败）
+    ///   - channelId: 频道的名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
+    ///   - info: 有关频道的附加信息。此参数可以设置为nil或包含通道相关信息。通道中的其他用户不接收此消息
+    ///   - uid: 一个32位无符号整数，其值从1到 2^32 - 1。 uid 必须是惟一的。如果没有分配 uid (或设置为0)，SDK将在 joinSuccessBlock中分配并返回一个 uid。您的应用程序必须记录并维护返回的 uid，因为SDK不这样做。
+    ///   - joinSuccess: 成功加入频道的回调。同 AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)
+    /// - Returns: 成功：0；失败：< 0
+    func joinChannel(byToken: String?, channelId: String, info: String?, uid: UInt, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32 {
+        let result = rtcEngineKit.joinChannel(byToken: byToken, channelId: channelId, info: info, uid: uid) { (channel, uid, elapsed) in
+            
+        }
+        return result
+    }
+    
+    /// 使用用户账号加入频道
+    ///
+    /// 在用户成功加入频道后，SDK会触发如下回调：
+    /// - 本地用户 AgoraRtcEngineDelegate.rtcEngine(_:didRegisteredLocalUser:withUid:) 和 AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)
+    /// - 远端用户 AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:) 和 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:)【在通讯配置文件和直播配置文件】
+    ///
+    /// **注意：** 为确保通信顺畅，请使用相同的参数类型来标识用户。例如，如果用户使用用户ID加入频道，则确保所有其他用户也使用该用户ID。这同样适用于用户帐户。如果用户使用Agora Web SDK加入频道，请确保将用户的uid设置为相同的参数类型
+    /// - Parameters:
+    ///   - byUserAccount: 用户账号。最大长度是256字节。确保设置了该参数，而没有将其设置为null。可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
+    ///   - token: 服务器生成的token。（对于低安全性要求：您可以使用仪表板上生成的临时token。有关详细信息，请参见(https://docs.agora.io/en/voice/token? platform= all%20platform # Get -a- temporarytoken)；对于高安全性要求:将其设置为在服务器上生成的token。有关详细信息，请参见[Get a token](https://docs.agora.io/en/voice/token? platform= all%20platform # Get -a-token)）
+    ///   - channelId: 频道的名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
+    ///   - joinSuccess: 成功加入频道的回调。同 AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)
+    /// - Returns: 成功：0；失败：< 0
+    func joinChannel(byUserAccount: String, token: String?, channelId: String, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32 {
+        let result = rtcEngineKit.joinChannel(byUserAccount: byUserAccount, token: token, channelId: channelId) { (channel, uid, elasped) in
+            
+        }
+        return result
+    }
+    
+    /// 注册一个用户账号
+    ///
+    /// 注册后，用户帐户可用于在用户加入频道时标识本地用户。在用户成功注册用户帐户之后，SDK在本地客户机上触发 AgoraRtcEngineDelegate.rtcEngine(_:didRegisteredLocalUser:withUid:) 回调，报告本地用户的用户ID和用户帐户
+    ///
+    /// 为了使用用户账户加入频道，可以使用如下方式：
+    /// - 调用AgoraRtcEngineKit.registerLocalUserAccount(_:appId:)创建用户账号，然后使用AgoraRtcEngineKit.joinChannel(byUserAccount:token:channelId:joinSuccess:)加入频道
+    /// - 调用 AgoraRtcEngineKit.joinChannel(byUserAccount:token:channelId:joinSuccess:)加入频道
+    ///
+    /// 两者的区别在于前者的 AgoraRtcEngineKit.joinChannel(byUserAccount:token:channelId:joinSuccess:) 的 elapsed 比后者的短
+    /// - Parameters:
+    ///   - userAccount: 用户账号。最大长度是256字节。确保设置了该参数，而没有将其设置为null。可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
+    /// - Returns: 成功：0；失败：< 0
+    func registerLocalUserAccount(_ userAccount: String, appId: String) -> Int32 {
+        let result = rtcEngineKit.registerLocalUserAccount(userAccount, appId: appId)
+        return result
+    }
+    
+    /// 通过用户账号获取用户信息
+    ///
+    /// 远端用户连接频道后，SDK获取远端用户的UID和用户帐户，缓存在映射表缓存对象(“AgoraUserInfo”)中，并触发 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:)回调
+    ///
+    /// 在接收到 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:) 回调之后，您可以调用这个方法，通过传入用户帐户来从'userInfo'对象获取远端用户的UID
+    func getUserInfo(byUserAccount: String, withError: UnsafeMutablePointer<AgoraErrorCode>?) -> AgoraUserInfo? {
+        let userInfo = rtcEngineKit.getUserInfo(byUserAccount: byUserAccount, withError: withError)
+        return userInfo
+    }
+    
+    /// 通过UID获取用户信息
+    ///
+    /// 远端用户连接频道后，SDK获取远端用户的UID和用户帐户，缓存在映射表缓存对象(“AgoraUserInfo”)中，并触发 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:)回调
+    ///
+    /// 在接收到 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:) 回调之后，您可以调用这个方法，通过传入UID来从'userInfo'对象获取远端用户的用户账户
+    func getUserInfo(byUid: UInt, withError: UnsafeMutablePointer<AgoraErrorCode>?) -> AgoraUserInfo? {
+        let userInfo = rtcEngineKit.getUserInfo(byUid: byUid, withError: withError)
+        return userInfo
+    }
+    
+    /// 允许用户离开频道，例如挂起或退出呼叫
+    ///
+    /// 在加入通道之后，用户必须在加入另一个频道之前调用leaveChannel方法来结束调用
+    ///
+    /// 如果用户离开频道并释放与调用相关的所有资源，此方法将返回0
+    ///
+    /// 这个方法调用是异步的，当方法调用返回时，用户还没有退出频道
+    ///
+    /// 成功离开频道会触发如下回调：
+    /// - 本地用户 AgoraRtcEngineDelegate.rtcEngine(_:didLeaveChannelWith:)
+    /// - 远端用户 AgoraRtcEngineDelegate.rtcEngine(_:didOfflineOfUid:reason:)【在通讯配置文件和直播配置文件】
+    ///
+    /// **注意：**
+    /// - 如果调用 AgoraRtcEngineKit.leaveChannel(_:) 后立即调用 AgoraRtcEngineKit.destroy， AgoraRtcEngineKit.leaveChannel(_:)会被打断，SDK不会触发 AgoraRtcEngineDelegate.rtcEngine(_:didLeaveChannelWith:)
+    /// - 如果在CDN直播调用此方法，SDK会触发 AgoraRtcEngineKit.removePublishStreamUrl(_:)
+    /// - 当调用此方法时，SDK默认情况下会关闭iOS上的音频会话，并可能影响其他应用程序。如果你不想要这种默认行为,使用 AgoraRtcEngineKit.setAudioSessionOperationRestriction(_:) 设置 为 AgoraAudioSessionOperationRestriction.deactivateSession，所以当你调用 AgoraRtcEngineKit.leaveChannel(_:)方法，SDK不停用音频会话
+    /// - Returns: 成功：0；失败：< 0
+    func leaveChannel(_ leaveChannelBlock: ((AgoraChannelStats) -> Void)?) -> Int32 {
+        let result = rtcEngineKit.leaveChannel { (stats) in
+            
+        }
+        return result
+    }
+    
+    /// 当前token过期后获取新token
+    ///
+    /// 在token模式下，过了一段时间token过期了：
+    /// - 会触发 AgoraRtcEngineDelegate.rtcEngine(_:tokenPrivilegeWillExpire:) 或者
+    /// - AgoraRtcEngineDelegate.rtcEngine(_:connectionChangedTo:reason:)
+    ///
+    /// **注意：** 推荐使用 AgoraRtcEngineDelegate.rtcEngineRequestToken(_:)，而不是 AgoraRtcEngineDelegate.rtcEngine(_:didOccurError:)
+    /// - Returns: 成功：0；失败：< 0
+    func renewToken(_ token: String) -> Int32 {
+        let result = rtcEngineKit.renewToken(token)
+        return result
+    }
+    
+    
+    /// 开启与Agora Web SDK的互操作性
+    ///
+    /// 此方法只适用于直播配置文件。通讯配置文件下，默认是与Agora Web SDK有互操作性
+    /// - Returns: 成功：0；失败：< 0
+    func enableWebSdkInteroperability(_ enabled: Bool) -> Int32 {
+        let result = rtcEngineKit.enableWebSdkInteroperability(enabled)
+        return result
+    }
+    
+    /// 获取app的连接状态
+    func getConnectionState() -> AgoraConnectionStateType {
+        let result = rtcEngineKit.getConnectionState()
+        return result
+    }
+}
+
+
+// MARK: - Core Audio
+extension AgoraRTCEngineProxy {
+    
+    /// 开启音频模块
+    ///
+    /// 音频模块默认开启
+    ///
+    /// **注意：**
+    /// - 这种方法影响内部引擎，可以在 AgoraRtcEngineKit.leaveChannel(_:)方法之后调用。可以在加入频道之前或之后调用此方法
+    /// - 此方法重置内部引擎并需要一些时间才能生效。Agora推荐使用以下API方法分别控制音频引擎模块:
+    ///     - AgoraRtcEngineKit.enableLocalAudio(_:)：是否启用麦克风创建本地音频流
+    ///     - AgoraRtcEngineKit.muteLocalAudioStream(_:)：是否发布本地音频流
+    ///     - AgoraRtcEngineKit.muteRemoteAudioStream(_:mute:)：是否订阅并播放远端音频流
+    ///     - AgoraRtcEngineKit.muteAllRemoteAudioStreams(_:)：是否订阅并播放所有的远端音频流
+    /// - Returns: 成功：0；失败：< 0
+    func enableAudio() -> Int32 {
+        let result = rtcEngineKit.enableAudio()
+        return result
+    }
+    
+    
+    /// 禁用音频模块
+    ///
+    /// **注意：**
+    /// - 这种方法影响内部引擎，可以在 AgoraRtcEngineKit.leaveChannel(_:)方法之后调用。可以在加入频道之前或之后调用此方法
+    /// - 此方法重置内部引擎并需要一些时间才能生效。Agora推荐使用以下API方法分别控制音频引擎模块:
+    ///     - AgoraRtcEngineKit.enableLocalAudio(_:)：是否启用麦克风创建本地音频流
+    ///     - AgoraRtcEngineKit.muteLocalAudioStream(_:)：是否发布本地音频流
+    ///     - AgoraRtcEngineKit.muteRemoteAudioStream(_:mute:)：是否订阅并播放远端音频流
+    ///     - AgoraRtcEngineKit.muteAllRemoteAudioStreams(_:)：是否订阅并播放所有的远端音频流
+    /// - Returns: 成功：0；失败：< 0
+    func disableAudio() -> Int32 {
+        let result = rtcEngineKit.disableAudio()
+        return result
+    }
+    
+    /// 设置音频参数和应用场景
+    ///
+    /// **注意：**
+    /// - 在 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 之前必须调用此方法
+    /// - 在通讯配置文件下，可以设置profile，不能设置scenario
+    /// - 在通讯配置文件和直播配置文件下，由于网络自适应，比特率可能与您的设置不同
+    /// - 在涉及音乐教育的场景中，Agora推荐将配置文件设置为 AgoraAudioProfile.musicHighQuality 与 AgoraAudioScenario.gameStreaming
+    ///
+    /// - Parameters:
+    ///   - profile: 设置采样速率、比特率、编码模式和通道数。查看 AgoraAudioProfile
+    ///   - scenario: 设置音频应用程序场景。查看 AgoraAudioScenario。在不同的音频场景下，设备使用不同的音量轨道，即呼叫内音量或媒体音量。有关详细信息，请参见(https://docs.agora.io/en/Agora%20Platform/audio_how_to#audioscenario)
+    /// - Returns: 成功：0；失败：< 0
+    func setAudioProfile(profile: AgoraAudioProfile, scenario: AgoraAudioScenario) -> Int32 {
+        let result = rtcEngineKit.setAudioProfile(profile, scenario: scenario)
+        return result
+    }
+    
+    /// 调整录音音量
+    ///
+    /// - Parameter volume: 录音音量。（范围是：0~4001。0：静音；100：原始音量；400：最大声，四倍的原始音量与信号剪辑保护）
+    /// - Returns: 成功：0；失败：< 0
+    func adjustRecordingSignalVolume(_ volume: Int) -> Int32 {
+        let result = rtcEngineKit.adjustRecordingSignalVolume(volume)
+        return result
+    }
+    
+    /// 调整播放音量
+    ///
+    /// - Parameter volume: 播放音量。（范围是：0~4001。0：静音；100：原始音量；400：最大声，四倍的原始音量与信号剪辑保护）
+    /// - Returns: 成功：0；失败：< 0
+    func adjustPlaybackSignalVolume(_ volume: Int) -> Int32 {
+        let result = rtcEngineKit.adjustPlaybackSignalVolume(volume)
+        return result
+    }
+    
+    /// 使SDK能够定期向应用程序报告说话者和说话者的音量
+    ///
+    /// - Parameters:
+    ///   - interval: 设置两个连续音量指示之间的时间间隔（<0：禁用音量指示；>0：两个连续的音量指示之间的时间间隔(ms)。Agora建议设置 interval≥200 ms。一旦启用了这个方法，SDK返回体积指标的设置时间间隔AgoraRtcEngineDelegate.rtcEngine(_:reportAudioVolumeIndicationOfSpeakers:totalVolume:)回调，无论哪个用户在频道说话）
+    ///   - smooth: 平滑因子设置音频音量指示器的灵敏度。值的范围在0到10之间。值越大，表示指标越敏感。推荐值为3
+    /// - Returns: 成功：0；失败：< 0
+    func enableAudioVolumeIndication(_ interval: Int, smooth: Int) -> Int32 {
+        let result = rtcEngineKit.enableAudioVolumeIndication(interval, smooth: smooth)
+        return result
+    }
+    
+    /// 启用/禁用本地音频捕获
+    ///
+    /// 当应用程序加入频道时，默认情况下启用了音频模块。此方法禁用或重新启用本地音频捕获，即停止或重启本地音频捕获和处理
+    ///
+    /// 一旦本地音频模块被禁用或重新启用，SDK将触发AgoraRtcEngineDelegate.rtcEngine(_:didMicrophoneEnabled:)回调
+    ///
+    /// **注意：**
+    /// 在AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:)后调用此方法
+    ///
+    /// 此方法与AgoraRtcEngineKit.muteLocalAudioStream(_:)不同：
+    /// - AgoraRtcEngineKit.enableLocalAudio(_:)：禁止/重启本地音频捕获和处理
+    /// - AgoraRtcEngineKit.muteLocalAudioStream(_:)：发送/停止发送本地音频流
+    /// - Returns: 成功：0；失败：< 0
+    func enableLocalAudio(_ enabled: Bool) -> Int32 {
+        let result = rtcEngineKit.enableLocalAudio(enabled)
+        return result
+    }
+    
+    /// 发送/停止发送本地音频流
+    ///
+    /// 使用此方法停止/开始发送本地音频流。成功的调用此方法会触发远程客户端的 AgoraRtcEngineDelegate.rtcEngine(_:didAudioMuted:byUid:)回调
+    ///
+    /// **注意：** 当mute = true时，此方法不会禁用麦克风，因此不会影响任何正在进行的录制。
+    /// - Parameter mute: 是否静音。默认false
+    /// - Returns: 成功：0；失败：< 0
+    func muteLocalAudioStream(_ mute: Bool) -> Int32 {
+        let result = rtcEngineKit.muteLocalAudioStream(mute)
+        return result
+    }
+    
+    /// 接收/停止接收指定远程用户的音频流
+    ///
+    /// 可以调用 AgoraRtcEngineKit.muteAllRemoteAudioStreams(_:) 设置mute = true 来静音所有远端音频流，在调用此方法前，再次调用 AgoraRtcEngineKit.muteAllRemoteAudioStreams(_:) 设置mute = false。当 AgoraRtcEngineKit.muteRemoteAudioStream(_:mute:) 设置了指定的流，AgoraRtcEngineKit.muteAllRemoteAudioStreams(_:)设置所有远端用户
+    ///
+    /// - Parameters:
+    ///   - mute: 设置是否接收/停止接收指定远程用户的音频流。默认为false
+    /// - Returns: 成功：0；失败：< 0
+    func muteRemoteAudioStream(_ uid: UInt, mute: Bool) -> Int32 {
+        let result = rtcEngineKit.muteRemoteAudioStream(uid, mute: mute)
+        return result
+    }
+    
+    /// 接收/停止接收所有远端用户的音频流
+    ///
+    /// - Parameter mute: 设置是否接收/停止接收所有远端用户的音频流。默认为false
+    /// - Returns: 成功：0；失败：< 0
+    func muteAllRemoteAudioStreams(_ mute: Bool) -> Int32 {
+        let result = rtcEngineKit.muteAllRemoteAudioStreams(mute)
+        return result
+    }
+    
+    /// 默认是否接受所有的远端音频流
+    ///
+    /// 可以在加入频道之前或之后调用此方法。如果在加入频道后调用此方法，则不会接收随后加入的所有用户的音频流
+    ///
+    /// - Parameter mute: 默认是否接受所有的远端音频流。默认为false
+    /// - Returns: 成功：0；失败：< 0
+    func setDefaultMuteAllRemoteAudioStreams(_ mute: Bool) -> Int32 {
+        let result = rtcEngineKit.setDefaultMuteAllRemoteAudioStreams(mute)
+        return result
+    }
+}
+
+// MARK: - Core Video
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Video Pre-Process and Post-Process
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Audio Routing Controller
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - In Ear Monitor
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Audio Sound Effect
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Music File Playback and Mixing
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Audio Effect File Playback
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Audio Recorder
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Loopback Recording
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Miscellaneous Audio Control
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Network-related Test
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Custom Video Module
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - External Audio Data
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - External Video Data
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Raw Audio Data
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Watermark
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Stream Fallback
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Dual-stream Mode
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Encryption
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Inject an Online Media Stream
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - CDN Live Streaming
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Data Stream
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Miscellaneous Video Control
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Camera Control
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Screen Sharing
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Custom Media Metadata
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Miscellaneous Methods
+extension AgoraRTCEngineProxy {
+    
+}
+
+// MARK: - Customized Methods (Technical Preview)
+extension AgoraRTCEngineProxy {
+    
 }
 
 // MARK: - AgoraRtcEngineDelegate

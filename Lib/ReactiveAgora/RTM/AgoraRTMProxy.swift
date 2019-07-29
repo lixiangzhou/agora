@@ -208,7 +208,7 @@ extension AgoraRTMProxy {
     /// **注意：** 同一时间最多可以创建20个AgoraRtmChannel
     ///
     /// - Parameters:
-    ///   - channelId: RTM中频道的唯一名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","。**注意：**不能设置userId为nil，也不能以空格开头
+    ///   - channelId: RTM中频道的唯一名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
     ///   - delegate: AgoraRtmChannelDelegate
     /// - Returns: 成功时：返回AgoraRtmChannel；失败时：返回nil（可能的原因：channelId无效；已存在相同的channelId；频道数量超限）
     func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate? = nil) -> AgoraRtmChannel? {
