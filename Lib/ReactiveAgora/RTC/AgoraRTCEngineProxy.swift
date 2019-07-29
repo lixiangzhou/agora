@@ -213,6 +213,17 @@ class AgoraRTCEngineProxy: NSObject {
     // ------------------------------------------------------------------------------------
     // MARK: - CDN Publisher Delegate Methods Signal
     
+    /// 当RTMP流的状态发生更改 代理方法信号量
+    let (rtmpStreamingChangedToStateSignal, rtmpStreamingChangedToStateObserver) = Signal<(AgoraRtcEngineKit, String, AgoraRtmpStreamingState, AgoraRtmpStreamingErrorCode), Never>.pipe()
+    
+    /// 报告调用 AgoraRtcEngineKit.addPublishStreamUrl(_:transcodingEnabled:) 的结果 代理方法信号量
+    let (streamPublishedWithUrlSignal, streamPublishedWithUrlObserver) = Signal<(AgoraRtcEngineKit, String, AgoraErrorCode), Never>.pipe()
+    
+    /// 报告调用 AgoraRtcEngineKit.removePublishStreamUrl(_:) 的结果 代理方法信号量
+    let (streamUnpublishedWithUrlSignal, streamUnpublishedWithUrlObserver) = Signal<(AgoraRtcEngineKit, String), Never>.pipe()
+    
+    /// 当更新CDN实时流媒体设置 代理方法信号量
+    let (transcodingUpdatedSignal, transcodingUpdatedObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
@@ -835,6 +846,7 @@ extension AgoraRTCEngineProxy {
     /// - url: RTMP url
     func rtcEngine(_ engine: AgoraRtcEngineKit, rtmpStreamingChangedToState url: String, state: AgoraRtmpStreamingState, errorCode: AgoraRtmpStreamingErrorCode) {
         Agora.log(engine, url, state, state.rawValue, errorCode, errorCode.rawValue)
+        rtmpStreamingChangedToStateObserver.send(value: (engine, url, state, errorCode))
     }
     
     /// 报告调用 AgoraRtcEngineKit.addPublishStreamUrl(_:transcodingEnabled:) 的结果时调用
@@ -842,6 +854,7 @@ extension AgoraRTCEngineProxy {
     /// - url: RTMP url
     func rtcEngine(_ engine: AgoraRtcEngineKit, streamPublishedWithUrl url: String, errorCode: AgoraErrorCode) {
         Agora.log(engine, url, errorCode, errorCode.rawValue)
+        streamPublishedWithUrlObserver.send(value: (engine, url, errorCode))
     }
     
     /// 报告调用 AgoraRtcEngineKit.removePublishStreamUrl(_:) 的结果时调用
@@ -850,11 +863,13 @@ extension AgoraRTCEngineProxy {
     /// - url: RTMP url
     func rtcEngine(_ engine: AgoraRtcEngineKit, streamUnpublishedWithUrl url: String) {
         Agora.log(engine, url)
+        streamUnpublishedWithUrlObserver.send(value: (engine, url))
     }
     
     /// 当更新CDN实时流媒体设置时调用
     func rtcEngineTranscodingUpdated(_ engine: AgoraRtcEngineKit) {
         Agora.log(engine)
+        transcodingUpdatedObserver.send(value: engine)
     }
 }
 
