@@ -374,6 +374,7 @@ class AgoraRTCEngineProxy: NSObject {
     let (mediaEngineDidStartCallSignal, mediaEngineDidStartCallObserver) = Signal<(AgoraRtcEngineKit), Never>.pipe()
 }
 
+
 // MARK: - Method Proxy
 // MARK: - Core Service
 extension AgoraRTCEngineProxy {
@@ -580,7 +581,6 @@ extension AgoraRTCEngineProxy {
         return result
     }
     
-    
     /// 禁用音频模块
     ///
     /// **注意：**
@@ -705,149 +705,353 @@ extension AgoraRTCEngineProxy {
     }
 }
 
+
 // MARK: - Core Video
 extension AgoraRTCEngineProxy {
     
+    /// 开启视频模块
+    ///
+    /// 可以在进入频道之前或调用期间调用此方法。如果在进入频道之前调用此方法，服务将以视频模式启动。如果在音频调用期间调用此方法，音频模式将切换到视频模式
+    ///
+    /// 成功的调用此方法会在远端触发 AgoraRtcEngineDelegate.rtcEngine(_:didVideoEnabled:byUid:)
+    ///
+    /// **注意：**
+    /// - 这种方法影响内部引擎，可以在 AgoraRtcEngineKit.leaveChannel(_:)方法之后调用
+    /// - 此方法重置内部引擎并需要一些时间才能生效。Agora推荐使用以下API方法分别控制视频引擎模块:
+    ///     - AgoraRtcEngineKit.enableLocalVideo(_:)：是否启用相机创建本地视频流
+    ///     - AgoraRtcEngineKit.muteLocalVideoStream(_:)：是否发布本地视频流
+    ///     - AgoraRtcEngineKit.muteRemoteVideoStream(_:mute:)：是否订阅并播放远端视频流
+    ///     - AgoraRtcEngineKit.muteAllRemoteVideoStreams(_:)：是否订阅并播放所有的远端视频流
+    /// - Returns: 成功：0；失败：< 0
+    func enableVideo() -> Int32 {
+        let result = rtcEngineKit.enableVideo()
+        return result
+    }
+    
+    /// 禁用视频模块
+    ///
+    /// 可以在进入频道之前或调用期间调用此方法。如果在进入频道之前调用此方法，服务将以音频模式启动。如果在视频调用期间调用此方法，则视频模式将切换到音频模式。要启用视频模块，请调用 AgoraRtcEngineKit.enableVideo 方法
+    ///
+    /// 成功的调用此方法会在远端触发 AgoraRtcEngineDelegate.rtcEngine(_:didVideoEnabled:byUid:)
+    ///
+    /// **注意：**
+    /// - 这种方法影响内部引擎，可以在 AgoraRtcEngineKit.leaveChannel(_:)方法之后调用
+    /// - 此方法重置内部引擎并需要一些时间才能生效。Agora推荐使用以下API方法分别控制视频引擎模块:
+    ///     - AgoraRtcEngineKit.enableLocalVideo(_:)：是否启用相机创建本地视频流
+    ///     - AgoraRtcEngineKit.muteLocalVideoStream(_:)：是否发布本地视频流
+    ///     - AgoraRtcEngineKit.muteRemoteVideoStream(_:mute:)：是否订阅并播放远端视频流
+    ///     - AgoraRtcEngineKit.muteAllRemoteVideoStreams(_:)：是否订阅并播放所有的远端视频流
+    /// - Returns: 成功：0；失败：< 0
+    func disableVideo() -> Int32 {
+        let result = rtcEngineKit.disableVideo()
+        return result
+    }
+    
+    /// 设置视频编码配置
+    ///
+    /// 每个视频编码器配置对应一组视频参数，包括分辨率、帧速率、比特率和视频方向
+    ///
+    /// 该方法所规定的参数是理想网络条件下的最大值。如果视频引擎由于不可靠的网络条件而无法使用指定的参数呈现视频，则在找到成功的配置之前，将考虑列表下面的参数
+    ///
+    /// 如果在加入通道后不需要设置视频编码器配置，可以在调用enableVideo方法之前调用此方法，以减少第一个视频帧的呈现时间
+    /// - Returns: 成功：0；失败：< 0
+    func setVideoEncoderConfiguration(_ config: AgoraVideoEncoderConfiguration) -> Int32 {
+        let result = rtcEngineKit.setVideoEncoderConfiguration(config)
+        return result
+    }
+    
+    /// 设置本地机器上显示的本地视图和配置视频显示
+    ///
+    /// app 调用此方法绑定本地视频流的每个视频窗口(视图)并配置视频显示设置。在初始化后调用此方法，以在进入频道之前配置本地视频显示设置。在用户离开频道后绑定仍然有效，这意味着窗口仍然显示。要解除绑定视图，请将AgoraRtcVideoCanvas中的 view 设置为nil
+    /// - Returns: 成功：0；失败：< 0
+    func setupLocalVideo(_ local: AgoraRtcVideoCanvas) -> Int32 {
+        let result = rtcEngineKit.setupLocalVideo(local)
+        return result
+    }
+    
+    /// 设置远端视频视图
+    ///
+    /// 此方法将远端用户绑定到视频显示窗口(设置指定的 uid 用户的视图)
+    ///
+    /// 在用户加入通道之前，app 在这个方法调用中指定远程视频的 uid
+    ///
+    /// 如果app不知道远程 uid，请在应用程序接收到 AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:) 回调之后设置它
+    ///
+    /// 如果启用了视频录制功能，那么视频录制服务将作为一个虚拟客户机加入频道，从而使其他客户机也接收到AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:)回调。不要将虚拟客户端绑定到app视图，因为虚拟客户端不会发送任何视频流。如果app不识别虚拟客户机，当SDK触发 AgoraRtcEngineDelegate.rtcEngine(_:firstRemoteVideoDecodedOfUid:size:elapsed:) 回调时，将远程用户绑定到视图
+    ///
+    /// 要将远端用户从视图中解绑定，请将AgoraRtcVideoCanvas中的 view 设置为nil。一旦远端用户离开频道，SDK就会释放远程用户
+    /// - Returns: 成功：0；失败：< 0
+    func setupRemoteVideo(_ remote: AgoraRtcVideoCanvas) -> Int32 {
+        let result = rtcEngineKit.setupRemoteVideo(remote)
+        return result
+    }
+    
+    /// 设置本地视频显示模式
+    ///
+    /// 在调用期间可以多次调用此方法来更改显示模式
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalRenderMode(_ mode: AgoraVideoRenderMode) -> Int32 {
+        let result = rtcEngineKit.setLocalRenderMode(mode)
+        return result
+    }
+    
+    /// 设置远端视频显示模式
+    ///
+    /// 在调用期间可以多次调用此方法来更改显示模式
+    /// - Parameters:
+    ///     - uid: 远端用户的UID
+    /// - Returns: 成功：0；失败：< 0
+    func setRemoteRenderMode(_ uid: UInt, _ mode: AgoraVideoRenderMode) -> Int32 {
+        let result = rtcEngineKit.setRemoteRenderMode(uid, mode: mode)
+        return result
+    }
+    
+    /// 在加入频道之前启动本地视频预览
+    ///
+    /// 默认情况下，本地预览启用镜像模式
+    ///
+    /// 在调用此方法前，必须：
+    /// - 调用 AgoraRtcEngineKit.setupLocalVideo(_:) 设置本地预览窗口并配置属性
+    /// - 调用 AgoraRtcEngineKit.enableVideo 开启视频
+    ///
+    /// **注意：** 一旦调用此方法来启动本地视频预览，如果通过调用 AgoraRtcEngineKit.leaveChannel(_:) 方法离开频道，本地视频预览将一直保留，直到您调用 AgoraRtcEngineKit.stopPreview 方法来禁用它
+    /// - Returns: 成功：0；失败：< 0
+    func startPreview() -> Int32 {
+        let result = rtcEngineKit.startPreview()
+        return result
+    }
+    
+    /// 停止本地视频预览和视频
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func stopPreview() -> Int32 {
+        let result = rtcEngineKit.stopPreview()
+        return result
+    }
+    
+    /// 禁用本地视频
+    ///
+    /// 此方法禁用本地视频，只有当用户希望观看远端视频而不向其他用户发送任何视频流时才设置 AgoraRtcEngineKit.enableLocalVideo(_:)为false
+    ///
+    /// 在调用 AgoraRtcEngineKit.enableVideo 方法之后调用此方法。否则，此方法可能无法正常工作
+    ///
+    /// 调用 AgoraRtcEngineKit.enableVideo 方法后，默认情况下启用了本地视频。可以使用此方法禁用本地视频，而远程视频不受影响。
+    ///
+    /// 成功的调用此方法会触发远端客户机上的 AgoraRtcEngineDelegate.rtcEngine(_:didLocalVideoEnabled:byUid:) 回调
+    ///
+    /// **注意：** 该方法启用内部引擎，并且可以在调用 AgoraRtcEngineKit.leaveChannel(_:) 方法后调用
+    /// - Returns: 成功：0；失败：< 0
+    func enableLocalVideo(_ enabled: Bool) -> Int32 {
+        let result = rtcEngineKit.enableLocalVideo(enabled)
+        return result
+    }
+    
+    /// 发送/停止发送本地视频流
+    ///
+    /// 当 mute == true 时，此方法不会禁用相机，因此不会影响检索本地视频流。与控制本地视频流发送的 AgoraRtcEngineKit.enableLocalVideo(_:) 方法相比，此方法的响应速度更快
+    ///
+    /// 成功的调用此方法会触发远端机的 AgoraRtcEngineDelegate.rtcEngine(_:didVideoMuted:byUid:) 回调
+    /// - Returns: 成功：0；失败：< 0
+    func muteLocalVideoStream(_ mute: Bool) -> Int32 {
+        let result = rtcEngineKit.muteLocalVideoStream(mute)
+        return result
+    }
+    
+    /// 接收/停止接收所有远端视频流
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func muteAllRemoteVideoStreams(_ mute: Bool) -> Int32 {
+        let result = rtcEngineKit.muteAllRemoteVideoStreams(mute)
+        return result
+    }
+    
+    /// 接收/停止一个特定远端视频流
+    ///
+    /// **注意：** 如果调用 AgoraRtcEngineKit.muteAllRemoteVideoStreams(_:) 并将 mute 设为 true 以停止接收所有远端视频流。在调用该方法之前请再次调用AgoraRtcEngineKit.muteAllRemoteVideoStreams(_:) 并将 mute 设为 false
+    /// - Parameters:
+    ///   - uid: 特定远端用户的UID
+    /// - Returns: 成功：0；失败：< 0
+    func muteRemoteVideoStream(_ uid: UInt, _ mute: Bool) -> Int32 {
+        let result = rtcEngineKit.muteRemoteVideoStream(uid, mute: mute)
+        return result
+    }
+    
+    /// 设置是否默认接收所有远程视频流。默认false
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func setDefaultMuteAllRemoteVideoStreams(_ mute: Bool) -> Int32 {
+        let result = rtcEngineKit.setDefaultMuteAllRemoteVideoStreams(mute)
+        return result
+    }
 }
+
 
 // MARK: - Video Pre-Process and Post-Process
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Audio Routing Controller
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - In Ear Monitor
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Audio Sound Effect
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Music File Playback and Mixing
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Audio Effect File Playback
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Audio Recorder
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Loopback Recording
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Miscellaneous Audio Control
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Network-related Test
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Custom Video Module
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - External Audio Data
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - External Video Data
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Raw Audio Data
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Watermark
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Stream Fallback
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Dual-stream Mode
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Encryption
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Inject an Online Media Stream
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - CDN Live Streaming
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Data Stream
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Miscellaneous Video Control
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Camera Control
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Screen Sharing
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Custom Media Metadata
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - Miscellaneous Methods
 extension AgoraRTCEngineProxy {
     
 }
+
 
 // MARK: - Customized Methods (Technical Preview)
 extension AgoraRTCEngineProxy {
     
 }
 
+
 // MARK: - AgoraRtcEngineDelegate
 extension AgoraRTCEngineProxy: AgoraRtcEngineDelegate {
 }
+
 
 // MARK: - Core Delegate Methods
 extension AgoraRTCEngineProxy {
@@ -1005,6 +1209,7 @@ extension AgoraRTCEngineProxy {
         requestTokenObserver.send(value: (engine))
     }
 }
+
 
 // MARK: - Media Delegate Methods
 extension AgoraRTCEngineProxy {
@@ -1189,6 +1394,7 @@ extension AgoraRTCEngineProxy {
     }
 }
 
+
 // MARK: - Fallback Delegate Methods
 extension AgoraRTCEngineProxy {
     
@@ -1217,6 +1423,7 @@ extension AgoraRTCEngineProxy {
         didRemoteSubscribeFallbackToAudioOnlyObserver.send(value: (engine, isFallbackOrRecover, uid))
     }
 }
+
 
 // MARK: - Device Delegate Methods
 extension AgoraRTCEngineProxy {
@@ -1254,6 +1461,7 @@ extension AgoraRTCEngineProxy {
         cameraExposureDidChangedObserver.send(value: (engine, rect))
     }
 }
+
 
 // MARK: - Statistics Delegate Methods
 extension AgoraRTCEngineProxy {
@@ -1356,6 +1564,7 @@ extension AgoraRTCEngineProxy {
     }
 }
 
+
 // MARK: - Audio Player Delegate Methods
 extension AgoraRTCEngineProxy {
     
@@ -1401,6 +1610,7 @@ extension AgoraRTCEngineProxy {
     }
 }
 
+
 // MARK: - CDN Publisher Delegate Methods
 extension AgoraRTCEngineProxy {
     
@@ -1438,6 +1648,7 @@ extension AgoraRTCEngineProxy {
     }
 }
 
+
 // MARK: - Inject Stream URL Delegate Methods
 extension AgoraRTCEngineProxy {
     
@@ -1447,6 +1658,7 @@ extension AgoraRTCEngineProxy {
         streamInjectedStatusOfUrlObserver.send(value: (engine, url, uid, status))
     }
 }
+
 
 // MARK: - Stream Message Delegate Methods
 extension AgoraRTCEngineProxy {
@@ -1470,6 +1682,7 @@ extension AgoraRTCEngineProxy {
         didOccurStreamMessageErrorObserver.send(value: (engine, uid, streamId, error, missed, cached))
     }
 }
+
 
 // MARK: - Miscellaneous Delegate Methods
 extension AgoraRTCEngineProxy {
