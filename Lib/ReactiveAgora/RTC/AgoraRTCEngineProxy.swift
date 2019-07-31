@@ -1712,6 +1712,40 @@ extension AgoraRTCEngineProxy {
 // MARK: - Encryption
 extension AgoraRTCEngineProxy {
     
+    /// 在加入频道之前启用内置加密密码
+    ///
+    /// 频道中的所有用户必须设置相同的加密密码。一旦用户离开通道，加密密码将自动清除
+    ///
+    /// 如果加密密码未指定或设置为空，则禁用加密功能
+    ///
+    /// **注意：**
+    /// - 不要在CDN直播中使用此方法
+    /// - 为达到最佳传输效果，请确保加密后的数据大小不超过原始数据大小 + 16字节。16字节是AES加密的最大填充大小
+    /// - Parameter secret: 加密密码
+    /// - Returns: 成功：0；失败：< 0
+    func setEncryptionSecret(_ secret: String?) -> Int32 {
+        let result = rtcEngineKit.setEncryptionSecret(secret)
+        return result
+    }
+    
+    /// 设置内置加密模式
+    ///
+    /// SDK支持内置加密，默认设置为 "aes-128-xts"。调用此方法以使用其他加密模式
+    ///
+    /// 同一通道中的所有用户必须使用相同的加密模式和密码
+    ///
+    /// 有关AES加密算法的信息，请参阅加密模式之间的差异
+    ///
+    /// **注意：**
+    /// - 在调用该方法之前，调用 AgoraRtcEngineKit.setEncryptionSecret(_:) 方法启用内置加密函数
+    /// - 不要在CDN直播中使用此方法
+    ///
+    /// - Parameter mode: 加密模式（"aes-128-xts": (default) 128-bit AES encryption, XTS mode；"aes-256-xts": 256-bit AES encryption, XTS mode；"aes-128-ecb": 128-bit AES encryption, ECB mode）
+    /// - Returns: 成功：0；失败：< 0
+    func setEncryptionMode(_ mode: String?) -> Int32 {
+        let result = rtcEngineKit.setEncryptionMode(mode)
+        return result
+    }
 }
 
 
