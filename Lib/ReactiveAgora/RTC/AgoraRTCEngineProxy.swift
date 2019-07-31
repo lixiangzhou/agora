@@ -1542,6 +1542,42 @@ extension AgoraRTCEngineProxy {
 // MARK: - Raw Audio Data
 extension AgoraRTCEngineProxy {
     
+    /// 设置 onRecordAudioFrame 回调的音频录制格式
+    ///
+    /// - Parameters:
+    ///   - sampleRate: 音频采样率（由 onRecordAudioFrame 回调返回）。可以为8000, 16000, 32000, 44100, or 48000 Hz
+    ///   - channel: 音频频道号（由 onRecordAudioFrame 回调返回）。可以是1（Mono）2（Stereo）
+    ///   - mode: AgoraAudioRawFrameOperationMode
+    ///   - samplesPerCall: 样本点（由 onRecordAudioFrame 回调返回）。通常设置发布流的 samplesPerCall 为1024。samplesPerCall = (int)(sampleRate × sampleInterval)。sampleInterval >= 0.01s
+    /// - Returns: 成功：0；失败：< 0
+    func setRecordingAudioFrameParametersWithSampleRate(_ sampleRate: Int, channel: Int, mode: AgoraAudioRawFrameOperationMode, samplesPerCall: Int) -> Int32 {
+        let result = rtcEngineKit.setRecordingAudioFrameParametersWithSampleRate(sampleRate, channel: channel, mode: mode, samplesPerCall: samplesPerCall)
+        return result
+    }
+    
+    /// 设置 onPlaybackAudioFrame 回调的音频播放格式
+    ///
+    /// - Parameters:
+    ///   - sampleRate: 音频采样率（由 onPlaybackAudioFrame 回调返回）。可以为8000, 16000, 32000, 44100, or 48000 Hz
+    ///   - channel: 音频频道号（由 onPlaybackAudioFrame 回调返回）。可以是1（Mono）2（Stereo）
+    ///   - mode: AgoraAudioRawFrameOperationMode
+    ///   - samplesPerCall: 样本点（由 onPlaybackAudioFrame 回调返回）。通常设置发布流的 samplesPerCall 为1024。samplesPerCall = (int)(sampleRate × sampleInterval)。sampleInterval >= 0.01s
+    /// - Returns: 成功：0；失败：< 0
+    func setPlaybackAudioFrameParametersWithSampleRate(_ sampleRate: Int, channel: Int, mode: AgoraAudioRawFrameOperationMode, samplesPerCall: Int) -> Int32 {
+        let result = rtcEngineKit.setPlaybackAudioFrameParametersWithSampleRate(sampleRate, channel: channel, mode: mode, samplesPerCall: samplesPerCall)
+        return result
+    }
+    
+    /// 设置 onMixedAudioFrame 回调的混合音频格式
+    ///
+    /// - Parameters:
+    ///   - sampleRate: 音频采样率（由 onMixedAudioFrame 回调返回）。可以为8000, 16000, 32000, 44100, or 48000 Hz
+    ///   - samplesPerCall: 样本点（由 onMixedAudioFrame 回调返回）。通常设置发布流的 samplesPerCall 为1024。samplesPerCall = (int)(sampleRate × sampleInterval)。sampleInterval >= 0.01s
+    /// - Returns: 成功：0；失败：< 0
+    func setMixedAudioFrameParametersWithSampleRate(_ sampleRate: Int, samplesPerCall: Int) -> Int32 {
+        let result = rtcEngineKit.setMixedAudioFrameParametersWithSampleRate(sampleRate, samplesPerCall: samplesPerCall)
+        return result
+    }
 }
 
 
