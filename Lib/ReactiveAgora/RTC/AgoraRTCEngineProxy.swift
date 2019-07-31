@@ -889,78 +889,653 @@ extension AgoraRTCEngineProxy {
 // MARK: - Video Pre-Process and Post-Process
 extension AgoraRTCEngineProxy {
     
+    /// 启用/禁用图像增强并设置选项
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func setBeautyEffectOptions(_ enable: Bool, options: AgoraBeautyOptions?) -> Int32 {
+        let result = rtcEngineKit.setBeautyEffectOptions(enable, options: options)
+        return result
+    }
+    
+    func enableRemoteSuperResolution(_ uid: UInt, _ enabled: Bool) -> Int32 {
+        let result = rtcEngineKit.enableRemoteSuperResolution(uid, enabled: enabled)
+        return result
+    }
 }
 
 
 // MARK: - Audio Routing Controller
 extension AgoraRTCEngineProxy {
     
+    /// 设置默认的音频路由
+    ///
+    /// 此方法设置在加入频道之前，默认情况下接收的音频是路由到耳机还是扬声器。如果用户不调用此方法，则默认情况下音频将路由到耳机
+    ///
+    /// **主题：**
+    /// - 此方法只在音频模式下有效
+    /// - 在调用 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 之前调用此方法
+    ///
+    /// 每种模式下的默认设置：
+    /// - 声音：耳机
+    /// - 视频：扬声器。如果用户在通讯配置文件下调用 AgoraRtcEngineKit.disableVideo 方法或如果用户调用 AgoraRtcEngineKit.muteLocalVideoStream(_:) 和 AgoraRtcEngineKit.muteAllRemoteVideoStreams(_:) 方法，默认的音频线路自动切换到耳机
+    /// 现场直播：扬声器
+    /// 游戏语音：扬声器
+    /// - Parameter defaultToSpeaker: 设置默认的音频路由（true：扬声器；false：耳机）
+    /// - Returns: 成功：0；失败：< 0
+    func setDefaultAudioRouteToSpeakerphone(_ defaultToSpeaker: Bool) -> Int32 {
+        let result = rtcEngineKit.setDefaultAudioRouteToSpeakerphone(defaultToSpeaker)
+        return result
+    }
+    
+    /// 开启/禁用音频路由到扬声器
+    ///
+    /// 此方法设置音频是否路由到扬声器。调用此方法后，SDK返回 AgoraRtcEngineDelegate.rtcEngine(_:didAudioRouteChanged:) 回调，指示音频路由发生更改
+    ///
+    /// **注意：**
+    /// - 在调用 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 之后调用此方法
+    /// - SDK调用 AVAudioSession.setCategory(_:) 设置 AVAudioSession.Category.playAndRecord，带有配置耳机/扬声器的选项，因此此方法适用于系统中的所有音频播放
+    /// - Parameter enableSpeaker: true：路由到扬声器；false：路由到耳机
+    /// - Returns: 成功：0；失败：< 0
+    func setEnableSpeakerphone(_ enableSpeaker: Bool) -> Int32 {
+        let result = rtcEngineKit.setEnableSpeakerphone(enableSpeaker)
+        return result
+    }
+    
+    /// 检查扬声器是否开启
+    func isSpeakerphoneEnabled() -> Bool {
+        let result = rtcEngineKit.isSpeakerphoneEnabled()
+        return result
+    }
 }
 
 
 // MARK: - In Ear Monitor
 extension AgoraRTCEngineProxy {
     
+    /// 允许耳内监听
+    ///
+    /// - Parameter inEarMonitoring: 默认false
+    /// - Returns: 成功：0；失败：< 0
+    func enable(inEarMonitoring: Bool) -> Int32 {
+        let result = rtcEngineKit.enable(inEarMonitoring: inEarMonitoring)
+        return result
+    }
+    
+    /// 设置耳内监听的音量
+    ///
+    /// - Parameter volume: 耳内音量。范围是：0~100
+    /// - Returns: 成功：0；失败：< 0
+    func setInEarMonitoringVolume(_ volume: Int) -> Int32 {
+        let result = rtcEngineKit.setInEarMonitoringVolume(volume)
+        return result
+    }
 }
 
 
 // MARK: - Audio Sound Effect
 extension AgoraRTCEngineProxy {
     
+    /// 改变本地说话者的音高
+    ///
+    /// - Parameter pitch: 设置音高。范围：0.5~2.0。默认是1.0
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalVoicePitch(_ pitch: Double) -> Int32 {
+        let result = rtcEngineKit.setLocalVoicePitch(pitch)
+        return result
+    }
+    
+    /// 设置本地语音均衡效果
+    ///
+    /// - Parameters:
+    ///   - bandFrequency: 设置频带频率。范围：0~9，表示声音效果的各自10波段中心频率，包括31、62、125、500、1k、2k、4k、8k和16k Hz
+    ///   - withGain: 设置每个波段的增益(dB)。范围：-15~15。默认是0
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalVoiceEqualizationOf(_ bandFrequency: AgoraAudioEqualizationBandFrequency, withGain: Int) -> Int32 {
+        let result = rtcEngineKit.setLocalVoiceEqualizationOf(bandFrequency, withGain: withGain)
+        return result
+    }
+    
+    /// 设置本地声音混响
+    ///
+    ///  v2.4.0添加了 AgoraRtcEngineKit.setLocalVoiceReverbPreset(_:) 方法，这是一种更友好的方法，用于设置本地语音混响。可以使用此方法设置本地混响效果，如Popular、R&B、Rock、Hip-hop等
+    /// - Parameters:
+    ///   - reverbType: 设置音效类型
+    ///   - withValue: 音效类型的值。查看 AgoraAudioReverbType
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalVoiceReverbOf(_ reverbType: AgoraAudioReverbType, withValue: Int) -> Int32 {
+        let result = rtcEngineKit.setLocalVoiceReverbOf(reverbType, withValue: withValue)
+        return result
+    }
+    
+    /// 设置本地换声器选项
+    ///
+    /// **注意：** 不要与 AgoraRtcEngineKit.setLocalVoiceReverbPreset(_:) 一起使用，否则前面调用的方法不生效
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalVoiceChanger(_ voiceChanger: AgoraAudioVoiceChanger) -> Int32 {
+        let result = rtcEngineKit.setLocalVoiceChanger(voiceChanger)
+        return result
+    }
+    
+    /// 设置预设的本地声音混响效果
+    ///
+    /// **注意：**
+    /// - 不要与 AgoraRtcEngineKit.setLocalVoiceReverbOf(_:withValue:) 一起使用
+    /// - 不要与 AgoraRtcEngineKit.setLocalVoiceChanger(_:) 一起使用，否则前面调用的方法不生效
+    /// - Parameter reverbPreset: 本地声音混响选项
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalVoiceReverbPreset(_ reverbPreset: AgoraAudioReverbPreset) -> Int32 {
+        let result = rtcEngineKit.setLocalVoiceReverbPreset(reverbPreset)
+        return result
+    }
+    
+    /// 启用/禁用远端用户的立体平移
+    ///
+    /// 如果需要使用 AgoraRtcEngineKit.setRemoteVoicePosition(_:pan:gain:)，请确保在加入频道之前调用该方法，以便为远端用户启用立体平移
+    /// - Parameter enabled: 是否为远程用户启用立体平移
+    /// - Returns: 成功：0；失败：< 0
+    func enableSoundPositionIndication(_ enabled: Bool) -> Int32 {
+        let result = rtcEngineKit.enableSoundPositionIndication(enabled)
+        return result
+    }
+    
+    /// 设置远端用户的声音位置和增益
+    ///
+    /// 当本地用户调用此方法来设置远端用户的声音位置时，左右频道之间的声音差异允许本地用户跟踪远端用户的实时位置，创建真实的空间感。此方法适用于大型多人在线游戏，如《皇室战争》游戏
+    /// **注意：**
+    /// - 要使此方法有效，请在加入通道之前调用 AgoraRtcEngineKit.enableSoundPositionIndication(_:)，为远程用户启用立体移动。此方法需要硬件支持
+    /// - 为了获得最佳效果，我们建议使用以下音频输出设备：立体声耳机（iOS）；立体声扬声器（macOS）
+    /// - Parameters:
+    ///   - pan: 远端用户的声音位置。范围：-1.0~1.0（0.0：默认，远处的声音来自前方；-1.0：远处的声音来自左边；1.0：远处的声音来自右边）
+    ///   - gain: 远端用户的增益。范围：0.0~100.0。默认值是100.0(远端用户的原始增益)。价值越小，收益越少
+    /// - Returns: 成功：0；失败：< 0
+    func setRemoteVoicePosition(_ uid: UInt, pan: Double, gain: Double) -> Int32 {
+        let result = rtcEngineKit.setRemoteVoicePosition(uid, pan: pan, gain: gain)
+        return result
+    }
 }
 
 
 // MARK: - Music File Playback and Mixing
 extension AgoraRTCEngineProxy {
     
+    /// 开始音频混合
+    ///
+    /// 此方法将指定的本地音频文件与来自麦克风的音频流混合，或将麦克风的音频流替换为指定的本地音频文件。您可以选择其他用户是否可以听到本地音频回放，并指定回放循环的数量。该方法还支持在线音乐播放
+    ///
+    /// 成功的调用方法会触发本地客户机上的 AgoraRtcEngineDelegate.rtcEngine(_:localAudioMixingStateDidChanged:errorCode:) 回调
+    ///
+    /// 当音频混合文件回放完成时，SDK在本地客户机上触发 AgoraRtcEngineDelegate.rtcEngine(_:localAudioMixingStateDidChanged:errorCode:) 回调
+    ///
+    /// **注意：**
+    /// - 确保iOS设备版本 >= 8.0
+    /// - 确保在频道中调用此方法
+    /// - 如果想要播放在线音乐文件，请确保从播放在线音乐文件到调用此方法之间的时间间隔大于100 ms，或者出现audiofileopentoofrequency(702)警告
+    /// - 如果本地音频混合文件不存在，或者SDK不支持文件格式或无法访问音乐文件URL, SDK将返回AgoraWarningCodeAudioMixingOpenError(701)警告
+    /// - Parameters:
+    ///   - filePath: 要混合的本地或在线音频文件的绝对路径。支持的音频格式:mp3、aac、m4a、3gp和wav
+    ///   - loopback: 谁可以听见混音（true：只有本地用户可以听见；false：本地和远端都可以听见）
+    ///   - replace: 音频混合上下文（true：只发布指定的音频文件，麦克风接收到的音频流不发布；false：本地音频文件与来自麦克风的音频流混合）
+    ///   - cycle: 播放循环次数（-1表示无限次）
+    /// - Returns: 成功：0；失败：< 0
+    func startAudioMixing(_ filePath: String, loopback: Bool, replace: Bool, cycle: Int) -> Int32 {
+        let result = rtcEngineKit.startAudioMixing(filePath, loopback: loopback, replace: replace, cycle: cycle)
+        return result
+    }
+    
+    /// 停止音频混合 (在频道内调用该方法)
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func stopAudioMixing() -> Int32 {
+        let result = rtcEngineKit.stopAudioMixing()
+        return result
+    }
+    
+    /// 暂停音频混合 (在频道内调用该方法)
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func pauseAudioMixing() -> Int32 {
+        let result = rtcEngineKit.pauseAudioMixing()
+        return result
+    }
+    
+    /// 恢复音频混合 (在频道内调用该方法)
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func resumeAudioMixing() -> Int32 {
+        let result = rtcEngineKit.resumeAudioMixing()
+        return result
+    }
+    
+    /// 调节音频混合音量 (在频道内调用该方法)
+    ///
+    /// - Parameter volume: 音频混合音量。范围：0~100，默认100
+    /// - Returns: 成功：0；失败：< 0
+    func adjustAudioMixingVolume(_ volume: Int) -> Int32 {
+        let result = rtcEngineKit.adjustAudioMixingVolume(volume)
+        return result
+    }
+    
+    /// 调整本地播放的音频混合音量 (在频道内调用该方法)
+    ///
+    /// - Parameter volume: 音频混合音量。范围：0~100，默认100
+    /// - Returns: 成功：0；失败：< 0
+    func adjustAudioMixingPlayoutVolume(_ volume: Int) -> Int32 {
+        let result = rtcEngineKit.adjustAudioMixingPlayoutVolume(volume)
+        return result
+    }
+    
+    /// 调整要发布的（发送给其他人的）音频混合音量 (在频道内调用该方法)
+    ///
+    /// - Parameter volume: 音频混合音量。范围：0~100，默认100
+    /// - Returns: 成功：0；失败：< 0
+    func adjustAudioMixingPublishVolume(_ volume: Int) -> Int32 {
+        let result = rtcEngineKit.adjustAudioMixingPublishVolume(volume)
+        return result
+    }
+    
+    /// 获取用于发布的音频混合音量
+    ///
+    /// 此方法有助于排除音频音量相关问题
+    func getAudioMixingPublishVolume() -> Int32 {
+        let result = rtcEngineKit.getAudioMixingPublishVolume()
+        return result
+    }
+    
+    /// 获取用于本地播放的音频混合音量
+    ///
+    /// 此方法有助于排除音频音量相关问题
+    func getAudioMixingPlayoutVolume() -> Int32 {
+        let result = rtcEngineKit.getAudioMixingPlayoutVolume()
+        return result
+    }
+    
+    /// 获取音频混合的时间（ms） (在频道内调用该方法)
+    ///
+    /// - Returns: > 0：音频混合时间；< 0：失败
+    func getAudioMixingDuration() -> Int32 {
+        let result = rtcEngineKit.getAudioMixingDuration()
+        return result
+    }
+    
+    /// 获取音频混合文件的播放位置 (在频道内调用该方法)
+    ///
+    /// - Returns: > 0：音频混合文件当前的播放位置；< 0：失败
+    func getAudioMixingCurrentPosition() -> Int32 {
+        let result = rtcEngineKit.getAudioMixingCurrentPosition()
+        return result
+    }
+    
+    /// 将音频混合文件的播放位置设置为不同的起始位置(默认从开始播放)
+    ///
+    /// - Parameter pos: 音频混合文件的播放位置（ms）
+    /// - Returns: 成功：0；失败：< 0
+    func setAudioMixingPosition(_ pos: Int) -> Int32 {
+        let result = rtcEngineKit.setAudioMixingPosition(pos)
+        return result
+    }
 }
 
 
 // MARK: - Audio Effect File Playback
 extension AgoraRTCEngineProxy {
     
+    /// 获取音效的音量（范围：0~100）
+    ///
+    /// - Returns: > 0：音效的音量；< 0：失败
+    func getEffectsVolume() -> Double {
+        let result = rtcEngineKit.getEffectsVolume()
+        return result
+    }
+    
+    /// 设置音效音量
+    ///
+    /// - Parameter volume: 音效音量。范围：0~100，默认100
+    /// - Returns: 成功：0；失败：< 0
+    func setEffectsVolume(_ volume: Double) -> Int32 {
+        let result = rtcEngineKit.setEffectsVolume(volume)
+        return result
+    }
+    
+    /// 设置指定的音效的音量
+    ///
+    /// - Parameters:
+    ///     - soundId: 音效ID
+    ///     - withVolume: 音效音量。范围：0~100，默认100
+    /// - Returns: 成功：0；失败：< 0
+    func setEffectsVolume(_ soundId: Int32, withVolume: Double) -> Int32 {
+        let result = rtcEngineKit.setVolumeOfEffect(soundId, withVolume: withVolume)
+        return result
+    }
+    
+    /// 播放指定的音效
+    ///
+    /// 可以使用此方法为特定场景(例如游戏)添加特定的音效
+    ///
+    /// 使用此方法，您可以设置音效文件的循环计数、音高、平移和增益，以及远程用户是否能够听到音效
+    ///
+    /// 要同时播放多个音效文件，请使用不同的声音和文件路径多次调用此方法。我们建议同时播放不超过三个音效文件
+    ///
+    /// 当音频效果文件回放完成时，会触发 AgoraRtcEngineDelegate.rtcEngineDidAudioEffectFinish(_:soundId:)
+    ///
+    /// - Parameters:
+    ///   - soundId: 音效ID，每个音效都有唯一ID。（如果通过 AgoraRtcEngineKit.preloadEffect(_:filePath:) 预加载了音效文件到内存，确保soundId是唯一的）
+    ///   - filePath: 本地音效文件的绝对路径或在线音频效果文件的URL
+    ///   - loopCount: 循环次数（0：一次；1：两次；-1：一直播放，直到调用 AgoraRtcEngineKit.stopEffect(_:) 或 AgoraRtcEngineKit.stopAllEffects）
+    ///   - pitch: 音效的音高。范围：0.5~2。默认是1
+    ///   - pan: 音效空间位置。范围：-1.0~1.0（0.0：音效显示在前面；-1.0：音效显示在左边；1.0：音效显示在右边）
+    ///   - gain: 音效的音量。范围：0~100。默认100.
+    ///   - publish: 是否发布给Agora Cloud和远端用户
+    /// - Returns: 成功：0；失败：< 0
+    func playEffect(_ soundId: Int32, filePath: String?, loopCount: Int32, pitch: Double, pan: Double, gain: Double, publish: Bool) -> Int32 {
+        let result = rtcEngineKit.playEffect(soundId, filePath: filePath, loopCount: loopCount, pitch: pitch, pan: pan, gain: gain, publish: publish)
+        return result
+    }
+    
+    /// 停止播放指定的音效
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func stopEffect(_ soundId: Int32) -> Int32 {
+        let result = rtcEngineKit.stopEffect(soundId)
+        return result
+    }
+    
+    /// 停止播放所有的音效
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func stopAllEffects() -> Int32 {
+        let result = rtcEngineKit.stopAllEffects()
+        return result
+    }
+    
+    /// 预加载一个指定的音效文件到内存
+    ///
+    /// 为了保证顺畅的通讯，限制音频效果文件的大小。Agora建议在调用 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 之前使用此方法预加载音效
+    ///
+    /// 支持的音频格式:mp3、aac、m4a、3gp和wav。
+    ///
+    /// - Parameters:
+    ///   - soundId: 音效ID
+    ///   - filePath: 音效文件的绝对路径
+    /// - Returns: 成功：0；失败：< 0
+    func stopAllEffects(_ soundId: Int32, filePath: String?) -> Int32 {
+        let result = rtcEngineKit.preloadEffect(soundId, filePath: filePath)
+        return result
+    }
+    
+    /// 从内存中释放一个指定的音效
+    ///
+    /// - Parameter soundId: 音效ID
+    /// - Returns: 成功：0；失败：< 0
+    func unloadEffect(_ soundId: Int32) -> Int32 {
+        let result = rtcEngineKit.unloadEffect(soundId)
+        return result
+    }
+    
+    /// 暂停一个指定的音效
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func pauseEffect(_ soundId: Int32) -> Int32 {
+        let result = rtcEngineKit.pauseEffect(soundId)
+        return result
+    }
+    
+    /// 暂停所有的音效
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func pauseAllEffects() -> Int32 {
+        let result = rtcEngineKit.pauseAllEffects()
+        return result
+    }
+    
+    /// 恢复一个指定的音效
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func resumeEffect(_ soundId: Int32) -> Int32 {
+        let result = rtcEngineKit.resumeEffect(soundId)
+        return result
+    }
+    
+    /// 恢复所有的音效
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func resumeAllEffects() -> Int32 {
+        let result = rtcEngineKit.resumeAllEffects()
+        return result
+    }
 }
 
 
 // MARK: - Audio Recorder
 extension AgoraRTCEngineProxy {
     
-}
-
-
-// MARK: - Loopback Recording
-extension AgoraRTCEngineProxy {
+    /// 开始音频录制
+    ///
+    /// SDK允许在调用期间进行录制。支持格式：wav 文件大，保真度高；aac：文件小，保真度低
+    ///
+    /// 确保保存录制文件的目录存在并且是可写的。在 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 之后调用此方法。当调用 AgoraRtcEngineKit.leaveChannel(_:) 时，录制将自动停止
+    /// - Parameters:
+    ///   - filePath: 录制文件的绝对文件路径
+    /// - Returns: 成功：0；失败：< 0
+    func startAudioRecording(filePath: String, quality: AgoraAudioRecordingQuality) -> Int32 {
+        let result = rtcEngineKit.startAudioRecording(filePath, quality: quality)
+        return result
+    }
     
+    /// 停止客户端的音频录制
+    ///
+    /// **注意：** 可以在调用 AgoraRtcEngineKit.leaveChannel(_:) 方法之前调用此方法，否则在调用 AgoraRtcEngineKit.leaveChannel(_:) 方法时录制将自动停止
+    /// - Returns: 成功：0；失败：< 0
+    func stopAudioRecording() -> Int32 {
+        
+        let result = rtcEngineKit.stopAudioRecording()
+        return result
+    }
 }
 
 
 // MARK: - Miscellaneous Audio Control
 extension AgoraRTCEngineProxy {
     
+    /// 设置音频会话的操作限制
+    ///
+    /// SDK和app都可以默认配置音频会话。该app可能偶尔会使用其他应用程序或第三方组件来操纵音频会话，并限制SDK这样做。该方法允许应用程序限制SDK对音频会话的操作
+    ///
+    /// 可以随时调用此方法将音频会话的控制权返回给SDK
+    ///
+    /// **注意：** 这种方法限制了SDK对音频会话的操作。音频会话的任何操作都完全依赖于应用程序、其他应用程序或第三方组件
+    /// - Parameter restriction: 音频会话的操作限制
+    func setAudioSessionOperationRestriction(_ restriction: AgoraAudioSessionOperationRestriction) {
+        rtcEngineKit.setAudioSessionOperationRestriction(restriction)
+    }
 }
 
 
 // MARK: - Network-related Test
 extension AgoraRTCEngineProxy {
     
+    /// 开始语音通话回路测试
+    ///
+    /// 此方法启动音频通话回路测试，以确定音频设备(例如耳机和扬声器)和网络连接是否正常工作
+    ///
+    /// 在音频通话回路测试中，你记录你的声音。如果录音在设定的时间间隔内回放，则音频设备和网络连接正常工作
+    /// ** 注意：**
+    /// - 在加入通道之前调用此方法。
+    /// - 调用此方法后，调用 AgoraRtcEngineKit.stopEchoTest 方法结束测试。否则app无法运行下一个echo测试，或加入频道
+    /// - 在直播配置文件中，只有主机可以调用此方法
+    /// - Parameters:
+    ///   - withInterval: 说话和录音回放之间的时间间隔
+    ///   - successBlock: 成功回调
+    /// - Returns: 成功：0；失败：< 0
+    func startEchoTest(withInterval: Int, successBlock: ((String, UInt, Int) -> Void)?) -> Int32 {
+        let result = rtcEngineKit.startEchoTest(withInterval: withInterval) { (channel, uid, elapsed) in
+            successBlock?(channel, uid, elapsed)
+        }
+        return result
+    }
+    
+    /// 停止音频通话回路测试
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func stopEchoTest() -> Int32 {
+        let result = rtcEngineKit.stopEchoTest()
+        return result
+    }
+    
+    /// 开启网络连接质量测试
+    ///
+    /// 此方法测试用户网络连接的质量，默认情况下禁用
+    ///
+    /// 在用户加入频道或观众切换到主机之前，调用此方法检查上行网络质量
+    ///
+    /// 此方法消耗额外的网络流量，可能会影响通信质量。我们不建议与 AgoraRtcEngineKit.startLastmileProbeTest(_:) 一起调用此方法。
+    ///
+    /// 在接收到 AgoraRtcEngineDelegate.rtcEngine(_:lastmileQuality:) 回调之后，以及在用户加入通道或切换用户角色之前，调用 AgoraRtcEngineKit.disableLastmileTest 方法来禁用此测试
+    /// **注意：**
+    /// - 在收到 AgoraRtcEngineDelegate.rtcEngine(_:lastmileQuality:) 回调之前，不要调用任何其他方法。此外，此回调可能会被其他方法打断或不执行
+    /// - 在直播配置文件下，主机在加入频道后不应该调用此方法
+    /// - Returns: 成功：0；失败：< 0
+    func enableLastmileTest() -> Int32 {
+        let result = rtcEngineKit.enableLastmileTest()
+        return result
+    }
+    
+    /// 禁用网络连接质量测试
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func disableLastmileTest() -> Int32 {
+        let result = rtcEngineKit.disableLastmileTest()
+        return result
+    }
+    
+    /// 开始最后一英里网络探测测试
+    ///
+    /// 在加入频道之前开始最后一英里网络探测测试，以获得上行和下行最后一英里网络统计数据，包括带宽、包丢失、抖动和往返时间(RTT)
+    ///
+    /// 在用户加入频道或观众切换到主机之前，调用此方法检查上行网络质量
+    ///
+    /// 启用此方法后，SDK将返回以下回调：
+    /// - AgoraRtcEngineDelegate.rtcEngine(_:lastmileQuality:)：SDK根据网络条件在两秒内触发这个回调。这种回调对网络条件进行评级，并与用户体验更紧密地联系在一起
+    /// - AgoraRtcEngineDelegate.rtcEngine(_:lastmileProbeTest:)：SDK根据网络条件在30秒内触发这个回调。这个回调函数返回网络状态的实时统计信息，更加客观
+    /// - Parameter config: 最后一英里网络探测测试的配置
+    /// - Returns: 成功：0；失败：< 0
+    func startLastmileProbeTest(_ config: AgoraLastmileProbeConfig?) -> Int32 {
+        let result = rtcEngineKit.startLastmileProbeTest(config)
+        return result
+    }
+    
+    /// 停止最后一英里网络探测测试
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func stopLastmileProbeTest() -> Int32 {
+        let result = rtcEngineKit.stopLastmileProbeTest()
+        return result
+    }
 }
 
 
 // MARK: - Custom Video Module
 extension AgoraRTCEngineProxy {
     
+    /// 设置视频源
+    ///
+    /// 在实时通信中，SDK使用默认的视频输入源(内置摄像头)发布流。要使用外部视频源，请调用AgoraVideoSourceProtocol来设置自定义视频源，然后使用此方法将外部视频源添加到SDK中
+    func setVideoSource(_ videoSource: AgoraVideoSourceProtocol?) {
+        rtcEngineKit.setVideoSource(videoSource)
+    }
+    
+    
+    /// 设置本地视频渲染器
+    ///
+    /// 在实时通信中，SDK使用默认的视频渲染器来渲染视频。要使用外部视频渲染器，请调用AgoraVideoSinkProtocol来设置自定义本地视频渲染器，然后使用此方法将外部渲染器添加到SDK中
+    func setLocalVideoRenderer(_ videoRenderer: AgoraVideoSinkProtocol?) {
+        rtcEngineKit.setLocalVideoRenderer(videoRenderer)
+    }
+    
+    /// 设置远端视频渲染器
+    /// 此方法设置远端视频渲染器。在实时通信中，SDK使用默认的视频渲染器来渲染视频。要使用外部视频渲染器，请调用AgoraVideoSinkProtocol来设置自定义远程视频渲染器，然后使用此方法将外部渲染器添加到SDK中
+    func setRemoteVideoRenderer(_ videoRenderer: AgoraVideoSinkProtocol?, forUserId: UInt) {
+        rtcEngineKit.setRemoteVideoRenderer(videoRenderer, forUserId: forUserId)
+    }
+    
+    /// 获取视频源
+    func videoSource() -> AgoraVideoSourceProtocol? {
+        return rtcEngineKit.videoSource()
+    }
+    
+    /// 获取本地视频渲染器
+    func localVideoRenderer() -> AgoraVideoSinkProtocol? {
+        return rtcEngineKit.localVideoRenderer()
+    }
+    
+    /// 获取指定远端用户的视频源
+    func remoteVideoRenderer(ofUserId: UInt) -> AgoraVideoSinkProtocol? {
+        return rtcEngineKit.remoteVideoRenderer(ofUserId: ofUserId)
+    }
 }
 
 
 // MARK: - External Audio Data
 extension AgoraRTCEngineProxy {
     
+    /// 开启外部音频源 （在加入频道前调用）
+    ///
+    /// - Parameters:
+    ///   - withSampleRate: 外部音频源的采样率:8000、16000、44100或48000 Hz
+    ///   - channelsPerFrame: 外部声源信道的数量（最多两个信道）
+    func enableExternalAudioSource(withSampleRate: UInt, channelsPerFrame: UInt) {
+        rtcEngineKit.enableExternalAudioSource(withSampleRate: withSampleRate, channelsPerFrame: channelsPerFrame)
+    }
+    
+    /// 禁用外部音频源
+    func disableExternalAudioSource() {
+        rtcEngineKit.disableExternalAudioSource()
+    }
+    
+    /// 将外部原始音频帧数据推送到SDK进行编码
+    ///
+    /// - Parameters:
+    ///   - data: 外部音频数据
+    ///   - samples: 样本数
+    ///   - timestamp: 外部音频帧的时间戳。它是强制性的。您可以将此参数用于以下目的：恢复所捕获音频帧的顺序；同步视频相关场景中的音频和视频帧，包括使用外部视频源的场景
+    func pushExternalAudioFrameRawData(_ data: UnsafeMutableRawPointer, samples: UInt, timestamp: TimeInterval) -> Bool {
+        let result = rtcEngineKit.pushExternalAudioFrameRawData(data, samples: samples, timestamp: timestamp)
+        return result
+    }
+    
+    /// 将外部CMSampleBuffer音频帧推送到SDK进行编码
+    ///
+    /// - Parameter sampleBuffer: 样本缓冲区
+    func pushExternalAudioFrameSampleBuffer(_ sampleBuffer: CMSampleBuffer) -> Bool {
+        let result = rtcEngineKit.pushExternalAudioFrameSampleBuffer(sampleBuffer)
+        return result
+    }
 }
 
 
 // MARK: - External Video Data
 extension AgoraRTCEngineProxy {
     
+    /// 配置外部视频源
+    ///
+    /// 如果使用外部视频源，请在 AgoraRtcEngineKit.enableVideo 或 AgoraRtcEngineKit.startPreview 方法之前调用此方法
+    /// - Parameters:
+    ///   - enable: 是否使用外部视频源。默认false
+    ///   - useTexture: 是否使用 texture 作为输入
+    ///   - pushMode: 目前只能使用true。外部视频源是否需要调用 AgoraRtcEngineKit.pushExternalVideoFrame(_:) 发送视频帧到SDK
+    func setExternalVideoSource(_ enable: Bool, useTexture: Bool, pushMode: Bool) {
+        rtcEngineKit.setExternalVideoSource(enable, useTexture: useTexture, pushMode: pushMode)
+    }
+    
+    /// 推送外部视频帧
+    ///
+    /// 该方法使用AgoraVideoFrame类推送视频帧，并使用 format 参数将视频帧传递给SDK。调用 AgoraRtcEngineKit.setExternalVideoSource(_:useTexture:pushMode:) 方法，并将 pushMode 设置为 true。否则，调用此方法后将返回失败
+    ///
+    /// **注意：** 在通信配置文件下，此方法不支持推送 texture 视频帧
+    /// - Parameter frame: 包含SDK要推送的编码视频数据的视频帧
+    func pushExternalVideoFrame(_ frame: AgoraVideoFrame) -> Bool {
+        let result = rtcEngineKit.pushExternalVideoFrame(frame)
+        return result
+    }
 }
 
 
