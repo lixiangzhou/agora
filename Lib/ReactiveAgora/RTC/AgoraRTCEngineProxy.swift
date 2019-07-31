@@ -1617,6 +1617,52 @@ extension AgoraRTCEngineProxy {
 // MARK: - Stream Fallback
 extension AgoraRTCEngineProxy {
     
+    /// 设置远端用户流的优先级
+    ///
+    /// 将此方法与 AgoraRtcEngineKit.setRemoteSubscribeFallbackOption(_:) 方法一起使用。如果给远端流启用了回退函数，SDK将确保高优先级用户获得尽可能好的流质
+    ///
+    /// **注意：** SDK支持仅为一个用户将userPriority设置为高
+    /// - Parameters:
+    ///   - uid: 远端用户的UID
+    ///   - userPriority: 用户优先级
+    /// - Returns: 成功：0；失败：< 0
+    func setRemoteUserPriority(_ uid: UInt, type: AgoraUserPriority) -> Int32 {
+        let result = rtcEngineKit.setRemoteUserPriority(uid, type: type)
+        return result
+    }
+    
+    
+    /// 根据网络条件为本地发布的视频流设置回退选项
+    ///
+    /// option 的默认设置是 AgoraStreamFallbackOptions.disabled，当上行网络条件不可靠时，本地发布的视流没有回退行为
+    ///
+    /// 如果设置为 AgoraStreamFallbackOptions.audioOnly，SDK将：
+    /// - 当在网络条件恶化且不能同时支持视频和音频时才启用音频，禁用上游视频
+    /// - 当网络状况改善时，重新启用视频
+    ///
+    /// 当发布的视源流返回到audio-only或当audio-only流切换回视频时，SDK触发 AgoraRtcEngineDelegate.rtcEngine(_:didLocalPublishFallbackToAudioOnly:) 回调
+    ///
+    /// **注意：** Agora不推荐在CDN实时流媒体中使用此方法，因为当发布的视频流返回到audio-only时，远程CDN实时用户会有明显的延迟
+    /// - Parameter option: 默认 AgoraStreamFallbackOptions.disabled
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalPublishFallbackOption(_ option: AgoraStreamFallbackOptions) -> Int32 {
+        let result = rtcEngineKit.setLocalPublishFallbackOption(option)
+        return result
+    }
+    
+    /// 根据网络条件为远程订阅的视频流设置回退选项
+    ///
+    /// option 的默认设置是 AgoraStreamFallbackOptions.videoStreamLow，在不可靠的下行网络条件下，远端订阅的视频流回落到低流(低分辨率和低比特率)视频
+    ///
+    /// 如果将 option 设置为 AgoraStreamFallbackOptions.audioOnly，当下行网络条件不能同时支持音频和视频时，SDK会自动将视频从高流量切换到低流量，禁用视频，以保证音频的质量。SDK监控网络质量，并在网络条件改善时重新启用视频流
+    ///
+    /// 当订阅的远端视源流返回到audio-only或当audio-only流切换回视频时，SDK触发 AgoraRtcEngineDelegate.rtcEngine(_:didRemoteSubscribeFallbackToAudioOnly:byUid:) 回调
+    /// - Parameter option: 默认 AgoraStreamFallbackOptions.videoStreamLow
+    /// - Returns: 成功：0；失败：< 0
+    func setRemoteSubscribeFallbackOption(_ option: AgoraStreamFallbackOptions) -> Int32 {
+        let result = rtcEngineKit.setRemoteSubscribeFallbackOption(option)
+        return result
+    }
 }
 
 
