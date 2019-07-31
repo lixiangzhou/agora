@@ -1584,6 +1584,33 @@ extension AgoraRTCEngineProxy {
 // MARK: - Watermark
 extension AgoraRTCEngineProxy {
     
+    /// 向本地视频或CDN实时流添加水印图像
+    ///
+    /// 该方法将PNG水印添加到本地视频流中，以供记录设备、通道观众或CDN现场观众查看和捕获
+    ///
+    /// 要将PNG文件仅添加到CDN实时发布流，请参见 AgoraRtcEngineKit.setLiveTranscoding(_:) 方法
+    ///
+    /// **注意：**
+    /// - 本地视频和CDN直播流的URL描述不同：
+    ///     - 在本地视频流中，AgoraImage中的 url 指的是在本地视频流中添加的水印图像文件的绝对路径
+    ///     - 在CDN直播流中，AgoraImage中的 url 是指在CDN直播中添加水印图像的url地址
+    /// - 水印图像的源文件必须是PNG文件格式。如果PNG文件的宽度和高度与在此方法中的设置不同，则会裁剪PNG文件以符合设置
+    /// - SDK只支持在本地视频或CDN直播流中添加一个水印图像。新添加的水印图像替代了原来的水印图像
+    /// - 如果在 AgoraRtcEngineKit.setVideoEncoderConfiguration(_:) 方法中将 orientationMode 设置为 Adaptive，水印图像将随着视频帧旋转，并围绕水印图像的左上角旋转
+    /// - Parameter watermark: AgoraImage
+    /// - Returns: 成功：0；失败：< 0
+    func addVideoWatermark(_ watermark: AgoraImage) -> Int32 {
+        let result = rtcEngineKit.addVideoWatermark(watermark)
+        return result
+    }
+    
+    /// 移除 AgoraRtcEngineKit.addVideoWatermark(_:) 添加的水印
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func clearVideoWatermarks() -> Int32 {
+        let result = rtcEngineKit.clearVideoWatermarks()
+        return result
+    }
 }
 
 
