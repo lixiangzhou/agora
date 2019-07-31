@@ -1669,6 +1669,43 @@ extension AgoraRTCEngineProxy {
 // MARK: - Dual-stream Mode
 extension AgoraRTCEngineProxy {
     
+    /// 启用/禁用dual-stream模式（直播）
+    ///
+    /// 如果启用双流模式，接收端可以选择接收高流(高分辨率高比特率)或低流(低分辨率低比特率)视频
+    /// - Parameter enabled: 默认false
+    /// - Returns: 成功：0；失败：< 0
+    func enableDualStreamMode(_ enabled: Bool) -> Int32 {
+        let result = rtcEngineKit.enableDualStreamMode(enabled)
+        return result
+    }
+    
+    /// 远端用户发送双流时设置本地用户接收的远端用户的视频流类型
+    ///
+    /// 此方法允许app根据视频窗口的大小来调整相应的视频流类型，从而减少带宽和资源
+    ///
+    /// - 如果远端用户通过调用 AgoraRtcEngineKit.enableDualStreamMode(_:) 方法启用双流模式，SDK默认接收高流视频。您可以使用此方法切换到低流视频
+    /// - 如果不启用双流模式，SDK默认接收高流量视频
+    ///
+    /// 方法结果在 AgoraRtcEngineDelegate.rtcEngine(_:didApiCallExecute:api:result:)返回。SDK默认接收高流量视频，节省带宽。如果需要，用户可以使用这种方法切换到低流量视频
+    ///
+    /// 默认情况下，低流视频的纵横比与高流视频相同。一旦设置了高流量视频的分辨率，系统就会自动设置低流量视频的分辨率、帧速率和比特率
+    /// - Parameters:
+    ///   - uid: 发送视频流的远端用户ID
+    ///   - type: AgoraVideoStreamType
+    /// - Returns: 成功：0；失败：< 0
+    func setRemoteVideoStream(_ uid: UInt, type: AgoraVideoStreamType) -> Int32 {
+        let result = rtcEngineKit.setRemoteVideoStream(uid, type: type)
+        return result
+    }
+    
+    /// 远端用户发送双流时设置本地用户接收的视频的默认视频流类型
+    ///
+    /// - Parameter streamType: AgoraVideoStreamType
+    /// - Returns: 成功：0；失败：< 0
+    func setRemoteDefaultVideoStreamType(_ streamType: AgoraVideoStreamType) -> Int32 {
+        let result = rtcEngineKit.setRemoteDefaultVideoStreamType(streamType)
+        return result
+    }
 }
 
 
