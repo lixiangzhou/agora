@@ -1790,48 +1790,365 @@ extension AgoraRTCEngineProxy {
 // MARK: - CDN Live Streaming
 extension AgoraRTCEngineProxy {
     
+    /// 发布本地流到CDN
+    ///
+    /// 此方法会在本地触发 AgoraRtcEngineDelegate.rtcEngine(_:rtmpStreamingChangedToState:state:errorCode:) 报告添加本地流到CDN的状态
+    ///
+    /// **注意：**
+    /// - 此方法只适用于直播配置文件
+    /// - 确保用户在调用此方法之前加入频道
+    /// - 此方法每次调用只添加一个URL
+    /// - url必须不包含特殊字符，例如中文字符
+    /// - Parameters:
+    ///   - url: RTMP格式的CDN流URL。最大长度1024字节
+    ///   - transcodingEnabled: 是否开启双流
+    /// - Returns: 成功：0；失败：< 0 （AgoraErrorCodeInvalidArgument，AgoraErrorCodeNotInitialized）
+    func addPublishStreamUrl(_ url: String, transcodingEnabled: Bool) -> Int32 {
+        let result = rtcEngineKit.addPublishStreamUrl(url, transcodingEnabled: transcodingEnabled)
+        return result
+    }
+    
+    /// 移除CDN中的RTMP流
+    ///
+    /// 此方法会在本地触发 AgoraRtcEngineDelegate.rtcEngine(_:rtmpStreamingChangedToState:state:errorCode:) 报告从CDN移除RTMP本地流的状态
+    ///
+    /// **注意：**
+    /// - 此方法只适用于直播配置文件
+    /// - 此方法每次调用只移除一个URL
+    /// - url必须不包含特殊字符，例如中文字符
+    /// - Parameter url: RTMP格式的CDN流URL。最大长度1024字节
+    /// - Returns: 成功：0；失败：< 0
+    func removePublishStreamUrl(_ url: String) -> Int32 {
+        let result = rtcEngineKit.removePublishStreamUrl(url)
+        return result
+    }
+    
+    /// 设置视频布局和CDN直播的音频设置（只适用于CDN直播）
+    ///
+    /// **注意：** 此方法只适用于直播配置文件
+    /// - Returns: 成功：0；失败：< 0
+    func setLiveTranscoding(_ transcoding: AgoraLiveTranscoding?) -> Int32 {
+        let result = rtcEngineKit.setLiveTranscoding(transcoding)
+        return result
+    }
 }
 
 
 // MARK: - Data Stream
 extension AgoraRTCEngineProxy {
     
+    /// 创建数据流。
+    ///
+    /// 每个用户最多可以同时拥有五个数据通道
+    ///
+    /// **注意：** 同时设置 reliable 和 ordered 同时为 true 和 false，不要设置一个为true，一个为false
+    /// - Parameters:
+    ///   - reliable: 设置是否保证接收方在5秒内接收到发送方的数据流（true：接收方在5秒内接收到发送方的数据流。如果接收者在5秒内没有接收到数据流，就会向应用程序报告错误；false：不能保证收件人在五秒内收到数据流，也不能就任何延迟或丢失的数据流报告错误消息）
+    ///   - ordered: 设置接收方是否按发送顺序接收数据流（true：接收方按发送顺序接收数据流；false：接收方没有按发送顺序接收数据流）
+    /// - Returns: 成功：数据流的ID；失败：< 0
+    func createDataStream(_ streamId: UnsafeMutablePointer<Int>, reliable: Bool, ordered: Bool) -> Int32 {
+        let result = rtcEngineKit.createDataStream(streamId, reliable: reliable, ordered: ordered)
+        return result
+    }
+    
+    /// 向频道中的所有用户发送数据流消息
+    ///
+    /// SDK对此方法有如下限制：
+    /// - 每个通道每秒最多可发送30个数据包，每个数据包的最大大小为1kb
+    /// - 每个用户端每秒最多可发送6kb的数据
+    /// - 每个用户最多可以同时拥有5个数据流
+    ///
+    /// 成功的调用此方法会触发远端用户的 AgoraRtcEngineDelegate.rtcEngine(_:receiveStreamMessageFromUid:streamId:data:)
+    ///
+    /// 失败的调用此方法会触发远端用户的 AgoraRtcEngineDelegate.rtcEngine(_:didOccurStreamMessageErrorFromUid:streamId:error:missed:cached:)
+    ///
+    /// **注意：** 此方法仅适用于通信配置文件或直播配置文件中的主机。如果直播配置文件中的观众调用此方法，则可以将观众角色更改为主机
+    /// - Parameters:
+    ///   - streamId: AgoraRtcEngineKit.createDataStream(_:reliable:ordered:) 创建的流的ID
+    /// - Returns: 成功：0；失败：< 0
+    func sendStreamMessage(_ streamId: Int, data: Data) -> Int32 {
+        let result = rtcEngineKit.sendStreamMessage(streamId, data: data)
+        return result
+    }
 }
 
 
 // MARK: - Miscellaneous Video Control
 extension AgoraRTCEngineProxy {
     
+    /// 设置本地视频镜像模式
+    ///
+    /// 在调用AgoraRtcEngineKit.startPreview 方法之前使用此方法，否则除非重新启用AgoraRtcEngineKit.startPreview，不然镜像模式不会生效
+    /// - Returns: 成功：0；失败：< 0
+    func setLocalVideoMirrorMode(_ mode: AgoraVideoMirrorMode) -> Int32 {
+        let result = rtcEngineKit.setLocalVideoMirrorMode(mode)
+        return result
+    }
+    
+    /// 设置相机捕获首选项
+    ///
+    /// 对于视频通话或直播，SDK通常控制摄像机的输出参数。当默认相机捕捉设置不满足特殊要求或导致性能问题时，我们建议使用此方法设置相机捕捉首选项：
+    ///
+    /// - 如果捕获的原始视频数据的分辨率或帧速率高于(AgoraRtcEngineKit.setVideoEncoderConfiguration(_:)设置的分辨率或帧速率，则处理视频帧需要额外的CPU和RAM使用，并且会降低性能。我们建议将 configuration.preference 设置为 AgoraCameraCaptureOutputPreference.performance，以避免此类问题
+    /// - 如果您不需要本地视频预览或愿意牺牲预览质量，我们建议将configuration.preference 设置为 AgoraCameraCaptureOutputPreference.performance，以优化CPU和RAM的使用
+    /// - 如果您希望本地视频预览的质量更好，我们建议将 configuration.preference 设置为AgoraCameraCaptureOutputPreference.preview
+    ///
+    /// **注意：** 在启用本地摄像机之前调用此方法。也就是说，您可以在调用AgoraRtcEngineKit.joinChannel、AgoraRtcEngineKit.enableVideo或 AgoraRtcEngineKit.enableLocalVideo(_:)之前调用这个方法，这取决于使用哪个方法打开本地摄像机
+    /// - Returns: 成功：0；失败：< 0
+    func setCameraCapturerConfiguration(_ configuration: AgoraCameraCapturerConfiguration?) -> Int32 {
+        let result = rtcEngineKit.setCameraCapturerConfiguration(configuration)
+        return result
+    }
 }
 
 
 // MARK: - Camera Control
 extension AgoraRTCEngineProxy {
     
-}
-
-
-// MARK: - Screen Sharing
-extension AgoraRTCEngineProxy {
+    /// 切换前后摄像头
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func switchCamera() -> Int32 {
+        let result = rtcEngineKit.switchCamera()
+        return result
+    }
     
+    /// 检查相机是否支持缩放功能
+    ///
+    /// - Returns: true：支持；false：不支持
+    func isCameraZoomSupported() -> Bool {
+        let result = rtcEngineKit.isCameraZoomSupported()
+        return result
+    }
+    
+    /// 检查是否支持相机闪光灯功能
+    ///
+    /// **注意：** 该app通常默认启用前置摄像头。如果不支持前置摄像头的闪光灯，返回false。如果要检查是否支持后置照相机闪光灯，请在调用此方法之前调用AgoraRtcEngineKit.switchCamera方法
+    /// - Returns: true：支持；false：不支持
+    func isCameraTorchSupported() -> Bool {
+        let result = rtcEngineKit.isCameraTorchSupported()
+        return result
+    }
+    
+    /// 检查是否支持相机手动对焦功能
+    ///
+    /// - Returns: true：支持；false：不支持
+    func isCameraFocusPositionInPreviewSupported() -> Bool {
+        let result = rtcEngineKit.isCameraFocusPositionInPreviewSupported()
+        return result
+    }
+    
+    /// 检查是否支持相机手动曝光功能
+    ///
+    /// - Returns: true：支持；false：不支持
+    func isCameraExposurePositionSupported() -> Bool {
+        let result = rtcEngineKit.isCameraExposurePositionSupported()
+        return result
+    }
+    
+    /// 检查是否支持相机自动对焦功能
+    ///
+    /// - Returns: true：支持；false：不支持
+    func isCameraAutoFocusFaceModeSupported() -> Bool {
+        let result = rtcEngineKit.isCameraAutoFocusFaceModeSupported()
+        return result
+    }
+    
+    /// 设置相机的缩放比例
+    ///
+    /// - Parameter zoomFactor: 相机缩放因子。范围：1.0~相机支持的最大值
+    /// - Returns: 成功：设置的相机缩放因子；失败：< 0
+    func setCameraZoomFactor(_ zoomFactor: CGFloat) -> CGFloat {
+        let result = rtcEngineKit.setCameraZoomFactor(zoomFactor)
+        return result
+    }
+    
+    /// 设置手动对焦位置
+    ///
+    /// 成功的调用此方法会在本地触发 AgoraRtcEngineDelegate.rtcEngine(_:cameraFocusDidChangedTo:)
+    /// - Parameter position: 视图中触点的坐标
+    /// - Returns: true：成功；false：失败
+    func setCameraFocusPositionInPreview(_ position: CGPoint) -> Bool {
+        let result = rtcEngineKit.setCameraFocusPositionInPreview(position)
+        return result
+    }
+    
+    /// 设置相机曝光位置
+    ///
+    /// 成功的调用此方法会在本地触发 AgoraRtcEngineDelegate.rtcEngine(_:cameraExposureDidChangedTo:)
+    /// - Parameter position: 视图中触点的坐标
+    /// - Returns: true：成功；false：失败
+    func setCameraExposurePosition(_ position: CGPoint) -> Bool {
+        let result = rtcEngineKit.setCameraExposurePosition(position)
+        return result
+    }
+    
+    /// 开启相机闪光功能
+    ///
+    /// - Returns: true：成功；false：失败
+    func setCameraTorchOn(_ isOn: Bool) -> Bool {
+        let result = rtcEngineKit.setCameraTorchOn(isOn)
+        return result
+    }
+    
+    /// 是否启用相机自动对焦功能
+    ///
+    /// - Returns: true：成功；false：失败
+    func setCameraAutoFocusFaceModeEnabled(_ enable: Bool) -> Bool {
+        let result = rtcEngineKit.setCameraAutoFocusFaceModeEnabled(enable)
+        return result
+    }
 }
 
 
 // MARK: - Custom Media Metadata
 extension AgoraRTCEngineProxy {
     
+    /// 设置元数据的数据源
+    ///
+    /// 将此方法与 AgoraRtcEngineKit.setMediaMetadataDelegate(_:with:) 方法一起使用，在视频流中添加同步元数据。您可以创建更加多样化的直播交互，例如发送购物链接、数字优惠券和在线测试
+    ///
+    /// **注意：**
+    /// - 在 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 之前调用此方法
+    /// - 此方法只能用在直播配置文件中
+    /// - Parameters:
+    ///   - type: 目前只支持视频元数据
+    /// - Returns: true：成功；false：失败
+    func setMediaMetadataDataSource(_ metadataDataSource: AgoraMediaMetadataDataSource?, with type: AgoraMetadataType) -> Bool {
+        let result = rtcEngineKit.setMediaMetadataDataSource(metadataDataSource, with: type)
+        return result
+    }
+    
+    /// 设置元数据的代理
+    ///
+    /// **注意：**
+    /// - 在 AgoraRtcEngineKit.joinChannel(byToken:channelId:info:uid:joinSuccess:) 之前调用此方法
+    /// - 此方法只能用在直播配置文件中
+    /// - Parameters:
+    ///   - type: 目前只支持视频元数据
+    /// - Returns: true：成功；false：失败
+    func setMediaMetadataDelegate(_ metadataDelegate: AgoraMediaMetadataDelegate?, with type: AgoraMetadataType) -> Bool {
+        let result = rtcEngineKit.setMediaMetadataDelegate(metadataDelegate, with: type)
+        return result
+    }
 }
 
 
 // MARK: - Miscellaneous Methods
 extension AgoraRTCEngineProxy {
     
+    /// 获取当前的呼叫ID
+    ///
+    /// 当用户加入频道时，将生成一个 callId 来标识来自客户机的呼叫。反馈方法如 AgoraRtcEngineKit.rate(_:rating:description:) 和 AgoraRtcEngineKit.complain(_:description:)，必须在调用结束后调用，向SDK提交反馈
+    ///
+    /// AgoraRtcEngineKit.rate(_:rating:description:) 和 AgoraRtcEngineKit.complain(_:description:) 需要此方法获取callId
+    /// - Returns: 当前的呼叫ID
+    func getCallId() -> String? {
+        let result = rtcEngineKit.getCallId()
+        return result
+    }
+    
+    /// 允许用户在呼叫结束后对呼叫进行评级
+    ///
+    /// - Parameters:
+    ///   - callId: AgoraRtcEngineKit.getCallId 获取的callId
+    ///   - rating: 评分。范围：1~5。如果超出范围，会出现 AgoraErrorCode.invalidArgument 错误
+    ///   - description: 评分的描述，800字节内
+    /// - Returns: 成功：0；失败：< 0（AgoraErrorCode.invalidArgument，AgoraErrorCode.notReady）
+    func rate(_ callId: String, rating: Int, description: String?) -> Int32 {
+        let result = rtcEngineKit.rate(callId, rating: rating, description: description)
+        return result
+    }
+    
+    /// 允许用户在呼叫结束后抱怨呼叫质量
+    ///
+    /// - Parameters:
+    ///   - callId: AgoraRtcEngineKit.getCallId 获取的callId
+    ///   - description: 抱怨的描述，800字节内
+    /// - Returns: 成功：0；失败：< 0
+    func complain(_ callId: String, description: String?) -> Int32 {
+        let result = rtcEngineKit.complain(callId, description: description)
+        return result
+    }
+    
+    /// 启用/禁用向主队列分派委托的方法
+    ///
+    /// - Returns: 成功：0；失败：< 0
+    func enableMainQueueDispatch(_ enabled: Bool) -> Int32 {
+        let result = rtcEngineKit.enableMainQueueDispatch(enabled)
+        return result
+    }
+    
+    /// 获取SDK版本号
+    static func getSdkVersion() -> String {
+        let result = AgoraRtcEngineKit.getSdkVersion()
+        return result
+    }
+
+    /// 指定SDK输出日志文件
+    ///
+    /// 日志文件记录了SDK操作的所有日志数据。确保保存日志文件的目录存在并且是可写的
+    /// **注意：** ios 默认的日志输出目录：App Sandbox/Library/caches/agorasdk.log；确保此方法在 AgoraRtcEngineKit.sharedEngine(withAppId:delegate:) 后立即调用
+    /// - Parameter filePath: 日志文件的绝对路径。日志文件是utf-8的
+    /// - Returns: 成功：0；失败：< 0
+    func setLogFile(_ filePath: String) -> Int32 {
+        let result = rtcEngineKit.setLogFile(filePath)
+        return result
+    }
+    
+    /// 设置SDK的输出日志级别
+    ///
+    /// 可以使用一个或多个过滤器的组合。日志级别遵循OFF、CRITICAL、ERROR、WARNING、INFO和DEBUG的顺序。选择一个级别来查看该级别之前的日志
+    ///
+    /// - Parameter filter: AgoraLogFilter
+    /// - Returns: 成功：0；失败：< 0
+    func setLogFilter(_ filter: AgoraLogFilter) -> Int32 {
+        let result = rtcEngineKit.setLogFilter(filter.rawValue)
+        return result
+    }
+
+    /// 设置日志文件大小(KB)
+    ///
+    /// SDK有两个日志文件，每个文件的默认大小为512KB。如果您将fileSizeInBytes设置为1024KB， SDK输出的日志文件的总最大大小为2MB，如果日志文件的总大小超过了设置的值，新的输出日志文件将覆盖旧的输出日志文件
+    /// - Returns: 成功：0；失败：< 0
+    func setLogFileSize(_ fileSizeInKBytes: UInt) -> Int32 {
+        let result = rtcEngineKit.setLogFileSize(fileSizeInKBytes)
+        return result
+    }
+
+    /// 返回SDK引擎的本机处理程序
+    ///
+    /// 此接口用于获取用于特殊场景(如注册音频和视频帧观察者)的SDK引擎的本机CC++处理程序
+    func getNativeHandle() -> UnsafeMutableRawPointer? {
+        let result = rtcEngineKit.getNativeHandle()
+        return result
+    }
+
+    /// AgoraRtcEngineDelegate
+    var delegate: AgoraRtcEngineDelegate? {
+        set { rtcEngineKit.delegate = newValue }
+        get { return rtcEngineKit.delegate }
+    }
 }
 
 
 // MARK: - Customized Methods (Technical Preview)
 extension AgoraRTCEngineProxy {
     
+    /// 通过使用JSON选项配置SDK，提供技术预览功能或特殊定制
+    ///
+    /// - Parameter options: JSON格式的SDK选项
+    /// - Returns: 成功：0；失败：< 0
+    func setParameters(_ options: String) -> Int32 {
+        let result = rtcEngineKit.setParameters(options)
+        return result
+    }
+    
+    /// 获取SDK的参数以进行定制
+    func getParameter(_ parameter: String, args: String?) -> String? {
+        let result = rtcEngineKit.getParameter(parameter, args: args)
+        return result
+    }
 }
 
 
