@@ -1752,6 +1752,38 @@ extension AgoraRTCEngineProxy {
 // MARK: - Inject an Online Media Stream
 extension AgoraRTCEngineProxy {
     
+    /// 将语音或视频流RTMP URL地址添加到直播
+    ///
+    /// AgoraRtcEngineDelegate.rtcEngine(_:streamPublishedWithUrl:errorCode:) 会返回注入流的状态
+    ///
+    /// 如果此方法调用成功，服务器将提取语音或视频流并将其注入到一个实时频道中。这适用于频道中所有观众都可以观看现场表演并相互互动的场景
+    ///
+    /// 此方法会触发：
+    /// - 本地用户
+    ///     - AgoraRtcEngineDelegate.rtcEngine(_:streamInjectedStatusOfUrl:uid:status:)
+    ///     - 如果此方法调用成功并且在线媒体流注入到了频道中时，AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:) 【uid:666】
+    /// - 远端用户
+    ///     - 如果此方法调用成功并且在线媒体流注入到了频道中时，AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:) 【uid:666】
+    ///
+    /// **注意：** 在调用此方法之前，联系 sales@agora.io 启用CDN流函数
+    /// - Parameters:
+    ///   - url: 要添加的URL。有效的协议是RTMP、HLS、FLV（支持的flv 音频编码类型：aac；支持的flv 视频编码类型：h264(avc)）
+    ///   - config: AgoraLiveInjectStreamConfig
+    /// - Returns: 成功：0；失败：< 0 （AgoraErrorCodeInvalidArgument，AgoraErrorCodeNotReady，AgoraErrorCodeNotSupported，AgoraErrorCodeNotInitialized）
+    func addInjectStreamUrl(_ url: String, config: AgoraLiveInjectStreamConfig) -> Int32 {
+        let result = rtcEngineKit.addInjectStreamUrl(url, config: config)
+        return result
+    }
+    
+    
+    /// 移除直播中的声音或视频流 RTMP URL
+    ///
+    /// 成功的调用此方法会触发 AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:) 【uid:666】
+    /// - Returns: 成功：0；失败：< 0
+    func removeInjectStreamUrl(_ url: String) -> Int32 {
+        let result = rtcEngineKit.removeInjectStreamUrl(url)
+        return result
+    }
 }
 
 
