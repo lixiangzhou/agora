@@ -29,6 +29,23 @@ class AgoraRTCEngineProxy: NSObject {
     // ------------------------------------------------------------------------------------
     // MARK: - Method CallBack Signal
     
+    // MARK: - Core Service Methods Signal
+    
+    /// 用户加入频道方法 信号量
+    ///
+    /// func joinChannel(byToken: String?, channelId: String, info: String?, uid: UInt, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32
+    let (joinChannelByTokenSignal, joinChannelByTokenObserver) = Signal<((String?, String, String?, UInt), (String, UInt, Int)), Never>.pipe()
+    
+    /// 用户加入频道方法 信号量
+    ///
+    /// func joinChannel(byUserAccount: String, token: String?, channelId: String, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32
+    let (joinChannelByAccountSignal, joinChannelByAccountObserver) = Signal<((String, String?, String), (String, UInt, Int)), Never>.pipe()
+
+    /// 用户离开频道
+    ///
+    /// func leaveChannel(_ leaveChannelBlock: ((AgoraChannelStats) -> Void)?) -> Int32
+    let (leaveChannelSignal, leaveChannelObserver) = Signal<AgoraChannelStats, Never>.pipe()
+    
     
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
@@ -380,7 +397,7 @@ class AgoraRTCEngineProxy: NSObject {
 extension AgoraRTCEngineProxy {
     
     /// 销毁RtcEngine实例，并释放SDK使用的所有资源。该方法对于偶尔进行视频、语音通话很有用，可以在不通话时为其他操作释放资源。一旦调用该方法，该实例的所有回调和代理都不会被调用。为了再次重启通信，调用 AgoraRtcEngineKit.sharedEngine(withAppId:delegate:) 创建一个新的AgoraRtcEngineKit实例。**注意：在子线程调用改方法；该方法是同步的，不能在该SDK的回调中调用，否则会造成死锁**
-    func destroy() {
+    @objc func destroy() {
         AgoraRtcEngineKit.destroy()
     }
     
@@ -397,7 +414,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter profile: 频道配置文件
     /// - Returns: 成功：0；失败：< 0
-    func setChannelProfile(_ profile: AgoraChannelProfile) -> Int {
+    @discardableResult
+    @objc func setChannelProfile(_ profile: AgoraChannelProfile) -> Int {
         let result = rtcEngineKit.setChannelProfile(profile)
         return Int(result)
     }
@@ -410,7 +428,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter role: 用户的角色
     /// - Returns: 成功：0；失败：< 0
-    func setClientRole(_ role: AgoraClientRole) -> Int {
+    @discardableResult
+    @objc func setClientRole(_ role: AgoraClientRole) -> Int {
         let result = rtcEngineKit.setClientRole(role)
         return Int(result)
     }
@@ -442,9 +461,11 @@ extension AgoraRTCEngineProxy {
     ///   - uid: 一个32位无符号整数，其值从1到 2^32 - 1。 uid 必须是惟一的。如果没有分配 uid (或设置为0)，SDK将在 joinSuccessBlock中分配并返回一个 uid。您的应用程序必须记录并维护返回的 uid，因为SDK不这样做。
     ///   - joinSuccess: 成功加入频道的回调。同 AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)
     /// - Returns: 成功：0；失败：< 0
-    func joinChannel(byToken: String?, channelId: String, info: String?, uid: UInt, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32 {
-        let result = rtcEngineKit.joinChannel(byToken: byToken, channelId: channelId, info: info, uid: uid) { (channel, uid, elapsed) in
-            
+    @discardableResult
+    @objc func joinChannel(byToken: String?, channelId: String, info: String?, uid: UInt, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32 {
+        let result = rtcEngineKit.joinChannel(byToken: byToken, channelId: channelId, info: info, uid: uid) { [weak self] (channel, uid2, elapsed) in
+            joinSuccess?(channel, uid, elapsed)
+            self?.joinChannelByTokenObserver.send(value: ((byToken, channelId, info, uid), (channelId, uid2, elapsed)))
         }
         return result
     }
@@ -462,9 +483,11 @@ extension AgoraRTCEngineProxy {
     ///   - channelId: 频道的名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
     ///   - joinSuccess: 成功加入频道的回调。同 AgoraRtcEngineDelegate.rtcEngine(_:didJoinChannel:withUid:elapsed:)
     /// - Returns: 成功：0；失败：< 0
-    func joinChannel(byUserAccount: String, token: String?, channelId: String, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32 {
-        let result = rtcEngineKit.joinChannel(byUserAccount: byUserAccount, token: token, channelId: channelId) { (channel, uid, elasped) in
-            
+    @discardableResult
+    @objc func joinChannel(byUserAccount: String, token: String?, channelId: String, joinSuccess: ((String, UInt, Int) -> Void)?) -> Int32 {
+        let result = rtcEngineKit.joinChannel(byUserAccount: byUserAccount, token: token, channelId: channelId) { [weak self] (channel, uid, elapsed) in
+            joinSuccess?(channel, uid, elapsed)
+            self?.joinChannelByAccountObserver.send(value: ((byUserAccount, token, channelId), (channelId, uid, elapsed)))
         }
         return result
     }
@@ -481,7 +504,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - userAccount: 用户账号。最大长度是256字节。确保设置了该参数，而没有将其设置为null。可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
     /// - Returns: 成功：0；失败：< 0
-    func registerLocalUserAccount(_ userAccount: String, appId: String) -> Int32 {
+    @discardableResult
+    @objc func registerLocalUserAccount(_ userAccount: String, appId: String) -> Int32 {
         let result = rtcEngineKit.registerLocalUserAccount(userAccount, appId: appId)
         return result
     }
@@ -491,7 +515,7 @@ extension AgoraRTCEngineProxy {
     /// 远端用户连接频道后，SDK获取远端用户的UID和用户帐户，缓存在映射表缓存对象(“AgoraUserInfo”)中，并触发 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:)回调
     ///
     /// 在接收到 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:) 回调之后，您可以调用这个方法，通过传入用户帐户来从'userInfo'对象获取远端用户的UID
-    func getUserInfo(byUserAccount: String, withError: UnsafeMutablePointer<AgoraErrorCode>?) -> AgoraUserInfo? {
+    @objc func getUserInfo(byUserAccount: String, withError: UnsafeMutablePointer<AgoraErrorCode>?) -> AgoraUserInfo? {
         let userInfo = rtcEngineKit.getUserInfo(byUserAccount: byUserAccount, withError: withError)
         return userInfo
     }
@@ -501,7 +525,7 @@ extension AgoraRTCEngineProxy {
     /// 远端用户连接频道后，SDK获取远端用户的UID和用户帐户，缓存在映射表缓存对象(“AgoraUserInfo”)中，并触发 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:)回调
     ///
     /// 在接收到 AgoraRtcEngineDelegate.rtcEngine(_:didUpdatedUserInfo:withUid:) 回调之后，您可以调用这个方法，通过传入UID来从'userInfo'对象获取远端用户的用户账户
-    func getUserInfo(byUid: UInt, withError: UnsafeMutablePointer<AgoraErrorCode>?) -> AgoraUserInfo? {
+    @objc func getUserInfo(byUid: UInt, withError: UnsafeMutablePointer<AgoraErrorCode>?) -> AgoraUserInfo? {
         let userInfo = rtcEngineKit.getUserInfo(byUid: byUid, withError: withError)
         return userInfo
     }
@@ -523,9 +547,10 @@ extension AgoraRTCEngineProxy {
     /// - 如果在CDN直播调用此方法，SDK会触发 AgoraRtcEngineKit.removePublishStreamUrl(_:)
     /// - 当调用此方法时，SDK默认情况下会关闭iOS上的音频会话，并可能影响其他应用程序。如果你不想要这种默认行为,使用 AgoraRtcEngineKit.setAudioSessionOperationRestriction(_:) 设置 为 AgoraAudioSessionOperationRestriction.deactivateSession，所以当你调用 AgoraRtcEngineKit.leaveChannel(_:)方法，SDK不停用音频会话
     /// - Returns: 成功：0；失败：< 0
-    func leaveChannel(_ leaveChannelBlock: ((AgoraChannelStats) -> Void)?) -> Int32 {
+    @discardableResult
+    @objc func leaveChannel(_ leaveChannelBlock: ((AgoraChannelStats) -> Void)?) -> Int32 {
         let result = rtcEngineKit.leaveChannel { (stats) in
-            
+            leaveChannelBlock?(stats)
         }
         return result
     }
@@ -538,7 +563,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 推荐使用 AgoraRtcEngineDelegate.rtcEngineRequestToken(_:)，而不是 AgoraRtcEngineDelegate.rtcEngine(_:didOccurError:)
     /// - Returns: 成功：0；失败：< 0
-    func renewToken(_ token: String) -> Int32 {
+    @discardableResult
+    @objc func renewToken(_ token: String) -> Int32 {
         let result = rtcEngineKit.renewToken(token)
         return result
     }
@@ -548,13 +574,14 @@ extension AgoraRTCEngineProxy {
     ///
     /// 此方法只适用于直播配置文件。通讯配置文件下，默认是与Agora Web SDK有互操作性
     /// - Returns: 成功：0；失败：< 0
-    func enableWebSdkInteroperability(_ enabled: Bool) -> Int32 {
+    @discardableResult
+    @objc func enableWebSdkInteroperability(_ enabled: Bool) -> Int32 {
         let result = rtcEngineKit.enableWebSdkInteroperability(enabled)
         return result
     }
     
     /// 获取app的连接状态
-    func getConnectionState() -> AgoraConnectionStateType {
+    @objc func getConnectionState() -> AgoraConnectionStateType {
         let result = rtcEngineKit.getConnectionState()
         return result
     }
@@ -576,7 +603,8 @@ extension AgoraRTCEngineProxy {
     ///     - AgoraRtcEngineKit.muteRemoteAudioStream(_:mute:)：是否订阅并播放远端音频流
     ///     - AgoraRtcEngineKit.muteAllRemoteAudioStreams(_:)：是否订阅并播放所有的远端音频流
     /// - Returns: 成功：0；失败：< 0
-    func enableAudio() -> Int32 {
+    @discardableResult
+    @objc func enableAudio() -> Int32 {
         let result = rtcEngineKit.enableAudio()
         return result
     }
@@ -591,7 +619,8 @@ extension AgoraRTCEngineProxy {
     ///     - AgoraRtcEngineKit.muteRemoteAudioStream(_:mute:)：是否订阅并播放远端音频流
     ///     - AgoraRtcEngineKit.muteAllRemoteAudioStreams(_:)：是否订阅并播放所有的远端音频流
     /// - Returns: 成功：0；失败：< 0
-    func disableAudio() -> Int32 {
+    @discardableResult
+    @objc func disableAudio() -> Int32 {
         let result = rtcEngineKit.disableAudio()
         return result
     }
@@ -608,7 +637,8 @@ extension AgoraRTCEngineProxy {
     ///   - profile: 设置采样速率、比特率、编码模式和通道数。查看 AgoraAudioProfile
     ///   - scenario: 设置音频应用程序场景。查看 AgoraAudioScenario。在不同的音频场景下，设备使用不同的音量轨道，即呼叫内音量或媒体音量。有关详细信息，请参见(https://docs.agora.io/en/Agora%20Platform/audio_how_to#audioscenario)
     /// - Returns: 成功：0；失败：< 0
-    func setAudioProfile(profile: AgoraAudioProfile, scenario: AgoraAudioScenario) -> Int32 {
+    @discardableResult
+    @objc func setAudioProfile(profile: AgoraAudioProfile, scenario: AgoraAudioScenario) -> Int32 {
         let result = rtcEngineKit.setAudioProfile(profile, scenario: scenario)
         return result
     }
@@ -617,7 +647,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter volume: 录音音量。（范围是：0~4001。0：静音；100：原始音量；400：最大声，四倍的原始音量与信号剪辑保护）
     /// - Returns: 成功：0；失败：< 0
-    func adjustRecordingSignalVolume(_ volume: Int) -> Int32 {
+    @discardableResult
+    @objc func adjustRecordingSignalVolume(_ volume: Int) -> Int32 {
         let result = rtcEngineKit.adjustRecordingSignalVolume(volume)
         return result
     }
@@ -626,7 +657,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter volume: 播放音量。（范围是：0~4001。0：静音；100：原始音量；400：最大声，四倍的原始音量与信号剪辑保护）
     /// - Returns: 成功：0；失败：< 0
-    func adjustPlaybackSignalVolume(_ volume: Int) -> Int32 {
+    @discardableResult
+    @objc func adjustPlaybackSignalVolume(_ volume: Int) -> Int32 {
         let result = rtcEngineKit.adjustPlaybackSignalVolume(volume)
         return result
     }
@@ -637,7 +669,8 @@ extension AgoraRTCEngineProxy {
     ///   - interval: 设置两个连续音量指示之间的时间间隔（<0：禁用音量指示；>0：两个连续的音量指示之间的时间间隔(ms)。Agora建议设置 interval≥200 ms。一旦启用了这个方法，SDK返回体积指标的设置时间间隔AgoraRtcEngineDelegate.rtcEngine(_:reportAudioVolumeIndicationOfSpeakers:totalVolume:)回调，无论哪个用户在频道说话）
     ///   - smooth: 平滑因子设置音频音量指示器的灵敏度。值的范围在0到10之间。值越大，表示指标越敏感。推荐值为3
     /// - Returns: 成功：0；失败：< 0
-    func enableAudioVolumeIndication(_ interval: Int, smooth: Int) -> Int32 {
+    @discardableResult
+    @objc func enableAudioVolumeIndication(_ interval: Int, smooth: Int) -> Int32 {
         let result = rtcEngineKit.enableAudioVolumeIndication(interval, smooth: smooth)
         return result
     }
@@ -655,7 +688,8 @@ extension AgoraRTCEngineProxy {
     /// - AgoraRtcEngineKit.enableLocalAudio(_:)：禁止/重启本地音频捕获和处理
     /// - AgoraRtcEngineKit.muteLocalAudioStream(_:)：发送/停止发送本地音频流
     /// - Returns: 成功：0；失败：< 0
-    func enableLocalAudio(_ enabled: Bool) -> Int32 {
+    @discardableResult
+    @objc func enableLocalAudio(_ enabled: Bool) -> Int32 {
         let result = rtcEngineKit.enableLocalAudio(enabled)
         return result
     }
@@ -667,7 +701,8 @@ extension AgoraRTCEngineProxy {
     /// **注意：** 当mute = true时，此方法不会禁用麦克风，因此不会影响任何正在进行的录制。
     /// - Parameter mute: 是否静音。默认false
     /// - Returns: 成功：0；失败：< 0
-    func muteLocalAudioStream(_ mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func muteLocalAudioStream(_ mute: Bool) -> Int32 {
         let result = rtcEngineKit.muteLocalAudioStream(mute)
         return result
     }
@@ -679,7 +714,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - mute: 设置是否接收/停止接收指定远程用户的音频流。默认为false
     /// - Returns: 成功：0；失败：< 0
-    func muteRemoteAudioStream(_ uid: UInt, mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func muteRemoteAudioStream(_ uid: UInt, mute: Bool) -> Int32 {
         let result = rtcEngineKit.muteRemoteAudioStream(uid, mute: mute)
         return result
     }
@@ -688,7 +724,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter mute: 设置是否接收/停止接收所有远端用户的音频流。默认为false
     /// - Returns: 成功：0；失败：< 0
-    func muteAllRemoteAudioStreams(_ mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func muteAllRemoteAudioStreams(_ mute: Bool) -> Int32 {
         let result = rtcEngineKit.muteAllRemoteAudioStreams(mute)
         return result
     }
@@ -699,7 +736,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter mute: 默认是否接受所有的远端音频流。默认为false
     /// - Returns: 成功：0；失败：< 0
-    func setDefaultMuteAllRemoteAudioStreams(_ mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func setDefaultMuteAllRemoteAudioStreams(_ mute: Bool) -> Int32 {
         let result = rtcEngineKit.setDefaultMuteAllRemoteAudioStreams(mute)
         return result
     }
@@ -723,7 +761,8 @@ extension AgoraRTCEngineProxy {
     ///     - AgoraRtcEngineKit.muteRemoteVideoStream(_:mute:)：是否订阅并播放远端视频流
     ///     - AgoraRtcEngineKit.muteAllRemoteVideoStreams(_:)：是否订阅并播放所有的远端视频流
     /// - Returns: 成功：0；失败：< 0
-    func enableVideo() -> Int32 {
+    @discardableResult
+    @objc func enableVideo() -> Int32 {
         let result = rtcEngineKit.enableVideo()
         return result
     }
@@ -742,7 +781,8 @@ extension AgoraRTCEngineProxy {
     ///     - AgoraRtcEngineKit.muteRemoteVideoStream(_:mute:)：是否订阅并播放远端视频流
     ///     - AgoraRtcEngineKit.muteAllRemoteVideoStreams(_:)：是否订阅并播放所有的远端视频流
     /// - Returns: 成功：0；失败：< 0
-    func disableVideo() -> Int32 {
+    @discardableResult
+    @objc func disableVideo() -> Int32 {
         let result = rtcEngineKit.disableVideo()
         return result
     }
@@ -755,7 +795,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// 如果在加入通道后不需要设置视频编码器配置，可以在调用enableVideo方法之前调用此方法，以减少第一个视频帧的呈现时间
     /// - Returns: 成功：0；失败：< 0
-    func setVideoEncoderConfiguration(_ config: AgoraVideoEncoderConfiguration) -> Int32 {
+    @discardableResult
+    @objc func setVideoEncoderConfiguration(_ config: AgoraVideoEncoderConfiguration) -> Int32 {
         let result = rtcEngineKit.setVideoEncoderConfiguration(config)
         return result
     }
@@ -764,7 +805,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// app 调用此方法绑定本地视频流的每个视频窗口(视图)并配置视频显示设置。在初始化后调用此方法，以在进入频道之前配置本地视频显示设置。在用户离开频道后绑定仍然有效，这意味着窗口仍然显示。要解除绑定视图，请将AgoraRtcVideoCanvas中的 view 设置为nil
     /// - Returns: 成功：0；失败：< 0
-    func setupLocalVideo(_ local: AgoraRtcVideoCanvas) -> Int32 {
+    @discardableResult
+    @objc func setupLocalVideo(_ local: AgoraRtcVideoCanvas) -> Int32 {
         let result = rtcEngineKit.setupLocalVideo(local)
         return result
     }
@@ -781,7 +823,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// 要将远端用户从视图中解绑定，请将AgoraRtcVideoCanvas中的 view 设置为nil。一旦远端用户离开频道，SDK就会释放远程用户
     /// - Returns: 成功：0；失败：< 0
-    func setupRemoteVideo(_ remote: AgoraRtcVideoCanvas) -> Int32 {
+    @discardableResult
+    @objc func setupRemoteVideo(_ remote: AgoraRtcVideoCanvas) -> Int32 {
         let result = rtcEngineKit.setupRemoteVideo(remote)
         return result
     }
@@ -790,7 +833,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// 在调用期间可以多次调用此方法来更改显示模式
     /// - Returns: 成功：0；失败：< 0
-    func setLocalRenderMode(_ mode: AgoraVideoRenderMode) -> Int32 {
+    @discardableResult
+    @objc func setLocalRenderMode(_ mode: AgoraVideoRenderMode) -> Int32 {
         let result = rtcEngineKit.setLocalRenderMode(mode)
         return result
     }
@@ -801,7 +845,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///     - uid: 远端用户的UID
     /// - Returns: 成功：0；失败：< 0
-    func setRemoteRenderMode(_ uid: UInt, _ mode: AgoraVideoRenderMode) -> Int32 {
+    @discardableResult
+    @objc func setRemoteRenderMode(_ uid: UInt, _ mode: AgoraVideoRenderMode) -> Int32 {
         let result = rtcEngineKit.setRemoteRenderMode(uid, mode: mode)
         return result
     }
@@ -816,7 +861,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 一旦调用此方法来启动本地视频预览，如果通过调用 AgoraRtcEngineKit.leaveChannel(_:) 方法离开频道，本地视频预览将一直保留，直到您调用 AgoraRtcEngineKit.stopPreview 方法来禁用它
     /// - Returns: 成功：0；失败：< 0
-    func startPreview() -> Int32 {
+    @discardableResult
+    @objc func startPreview() -> Int32 {
         let result = rtcEngineKit.startPreview()
         return result
     }
@@ -824,7 +870,8 @@ extension AgoraRTCEngineProxy {
     /// 停止本地视频预览和视频
     ///
     /// - Returns: 成功：0；失败：< 0
-    func stopPreview() -> Int32 {
+    @discardableResult
+    @objc func stopPreview() -> Int32 {
         let result = rtcEngineKit.stopPreview()
         return result
     }
@@ -841,7 +888,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 该方法启用内部引擎，并且可以在调用 AgoraRtcEngineKit.leaveChannel(_:) 方法后调用
     /// - Returns: 成功：0；失败：< 0
-    func enableLocalVideo(_ enabled: Bool) -> Int32 {
+    @discardableResult
+    @objc func enableLocalVideo(_ enabled: Bool) -> Int32 {
         let result = rtcEngineKit.enableLocalVideo(enabled)
         return result
     }
@@ -852,7 +900,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// 成功的调用此方法会触发远端机的 AgoraRtcEngineDelegate.rtcEngine(_:didVideoMuted:byUid:) 回调
     /// - Returns: 成功：0；失败：< 0
-    func muteLocalVideoStream(_ mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func muteLocalVideoStream(_ mute: Bool) -> Int32 {
         let result = rtcEngineKit.muteLocalVideoStream(mute)
         return result
     }
@@ -860,7 +909,8 @@ extension AgoraRTCEngineProxy {
     /// 接收/停止接收所有远端视频流
     ///
     /// - Returns: 成功：0；失败：< 0
-    func muteAllRemoteVideoStreams(_ mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func muteAllRemoteVideoStreams(_ mute: Bool) -> Int32 {
         let result = rtcEngineKit.muteAllRemoteVideoStreams(mute)
         return result
     }
@@ -871,7 +921,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - uid: 特定远端用户的UID
     /// - Returns: 成功：0；失败：< 0
-    func muteRemoteVideoStream(_ uid: UInt, _ mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func muteRemoteVideoStream(_ uid: UInt, _ mute: Bool) -> Int32 {
         let result = rtcEngineKit.muteRemoteVideoStream(uid, mute: mute)
         return result
     }
@@ -879,7 +930,8 @@ extension AgoraRTCEngineProxy {
     /// 设置是否默认接收所有远程视频流。默认false
     ///
     /// - Returns: 成功：0；失败：< 0
-    func setDefaultMuteAllRemoteVideoStreams(_ mute: Bool) -> Int32 {
+    @discardableResult
+    @objc func setDefaultMuteAllRemoteVideoStreams(_ mute: Bool) -> Int32 {
         let result = rtcEngineKit.setDefaultMuteAllRemoteVideoStreams(mute)
         return result
     }
@@ -892,12 +944,14 @@ extension AgoraRTCEngineProxy {
     /// 启用/禁用图像增强并设置选项
     ///
     /// - Returns: 成功：0；失败：< 0
-    func setBeautyEffectOptions(_ enable: Bool, options: AgoraBeautyOptions?) -> Int32 {
+    @discardableResult
+    @objc func setBeautyEffectOptions(_ enable: Bool, options: AgoraBeautyOptions?) -> Int32 {
         let result = rtcEngineKit.setBeautyEffectOptions(enable, options: options)
         return result
     }
     
-    func enableRemoteSuperResolution(_ uid: UInt, _ enabled: Bool) -> Int32 {
+    @discardableResult
+    @objc func enableRemoteSuperResolution(_ uid: UInt, _ enabled: Bool) -> Int32 {
         let result = rtcEngineKit.enableRemoteSuperResolution(uid, enabled: enabled)
         return result
     }
@@ -922,7 +976,8 @@ extension AgoraRTCEngineProxy {
     /// 游戏语音：扬声器
     /// - Parameter defaultToSpeaker: 设置默认的音频路由（true：扬声器；false：耳机）
     /// - Returns: 成功：0；失败：< 0
-    func setDefaultAudioRouteToSpeakerphone(_ defaultToSpeaker: Bool) -> Int32 {
+    @discardableResult
+    @objc func setDefaultAudioRouteToSpeakerphone(_ defaultToSpeaker: Bool) -> Int32 {
         let result = rtcEngineKit.setDefaultAudioRouteToSpeakerphone(defaultToSpeaker)
         return result
     }
@@ -936,13 +991,15 @@ extension AgoraRTCEngineProxy {
     /// - SDK调用 AVAudioSession.setCategory(_:) 设置 AVAudioSession.Category.playAndRecord，带有配置耳机/扬声器的选项，因此此方法适用于系统中的所有音频播放
     /// - Parameter enableSpeaker: true：路由到扬声器；false：路由到耳机
     /// - Returns: 成功：0；失败：< 0
-    func setEnableSpeakerphone(_ enableSpeaker: Bool) -> Int32 {
+    @discardableResult
+    @objc func setEnableSpeakerphone(_ enableSpeaker: Bool) -> Int32 {
         let result = rtcEngineKit.setEnableSpeakerphone(enableSpeaker)
         return result
     }
     
     /// 检查扬声器是否开启
-    func isSpeakerphoneEnabled() -> Bool {
+    @discardableResult
+    @objc func isSpeakerphoneEnabled() -> Bool {
         let result = rtcEngineKit.isSpeakerphoneEnabled()
         return result
     }
@@ -956,7 +1013,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter inEarMonitoring: 默认false
     /// - Returns: 成功：0；失败：< 0
-    func enable(inEarMonitoring: Bool) -> Int32 {
+    @discardableResult
+    @objc func enable(inEarMonitoring: Bool) -> Int32 {
         let result = rtcEngineKit.enable(inEarMonitoring: inEarMonitoring)
         return result
     }
@@ -965,7 +1023,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter volume: 耳内音量。范围是：0~100
     /// - Returns: 成功：0；失败：< 0
-    func setInEarMonitoringVolume(_ volume: Int) -> Int32 {
+    @discardableResult
+    @objc func setInEarMonitoringVolume(_ volume: Int) -> Int32 {
         let result = rtcEngineKit.setInEarMonitoringVolume(volume)
         return result
     }
@@ -979,7 +1038,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter pitch: 设置音高。范围：0.5~2.0。默认是1.0
     /// - Returns: 成功：0；失败：< 0
-    func setLocalVoicePitch(_ pitch: Double) -> Int32 {
+    @discardableResult
+    @objc func setLocalVoicePitch(_ pitch: Double) -> Int32 {
         let result = rtcEngineKit.setLocalVoicePitch(pitch)
         return result
     }
@@ -990,7 +1050,8 @@ extension AgoraRTCEngineProxy {
     ///   - bandFrequency: 设置频带频率。范围：0~9，表示声音效果的各自10波段中心频率，包括31、62、125、500、1k、2k、4k、8k和16k Hz
     ///   - withGain: 设置每个波段的增益(dB)。范围：-15~15。默认是0
     /// - Returns: 成功：0；失败：< 0
-    func setLocalVoiceEqualizationOf(_ bandFrequency: AgoraAudioEqualizationBandFrequency, withGain: Int) -> Int32 {
+    @discardableResult
+    @objc func setLocalVoiceEqualizationOf(_ bandFrequency: AgoraAudioEqualizationBandFrequency, withGain: Int) -> Int32 {
         let result = rtcEngineKit.setLocalVoiceEqualizationOf(bandFrequency, withGain: withGain)
         return result
     }
@@ -1002,7 +1063,8 @@ extension AgoraRTCEngineProxy {
     ///   - reverbType: 设置音效类型
     ///   - withValue: 音效类型的值。查看 AgoraAudioReverbType
     /// - Returns: 成功：0；失败：< 0
-    func setLocalVoiceReverbOf(_ reverbType: AgoraAudioReverbType, withValue: Int) -> Int32 {
+    @discardableResult
+    @objc func setLocalVoiceReverbOf(_ reverbType: AgoraAudioReverbType, withValue: Int) -> Int32 {
         let result = rtcEngineKit.setLocalVoiceReverbOf(reverbType, withValue: withValue)
         return result
     }
@@ -1011,7 +1073,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 不要与 AgoraRtcEngineKit.setLocalVoiceReverbPreset(_:) 一起使用，否则前面调用的方法不生效
     /// - Returns: 成功：0；失败：< 0
-    func setLocalVoiceChanger(_ voiceChanger: AgoraAudioVoiceChanger) -> Int32 {
+    @discardableResult
+    @objc func setLocalVoiceChanger(_ voiceChanger: AgoraAudioVoiceChanger) -> Int32 {
         let result = rtcEngineKit.setLocalVoiceChanger(voiceChanger)
         return result
     }
@@ -1023,7 +1086,8 @@ extension AgoraRTCEngineProxy {
     /// - 不要与 AgoraRtcEngineKit.setLocalVoiceChanger(_:) 一起使用，否则前面调用的方法不生效
     /// - Parameter reverbPreset: 本地声音混响选项
     /// - Returns: 成功：0；失败：< 0
-    func setLocalVoiceReverbPreset(_ reverbPreset: AgoraAudioReverbPreset) -> Int32 {
+    @discardableResult
+    @objc func setLocalVoiceReverbPreset(_ reverbPreset: AgoraAudioReverbPreset) -> Int32 {
         let result = rtcEngineKit.setLocalVoiceReverbPreset(reverbPreset)
         return result
     }
@@ -1033,7 +1097,8 @@ extension AgoraRTCEngineProxy {
     /// 如果需要使用 AgoraRtcEngineKit.setRemoteVoicePosition(_:pan:gain:)，请确保在加入频道之前调用该方法，以便为远端用户启用立体平移
     /// - Parameter enabled: 是否为远程用户启用立体平移
     /// - Returns: 成功：0；失败：< 0
-    func enableSoundPositionIndication(_ enabled: Bool) -> Int32 {
+    @discardableResult
+    @objc func enableSoundPositionIndication(_ enabled: Bool) -> Int32 {
         let result = rtcEngineKit.enableSoundPositionIndication(enabled)
         return result
     }
@@ -1048,7 +1113,8 @@ extension AgoraRTCEngineProxy {
     ///   - pan: 远端用户的声音位置。范围：-1.0~1.0（0.0：默认，远处的声音来自前方；-1.0：远处的声音来自左边；1.0：远处的声音来自右边）
     ///   - gain: 远端用户的增益。范围：0.0~100.0。默认值是100.0(远端用户的原始增益)。价值越小，收益越少
     /// - Returns: 成功：0；失败：< 0
-    func setRemoteVoicePosition(_ uid: UInt, pan: Double, gain: Double) -> Int32 {
+    @discardableResult
+    @objc func setRemoteVoicePosition(_ uid: UInt, pan: Double, gain: Double) -> Int32 {
         let result = rtcEngineKit.setRemoteVoicePosition(uid, pan: pan, gain: gain)
         return result
     }
@@ -1077,7 +1143,8 @@ extension AgoraRTCEngineProxy {
     ///   - replace: 音频混合上下文（true：只发布指定的音频文件，麦克风接收到的音频流不发布；false：本地音频文件与来自麦克风的音频流混合）
     ///   - cycle: 播放循环次数（-1表示无限次）
     /// - Returns: 成功：0；失败：< 0
-    func startAudioMixing(_ filePath: String, loopback: Bool, replace: Bool, cycle: Int) -> Int32 {
+    @discardableResult
+    @objc func startAudioMixing(_ filePath: String, loopback: Bool, replace: Bool, cycle: Int) -> Int32 {
         let result = rtcEngineKit.startAudioMixing(filePath, loopback: loopback, replace: replace, cycle: cycle)
         return result
     }
@@ -1085,7 +1152,8 @@ extension AgoraRTCEngineProxy {
     /// 停止音频混合 (在频道内调用该方法)
     ///
     /// - Returns: 成功：0；失败：< 0
-    func stopAudioMixing() -> Int32 {
+    @discardableResult
+    @objc func stopAudioMixing() -> Int32 {
         let result = rtcEngineKit.stopAudioMixing()
         return result
     }
@@ -1093,7 +1161,8 @@ extension AgoraRTCEngineProxy {
     /// 暂停音频混合 (在频道内调用该方法)
     ///
     /// - Returns: 成功：0；失败：< 0
-    func pauseAudioMixing() -> Int32 {
+    @discardableResult
+    @objc func pauseAudioMixing() -> Int32 {
         let result = rtcEngineKit.pauseAudioMixing()
         return result
     }
@@ -1101,7 +1170,8 @@ extension AgoraRTCEngineProxy {
     /// 恢复音频混合 (在频道内调用该方法)
     ///
     /// - Returns: 成功：0；失败：< 0
-    func resumeAudioMixing() -> Int32 {
+    @discardableResult
+    @objc func resumeAudioMixing() -> Int32 {
         let result = rtcEngineKit.resumeAudioMixing()
         return result
     }
@@ -1110,7 +1180,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter volume: 音频混合音量。范围：0~100，默认100
     /// - Returns: 成功：0；失败：< 0
-    func adjustAudioMixingVolume(_ volume: Int) -> Int32 {
+    @discardableResult
+    @objc func adjustAudioMixingVolume(_ volume: Int) -> Int32 {
         let result = rtcEngineKit.adjustAudioMixingVolume(volume)
         return result
     }
@@ -1119,7 +1190,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter volume: 音频混合音量。范围：0~100，默认100
     /// - Returns: 成功：0；失败：< 0
-    func adjustAudioMixingPlayoutVolume(_ volume: Int) -> Int32 {
+    @discardableResult
+    @objc func adjustAudioMixingPlayoutVolume(_ volume: Int) -> Int32 {
         let result = rtcEngineKit.adjustAudioMixingPlayoutVolume(volume)
         return result
     }
@@ -1128,7 +1200,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter volume: 音频混合音量。范围：0~100，默认100
     /// - Returns: 成功：0；失败：< 0
-    func adjustAudioMixingPublishVolume(_ volume: Int) -> Int32 {
+    @discardableResult
+    @objc func adjustAudioMixingPublishVolume(_ volume: Int) -> Int32 {
         let result = rtcEngineKit.adjustAudioMixingPublishVolume(volume)
         return result
     }
@@ -1136,7 +1209,8 @@ extension AgoraRTCEngineProxy {
     /// 获取用于发布的音频混合音量
     ///
     /// 此方法有助于排除音频音量相关问题
-    func getAudioMixingPublishVolume() -> Int32 {
+    @discardableResult
+    @objc func getAudioMixingPublishVolume() -> Int32 {
         let result = rtcEngineKit.getAudioMixingPublishVolume()
         return result
     }
@@ -1144,7 +1218,8 @@ extension AgoraRTCEngineProxy {
     /// 获取用于本地播放的音频混合音量
     ///
     /// 此方法有助于排除音频音量相关问题
-    func getAudioMixingPlayoutVolume() -> Int32 {
+    @discardableResult
+    @objc func getAudioMixingPlayoutVolume() -> Int32 {
         let result = rtcEngineKit.getAudioMixingPlayoutVolume()
         return result
     }
@@ -1152,7 +1227,8 @@ extension AgoraRTCEngineProxy {
     /// 获取音频混合的时间（ms） (在频道内调用该方法)
     ///
     /// - Returns: > 0：音频混合时间；< 0：失败
-    func getAudioMixingDuration() -> Int32 {
+    @discardableResult
+    @objc func getAudioMixingDuration() -> Int32 {
         let result = rtcEngineKit.getAudioMixingDuration()
         return result
     }
@@ -1160,7 +1236,8 @@ extension AgoraRTCEngineProxy {
     /// 获取音频混合文件的播放位置 (在频道内调用该方法)
     ///
     /// - Returns: > 0：音频混合文件当前的播放位置；< 0：失败
-    func getAudioMixingCurrentPosition() -> Int32 {
+    @discardableResult
+    @objc func getAudioMixingCurrentPosition() -> Int32 {
         let result = rtcEngineKit.getAudioMixingCurrentPosition()
         return result
     }
@@ -1169,7 +1246,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter pos: 音频混合文件的播放位置（ms）
     /// - Returns: 成功：0；失败：< 0
-    func setAudioMixingPosition(_ pos: Int) -> Int32 {
+    @discardableResult
+    @objc func setAudioMixingPosition(_ pos: Int) -> Int32 {
         let result = rtcEngineKit.setAudioMixingPosition(pos)
         return result
     }
@@ -1182,7 +1260,8 @@ extension AgoraRTCEngineProxy {
     /// 获取音效的音量（范围：0~100）
     ///
     /// - Returns: > 0：音效的音量；< 0：失败
-    func getEffectsVolume() -> Double {
+    @discardableResult
+    @objc func getEffectsVolume() -> Double {
         let result = rtcEngineKit.getEffectsVolume()
         return result
     }
@@ -1191,7 +1270,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter volume: 音效音量。范围：0~100，默认100
     /// - Returns: 成功：0；失败：< 0
-    func setEffectsVolume(_ volume: Double) -> Int32 {
+    @discardableResult
+    @objc func setEffectsVolume(_ volume: Double) -> Int32 {
         let result = rtcEngineKit.setEffectsVolume(volume)
         return result
     }
@@ -1202,7 +1282,8 @@ extension AgoraRTCEngineProxy {
     ///     - soundId: 音效ID
     ///     - withVolume: 音效音量。范围：0~100，默认100
     /// - Returns: 成功：0；失败：< 0
-    func setEffectsVolume(_ soundId: Int32, withVolume: Double) -> Int32 {
+    @discardableResult
+    @objc func setEffectsVolume(_ soundId: Int32, withVolume: Double) -> Int32 {
         let result = rtcEngineKit.setVolumeOfEffect(soundId, withVolume: withVolume)
         return result
     }
@@ -1226,7 +1307,8 @@ extension AgoraRTCEngineProxy {
     ///   - gain: 音效的音量。范围：0~100。默认100.
     ///   - publish: 是否发布给Agora Cloud和远端用户
     /// - Returns: 成功：0；失败：< 0
-    func playEffect(_ soundId: Int32, filePath: String?, loopCount: Int32, pitch: Double, pan: Double, gain: Double, publish: Bool) -> Int32 {
+    @discardableResult
+    @objc func playEffect(_ soundId: Int32, filePath: String?, loopCount: Int32, pitch: Double, pan: Double, gain: Double, publish: Bool) -> Int32 {
         let result = rtcEngineKit.playEffect(soundId, filePath: filePath, loopCount: loopCount, pitch: pitch, pan: pan, gain: gain, publish: publish)
         return result
     }
@@ -1234,7 +1316,8 @@ extension AgoraRTCEngineProxy {
     /// 停止播放指定的音效
     ///
     /// - Returns: 成功：0；失败：< 0
-    func stopEffect(_ soundId: Int32) -> Int32 {
+    @discardableResult
+    @objc func stopEffect(_ soundId: Int32) -> Int32 {
         let result = rtcEngineKit.stopEffect(soundId)
         return result
     }
@@ -1242,7 +1325,8 @@ extension AgoraRTCEngineProxy {
     /// 停止播放所有的音效
     ///
     /// - Returns: 成功：0；失败：< 0
-    func stopAllEffects() -> Int32 {
+    @discardableResult
+    @objc func stopAllEffects() -> Int32 {
         let result = rtcEngineKit.stopAllEffects()
         return result
     }
@@ -1257,7 +1341,8 @@ extension AgoraRTCEngineProxy {
     ///   - soundId: 音效ID
     ///   - filePath: 音效文件的绝对路径
     /// - Returns: 成功：0；失败：< 0
-    func stopAllEffects(_ soundId: Int32, filePath: String?) -> Int32 {
+    @discardableResult
+    @objc func stopAllEffects(_ soundId: Int32, filePath: String?) -> Int32 {
         let result = rtcEngineKit.preloadEffect(soundId, filePath: filePath)
         return result
     }
@@ -1266,7 +1351,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter soundId: 音效ID
     /// - Returns: 成功：0；失败：< 0
-    func unloadEffect(_ soundId: Int32) -> Int32 {
+    @discardableResult
+    @objc func unloadEffect(_ soundId: Int32) -> Int32 {
         let result = rtcEngineKit.unloadEffect(soundId)
         return result
     }
@@ -1274,7 +1360,8 @@ extension AgoraRTCEngineProxy {
     /// 暂停一个指定的音效
     ///
     /// - Returns: 成功：0；失败：< 0
-    func pauseEffect(_ soundId: Int32) -> Int32 {
+    @discardableResult
+    @objc func pauseEffect(_ soundId: Int32) -> Int32 {
         let result = rtcEngineKit.pauseEffect(soundId)
         return result
     }
@@ -1282,7 +1369,8 @@ extension AgoraRTCEngineProxy {
     /// 暂停所有的音效
     ///
     /// - Returns: 成功：0；失败：< 0
-    func pauseAllEffects() -> Int32 {
+    @discardableResult
+    @objc func pauseAllEffects() -> Int32 {
         let result = rtcEngineKit.pauseAllEffects()
         return result
     }
@@ -1290,7 +1378,8 @@ extension AgoraRTCEngineProxy {
     /// 恢复一个指定的音效
     ///
     /// - Returns: 成功：0；失败：< 0
-    func resumeEffect(_ soundId: Int32) -> Int32 {
+    @discardableResult
+    @objc func resumeEffect(_ soundId: Int32) -> Int32 {
         let result = rtcEngineKit.resumeEffect(soundId)
         return result
     }
@@ -1298,7 +1387,8 @@ extension AgoraRTCEngineProxy {
     /// 恢复所有的音效
     ///
     /// - Returns: 成功：0；失败：< 0
-    func resumeAllEffects() -> Int32 {
+    @discardableResult
+    @objc func resumeAllEffects() -> Int32 {
         let result = rtcEngineKit.resumeAllEffects()
         return result
     }
@@ -1316,7 +1406,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - filePath: 录制文件的绝对文件路径
     /// - Returns: 成功：0；失败：< 0
-    func startAudioRecording(filePath: String, quality: AgoraAudioRecordingQuality) -> Int32 {
+    @discardableResult
+    @objc func startAudioRecording(filePath: String, quality: AgoraAudioRecordingQuality) -> Int32 {
         let result = rtcEngineKit.startAudioRecording(filePath, quality: quality)
         return result
     }
@@ -1325,7 +1416,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 可以在调用 AgoraRtcEngineKit.leaveChannel(_:) 方法之前调用此方法，否则在调用 AgoraRtcEngineKit.leaveChannel(_:) 方法时录制将自动停止
     /// - Returns: 成功：0；失败：< 0
-    func stopAudioRecording() -> Int32 {
+    @discardableResult
+    @objc func stopAudioRecording() -> Int32 {
         
         let result = rtcEngineKit.stopAudioRecording()
         return result
@@ -1344,7 +1436,7 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 这种方法限制了SDK对音频会话的操作。音频会话的任何操作都完全依赖于应用程序、其他应用程序或第三方组件
     /// - Parameter restriction: 音频会话的操作限制
-    func setAudioSessionOperationRestriction(_ restriction: AgoraAudioSessionOperationRestriction) {
+    @objc func setAudioSessionOperationRestriction(_ restriction: AgoraAudioSessionOperationRestriction) {
         rtcEngineKit.setAudioSessionOperationRestriction(restriction)
     }
 }
@@ -1366,7 +1458,8 @@ extension AgoraRTCEngineProxy {
     ///   - withInterval: 说话和录音回放之间的时间间隔
     ///   - successBlock: 成功回调
     /// - Returns: 成功：0；失败：< 0
-    func startEchoTest(withInterval: Int, successBlock: ((String, UInt, Int) -> Void)?) -> Int32 {
+    @discardableResult
+    @objc func startEchoTest(withInterval: Int, successBlock: ((String, UInt, Int) -> Void)?) -> Int32 {
         let result = rtcEngineKit.startEchoTest(withInterval: withInterval) { (channel, uid, elapsed) in
             successBlock?(channel, uid, elapsed)
         }
@@ -1376,7 +1469,7 @@ extension AgoraRTCEngineProxy {
     /// 停止音频通话回路测试
     ///
     /// - Returns: 成功：0；失败：< 0
-    func stopEchoTest() -> Int32 {
+    @objc func stopEchoTest() -> Int32 {
         let result = rtcEngineKit.stopEchoTest()
         return result
     }
@@ -1394,7 +1487,8 @@ extension AgoraRTCEngineProxy {
     /// - 在收到 AgoraRtcEngineDelegate.rtcEngine(_:lastmileQuality:) 回调之前，不要调用任何其他方法。此外，此回调可能会被其他方法打断或不执行
     /// - 在直播配置文件下，主机在加入频道后不应该调用此方法
     /// - Returns: 成功：0；失败：< 0
-    func enableLastmileTest() -> Int32 {
+    @discardableResult
+    @objc func enableLastmileTest() -> Int32 {
         let result = rtcEngineKit.enableLastmileTest()
         return result
     }
@@ -1402,7 +1496,8 @@ extension AgoraRTCEngineProxy {
     /// 禁用网络连接质量测试
     ///
     /// - Returns: 成功：0；失败：< 0
-    func disableLastmileTest() -> Int32 {
+    @discardableResult
+    @objc func disableLastmileTest() -> Int32 {
         let result = rtcEngineKit.disableLastmileTest()
         return result
     }
@@ -1418,7 +1513,8 @@ extension AgoraRTCEngineProxy {
     /// - AgoraRtcEngineDelegate.rtcEngine(_:lastmileProbeTest:)：SDK根据网络条件在30秒内触发这个回调。这个回调函数返回网络状态的实时统计信息，更加客观
     /// - Parameter config: 最后一英里网络探测测试的配置
     /// - Returns: 成功：0；失败：< 0
-    func startLastmileProbeTest(_ config: AgoraLastmileProbeConfig?) -> Int32 {
+    @discardableResult
+    @objc func startLastmileProbeTest(_ config: AgoraLastmileProbeConfig?) -> Int32 {
         let result = rtcEngineKit.startLastmileProbeTest(config)
         return result
     }
@@ -1426,7 +1522,8 @@ extension AgoraRTCEngineProxy {
     /// 停止最后一英里网络探测测试
     ///
     /// - Returns: 成功：0；失败：< 0
-    func stopLastmileProbeTest() -> Int32 {
+    @discardableResult
+    @objc func stopLastmileProbeTest() -> Int32 {
         let result = rtcEngineKit.stopLastmileProbeTest()
         return result
     }
@@ -1439,7 +1536,7 @@ extension AgoraRTCEngineProxy {
     /// 设置视频源
     ///
     /// 在实时通信中，SDK使用默认的视频输入源(内置摄像头)发布流。要使用外部视频源，请调用AgoraVideoSourceProtocol来设置自定义视频源，然后使用此方法将外部视频源添加到SDK中
-    func setVideoSource(_ videoSource: AgoraVideoSourceProtocol?) {
+    @objc func setVideoSource(_ videoSource: AgoraVideoSourceProtocol?) {
         rtcEngineKit.setVideoSource(videoSource)
     }
     
@@ -1447,28 +1544,28 @@ extension AgoraRTCEngineProxy {
     /// 设置本地视频渲染器
     ///
     /// 在实时通信中，SDK使用默认的视频渲染器来渲染视频。要使用外部视频渲染器，请调用AgoraVideoSinkProtocol来设置自定义本地视频渲染器，然后使用此方法将外部渲染器添加到SDK中
-    func setLocalVideoRenderer(_ videoRenderer: AgoraVideoSinkProtocol?) {
+    @objc func setLocalVideoRenderer(_ videoRenderer: AgoraVideoSinkProtocol?) {
         rtcEngineKit.setLocalVideoRenderer(videoRenderer)
     }
     
     /// 设置远端视频渲染器
     /// 此方法设置远端视频渲染器。在实时通信中，SDK使用默认的视频渲染器来渲染视频。要使用外部视频渲染器，请调用AgoraVideoSinkProtocol来设置自定义远程视频渲染器，然后使用此方法将外部渲染器添加到SDK中
-    func setRemoteVideoRenderer(_ videoRenderer: AgoraVideoSinkProtocol?, forUserId: UInt) {
+    @objc func setRemoteVideoRenderer(_ videoRenderer: AgoraVideoSinkProtocol?, forUserId: UInt) {
         rtcEngineKit.setRemoteVideoRenderer(videoRenderer, forUserId: forUserId)
     }
     
     /// 获取视频源
-    func videoSource() -> AgoraVideoSourceProtocol? {
+    @objc func videoSource() -> AgoraVideoSourceProtocol? {
         return rtcEngineKit.videoSource()
     }
     
     /// 获取本地视频渲染器
-    func localVideoRenderer() -> AgoraVideoSinkProtocol? {
+    @objc func localVideoRenderer() -> AgoraVideoSinkProtocol? {
         return rtcEngineKit.localVideoRenderer()
     }
     
     /// 获取指定远端用户的视频源
-    func remoteVideoRenderer(ofUserId: UInt) -> AgoraVideoSinkProtocol? {
+    @objc func remoteVideoRenderer(ofUserId: UInt) -> AgoraVideoSinkProtocol? {
         return rtcEngineKit.remoteVideoRenderer(ofUserId: ofUserId)
     }
 }
@@ -1482,12 +1579,12 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - withSampleRate: 外部音频源的采样率:8000、16000、44100或48000 Hz
     ///   - channelsPerFrame: 外部声源信道的数量（最多两个信道）
-    func enableExternalAudioSource(withSampleRate: UInt, channelsPerFrame: UInt) {
+    @objc func enableExternalAudioSource(withSampleRate: UInt, channelsPerFrame: UInt) {
         rtcEngineKit.enableExternalAudioSource(withSampleRate: withSampleRate, channelsPerFrame: channelsPerFrame)
     }
     
     /// 禁用外部音频源
-    func disableExternalAudioSource() {
+    @objc func disableExternalAudioSource() {
         rtcEngineKit.disableExternalAudioSource()
     }
     
@@ -1497,7 +1594,8 @@ extension AgoraRTCEngineProxy {
     ///   - data: 外部音频数据
     ///   - samples: 样本数
     ///   - timestamp: 外部音频帧的时间戳。它是强制性的。您可以将此参数用于以下目的：恢复所捕获音频帧的顺序；同步视频相关场景中的音频和视频帧，包括使用外部视频源的场景
-    func pushExternalAudioFrameRawData(_ data: UnsafeMutableRawPointer, samples: UInt, timestamp: TimeInterval) -> Bool {
+    @discardableResult
+    @objc func pushExternalAudioFrameRawData(_ data: UnsafeMutableRawPointer, samples: UInt, timestamp: TimeInterval) -> Bool {
         let result = rtcEngineKit.pushExternalAudioFrameRawData(data, samples: samples, timestamp: timestamp)
         return result
     }
@@ -1505,7 +1603,8 @@ extension AgoraRTCEngineProxy {
     /// 将外部CMSampleBuffer音频帧推送到SDK进行编码
     ///
     /// - Parameter sampleBuffer: 样本缓冲区
-    func pushExternalAudioFrameSampleBuffer(_ sampleBuffer: CMSampleBuffer) -> Bool {
+    @discardableResult
+    @objc func pushExternalAudioFrameSampleBuffer(_ sampleBuffer: CMSampleBuffer) -> Bool {
         let result = rtcEngineKit.pushExternalAudioFrameSampleBuffer(sampleBuffer)
         return result
     }
@@ -1522,7 +1621,7 @@ extension AgoraRTCEngineProxy {
     ///   - enable: 是否使用外部视频源。默认false
     ///   - useTexture: 是否使用 texture 作为输入
     ///   - pushMode: 目前只能使用true。外部视频源是否需要调用 AgoraRtcEngineKit.pushExternalVideoFrame(_:) 发送视频帧到SDK
-    func setExternalVideoSource(_ enable: Bool, useTexture: Bool, pushMode: Bool) {
+    @objc func setExternalVideoSource(_ enable: Bool, useTexture: Bool, pushMode: Bool) {
         rtcEngineKit.setExternalVideoSource(enable, useTexture: useTexture, pushMode: pushMode)
     }
     
@@ -1532,7 +1631,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 在通信配置文件下，此方法不支持推送 texture 视频帧
     /// - Parameter frame: 包含SDK要推送的编码视频数据的视频帧
-    func pushExternalVideoFrame(_ frame: AgoraVideoFrame) -> Bool {
+    @discardableResult
+    @objc func pushExternalVideoFrame(_ frame: AgoraVideoFrame) -> Bool {
         let result = rtcEngineKit.pushExternalVideoFrame(frame)
         return result
     }
@@ -1550,7 +1650,8 @@ extension AgoraRTCEngineProxy {
     ///   - mode: AgoraAudioRawFrameOperationMode
     ///   - samplesPerCall: 样本点（由 onRecordAudioFrame 回调返回）。通常设置发布流的 samplesPerCall 为1024。samplesPerCall = (int)(sampleRate × sampleInterval)。sampleInterval >= 0.01s
     /// - Returns: 成功：0；失败：< 0
-    func setRecordingAudioFrameParametersWithSampleRate(_ sampleRate: Int, channel: Int, mode: AgoraAudioRawFrameOperationMode, samplesPerCall: Int) -> Int32 {
+    @discardableResult
+    @objc func setRecordingAudioFrameParametersWithSampleRate(_ sampleRate: Int, channel: Int, mode: AgoraAudioRawFrameOperationMode, samplesPerCall: Int) -> Int32 {
         let result = rtcEngineKit.setRecordingAudioFrameParametersWithSampleRate(sampleRate, channel: channel, mode: mode, samplesPerCall: samplesPerCall)
         return result
     }
@@ -1563,7 +1664,8 @@ extension AgoraRTCEngineProxy {
     ///   - mode: AgoraAudioRawFrameOperationMode
     ///   - samplesPerCall: 样本点（由 onPlaybackAudioFrame 回调返回）。通常设置发布流的 samplesPerCall 为1024。samplesPerCall = (int)(sampleRate × sampleInterval)。sampleInterval >= 0.01s
     /// - Returns: 成功：0；失败：< 0
-    func setPlaybackAudioFrameParametersWithSampleRate(_ sampleRate: Int, channel: Int, mode: AgoraAudioRawFrameOperationMode, samplesPerCall: Int) -> Int32 {
+    @discardableResult
+    @objc func setPlaybackAudioFrameParametersWithSampleRate(_ sampleRate: Int, channel: Int, mode: AgoraAudioRawFrameOperationMode, samplesPerCall: Int) -> Int32 {
         let result = rtcEngineKit.setPlaybackAudioFrameParametersWithSampleRate(sampleRate, channel: channel, mode: mode, samplesPerCall: samplesPerCall)
         return result
     }
@@ -1574,7 +1676,8 @@ extension AgoraRTCEngineProxy {
     ///   - sampleRate: 音频采样率（由 onMixedAudioFrame 回调返回）。可以为8000, 16000, 32000, 44100, or 48000 Hz
     ///   - samplesPerCall: 样本点（由 onMixedAudioFrame 回调返回）。通常设置发布流的 samplesPerCall 为1024。samplesPerCall = (int)(sampleRate × sampleInterval)。sampleInterval >= 0.01s
     /// - Returns: 成功：0；失败：< 0
-    func setMixedAudioFrameParametersWithSampleRate(_ sampleRate: Int, samplesPerCall: Int) -> Int32 {
+    @discardableResult
+    @objc func setMixedAudioFrameParametersWithSampleRate(_ sampleRate: Int, samplesPerCall: Int) -> Int32 {
         let result = rtcEngineKit.setMixedAudioFrameParametersWithSampleRate(sampleRate, samplesPerCall: samplesPerCall)
         return result
     }
@@ -1599,7 +1702,8 @@ extension AgoraRTCEngineProxy {
     /// - 如果在 AgoraRtcEngineKit.setVideoEncoderConfiguration(_:) 方法中将 orientationMode 设置为 Adaptive，水印图像将随着视频帧旋转，并围绕水印图像的左上角旋转
     /// - Parameter watermark: AgoraImage
     /// - Returns: 成功：0；失败：< 0
-    func addVideoWatermark(_ watermark: AgoraImage) -> Int32 {
+    @discardableResult
+    @objc func addVideoWatermark(_ watermark: AgoraImage) -> Int32 {
         let result = rtcEngineKit.addVideoWatermark(watermark)
         return result
     }
@@ -1607,7 +1711,8 @@ extension AgoraRTCEngineProxy {
     /// 移除 AgoraRtcEngineKit.addVideoWatermark(_:) 添加的水印
     ///
     /// - Returns: 成功：0；失败：< 0
-    func clearVideoWatermarks() -> Int32 {
+    @discardableResult
+    @objc func clearVideoWatermarks() -> Int32 {
         let result = rtcEngineKit.clearVideoWatermarks()
         return result
     }
@@ -1626,7 +1731,8 @@ extension AgoraRTCEngineProxy {
     ///   - uid: 远端用户的UID
     ///   - userPriority: 用户优先级
     /// - Returns: 成功：0；失败：< 0
-    func setRemoteUserPriority(_ uid: UInt, type: AgoraUserPriority) -> Int32 {
+    @discardableResult
+    @objc func setRemoteUserPriority(_ uid: UInt, type: AgoraUserPriority) -> Int32 {
         let result = rtcEngineKit.setRemoteUserPriority(uid, type: type)
         return result
     }
@@ -1645,7 +1751,8 @@ extension AgoraRTCEngineProxy {
     /// **注意：** Agora不推荐在CDN实时流媒体中使用此方法，因为当发布的视频流返回到audio-only时，远程CDN实时用户会有明显的延迟
     /// - Parameter option: 默认 AgoraStreamFallbackOptions.disabled
     /// - Returns: 成功：0；失败：< 0
-    func setLocalPublishFallbackOption(_ option: AgoraStreamFallbackOptions) -> Int32 {
+    @discardableResult
+    @objc func setLocalPublishFallbackOption(_ option: AgoraStreamFallbackOptions) -> Int32 {
         let result = rtcEngineKit.setLocalPublishFallbackOption(option)
         return result
     }
@@ -1659,7 +1766,8 @@ extension AgoraRTCEngineProxy {
     /// 当订阅的远端视源流返回到audio-only或当audio-only流切换回视频时，SDK触发 AgoraRtcEngineDelegate.rtcEngine(_:didRemoteSubscribeFallbackToAudioOnly:byUid:) 回调
     /// - Parameter option: 默认 AgoraStreamFallbackOptions.videoStreamLow
     /// - Returns: 成功：0；失败：< 0
-    func setRemoteSubscribeFallbackOption(_ option: AgoraStreamFallbackOptions) -> Int32 {
+    @discardableResult
+    @objc func setRemoteSubscribeFallbackOption(_ option: AgoraStreamFallbackOptions) -> Int32 {
         let result = rtcEngineKit.setRemoteSubscribeFallbackOption(option)
         return result
     }
@@ -1674,7 +1782,8 @@ extension AgoraRTCEngineProxy {
     /// 如果启用双流模式，接收端可以选择接收高流(高分辨率高比特率)或低流(低分辨率低比特率)视频
     /// - Parameter enabled: 默认false
     /// - Returns: 成功：0；失败：< 0
-    func enableDualStreamMode(_ enabled: Bool) -> Int32 {
+    @discardableResult
+    @objc func enableDualStreamMode(_ enabled: Bool) -> Int32 {
         let result = rtcEngineKit.enableDualStreamMode(enabled)
         return result
     }
@@ -1693,7 +1802,8 @@ extension AgoraRTCEngineProxy {
     ///   - uid: 发送视频流的远端用户ID
     ///   - type: AgoraVideoStreamType
     /// - Returns: 成功：0；失败：< 0
-    func setRemoteVideoStream(_ uid: UInt, type: AgoraVideoStreamType) -> Int32 {
+    @discardableResult
+    @objc func setRemoteVideoStream(_ uid: UInt, type: AgoraVideoStreamType) -> Int32 {
         let result = rtcEngineKit.setRemoteVideoStream(uid, type: type)
         return result
     }
@@ -1702,7 +1812,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter streamType: AgoraVideoStreamType
     /// - Returns: 成功：0；失败：< 0
-    func setRemoteDefaultVideoStreamType(_ streamType: AgoraVideoStreamType) -> Int32 {
+    @discardableResult
+    @objc func setRemoteDefaultVideoStreamType(_ streamType: AgoraVideoStreamType) -> Int32 {
         let result = rtcEngineKit.setRemoteDefaultVideoStreamType(streamType)
         return result
     }
@@ -1723,7 +1834,8 @@ extension AgoraRTCEngineProxy {
     /// - 为达到最佳传输效果，请确保加密后的数据大小不超过原始数据大小 + 16字节。16字节是AES加密的最大填充大小
     /// - Parameter secret: 加密密码
     /// - Returns: 成功：0；失败：< 0
-    func setEncryptionSecret(_ secret: String?) -> Int32 {
+    @discardableResult
+    @objc func setEncryptionSecret(_ secret: String?) -> Int32 {
         let result = rtcEngineKit.setEncryptionSecret(secret)
         return result
     }
@@ -1742,7 +1854,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter mode: 加密模式（"aes-128-xts": (default) 128-bit AES encryption, XTS mode；"aes-256-xts": 256-bit AES encryption, XTS mode；"aes-128-ecb": 128-bit AES encryption, ECB mode）
     /// - Returns: 成功：0；失败：< 0
-    func setEncryptionMode(_ mode: String?) -> Int32 {
+    @discardableResult
+    @objc func setEncryptionMode(_ mode: String?) -> Int32 {
         let result = rtcEngineKit.setEncryptionMode(mode)
         return result
     }
@@ -1770,7 +1883,8 @@ extension AgoraRTCEngineProxy {
     ///   - url: 要添加的URL。有效的协议是RTMP、HLS、FLV（支持的flv 音频编码类型：aac；支持的flv 视频编码类型：h264(avc)）
     ///   - config: AgoraLiveInjectStreamConfig
     /// - Returns: 成功：0；失败：< 0 （AgoraErrorCodeInvalidArgument，AgoraErrorCodeNotReady，AgoraErrorCodeNotSupported，AgoraErrorCodeNotInitialized）
-    func addInjectStreamUrl(_ url: String, config: AgoraLiveInjectStreamConfig) -> Int32 {
+    @discardableResult
+    @objc func addInjectStreamUrl(_ url: String, config: AgoraLiveInjectStreamConfig) -> Int32 {
         let result = rtcEngineKit.addInjectStreamUrl(url, config: config)
         return result
     }
@@ -1780,7 +1894,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// 成功的调用此方法会触发 AgoraRtcEngineDelegate.rtcEngine(_:didJoinedOfUid:elapsed:) 【uid:666】
     /// - Returns: 成功：0；失败：< 0
-    func removeInjectStreamUrl(_ url: String) -> Int32 {
+    @discardableResult
+    @objc func removeInjectStreamUrl(_ url: String) -> Int32 {
         let result = rtcEngineKit.removeInjectStreamUrl(url)
         return result
     }
@@ -1803,7 +1918,8 @@ extension AgoraRTCEngineProxy {
     ///   - url: RTMP格式的CDN流URL。最大长度1024字节
     ///   - transcodingEnabled: 是否开启双流
     /// - Returns: 成功：0；失败：< 0 （AgoraErrorCodeInvalidArgument，AgoraErrorCodeNotInitialized）
-    func addPublishStreamUrl(_ url: String, transcodingEnabled: Bool) -> Int32 {
+    @discardableResult
+    @objc func addPublishStreamUrl(_ url: String, transcodingEnabled: Bool) -> Int32 {
         let result = rtcEngineKit.addPublishStreamUrl(url, transcodingEnabled: transcodingEnabled)
         return result
     }
@@ -1818,7 +1934,8 @@ extension AgoraRTCEngineProxy {
     /// - url必须不包含特殊字符，例如中文字符
     /// - Parameter url: RTMP格式的CDN流URL。最大长度1024字节
     /// - Returns: 成功：0；失败：< 0
-    func removePublishStreamUrl(_ url: String) -> Int32 {
+    @discardableResult
+    @objc func removePublishStreamUrl(_ url: String) -> Int32 {
         let result = rtcEngineKit.removePublishStreamUrl(url)
         return result
     }
@@ -1827,7 +1944,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 此方法只适用于直播配置文件
     /// - Returns: 成功：0；失败：< 0
-    func setLiveTranscoding(_ transcoding: AgoraLiveTranscoding?) -> Int32 {
+    @discardableResult
+    @objc func setLiveTranscoding(_ transcoding: AgoraLiveTranscoding?) -> Int32 {
         let result = rtcEngineKit.setLiveTranscoding(transcoding)
         return result
     }
@@ -1846,7 +1964,8 @@ extension AgoraRTCEngineProxy {
     ///   - reliable: 设置是否保证接收方在5秒内接收到发送方的数据流（true：接收方在5秒内接收到发送方的数据流。如果接收者在5秒内没有接收到数据流，就会向应用程序报告错误；false：不能保证收件人在五秒内收到数据流，也不能就任何延迟或丢失的数据流报告错误消息）
     ///   - ordered: 设置接收方是否按发送顺序接收数据流（true：接收方按发送顺序接收数据流；false：接收方没有按发送顺序接收数据流）
     /// - Returns: 成功：数据流的ID；失败：< 0
-    func createDataStream(_ streamId: UnsafeMutablePointer<Int>, reliable: Bool, ordered: Bool) -> Int32 {
+    @discardableResult
+    @objc func createDataStream(_ streamId: UnsafeMutablePointer<Int>, reliable: Bool, ordered: Bool) -> Int32 {
         let result = rtcEngineKit.createDataStream(streamId, reliable: reliable, ordered: ordered)
         return result
     }
@@ -1866,7 +1985,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - streamId: AgoraRtcEngineKit.createDataStream(_:reliable:ordered:) 创建的流的ID
     /// - Returns: 成功：0；失败：< 0
-    func sendStreamMessage(_ streamId: Int, data: Data) -> Int32 {
+    @discardableResult
+    @objc func sendStreamMessage(_ streamId: Int, data: Data) -> Int32 {
         let result = rtcEngineKit.sendStreamMessage(streamId, data: data)
         return result
     }
@@ -1880,7 +2000,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// 在调用AgoraRtcEngineKit.startPreview 方法之前使用此方法，否则除非重新启用AgoraRtcEngineKit.startPreview，不然镜像模式不会生效
     /// - Returns: 成功：0；失败：< 0
-    func setLocalVideoMirrorMode(_ mode: AgoraVideoMirrorMode) -> Int32 {
+    @discardableResult
+    @objc func setLocalVideoMirrorMode(_ mode: AgoraVideoMirrorMode) -> Int32 {
         let result = rtcEngineKit.setLocalVideoMirrorMode(mode)
         return result
     }
@@ -1895,7 +2016,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 在启用本地摄像机之前调用此方法。也就是说，您可以在调用AgoraRtcEngineKit.joinChannel、AgoraRtcEngineKit.enableVideo或 AgoraRtcEngineKit.enableLocalVideo(_:)之前调用这个方法，这取决于使用哪个方法打开本地摄像机
     /// - Returns: 成功：0；失败：< 0
-    func setCameraCapturerConfiguration(_ configuration: AgoraCameraCapturerConfiguration?) -> Int32 {
+    @discardableResult
+    @objc func setCameraCapturerConfiguration(_ configuration: AgoraCameraCapturerConfiguration?) -> Int32 {
         let result = rtcEngineKit.setCameraCapturerConfiguration(configuration)
         return result
     }
@@ -1908,7 +2030,8 @@ extension AgoraRTCEngineProxy {
     /// 切换前后摄像头
     ///
     /// - Returns: 成功：0；失败：< 0
-    func switchCamera() -> Int32 {
+    @discardableResult
+    @objc func switchCamera() -> Int32 {
         let result = rtcEngineKit.switchCamera()
         return result
     }
@@ -1916,7 +2039,7 @@ extension AgoraRTCEngineProxy {
     /// 检查相机是否支持缩放功能
     ///
     /// - Returns: true：支持；false：不支持
-    func isCameraZoomSupported() -> Bool {
+    @objc func isCameraZoomSupported() -> Bool {
         let result = rtcEngineKit.isCameraZoomSupported()
         return result
     }
@@ -1925,7 +2048,7 @@ extension AgoraRTCEngineProxy {
     ///
     /// **注意：** 该app通常默认启用前置摄像头。如果不支持前置摄像头的闪光灯，返回false。如果要检查是否支持后置照相机闪光灯，请在调用此方法之前调用AgoraRtcEngineKit.switchCamera方法
     /// - Returns: true：支持；false：不支持
-    func isCameraTorchSupported() -> Bool {
+    @objc func isCameraTorchSupported() -> Bool {
         let result = rtcEngineKit.isCameraTorchSupported()
         return result
     }
@@ -1933,7 +2056,7 @@ extension AgoraRTCEngineProxy {
     /// 检查是否支持相机手动对焦功能
     ///
     /// - Returns: true：支持；false：不支持
-    func isCameraFocusPositionInPreviewSupported() -> Bool {
+    @objc func isCameraFocusPositionInPreviewSupported() -> Bool {
         let result = rtcEngineKit.isCameraFocusPositionInPreviewSupported()
         return result
     }
@@ -1941,7 +2064,7 @@ extension AgoraRTCEngineProxy {
     /// 检查是否支持相机手动曝光功能
     ///
     /// - Returns: true：支持；false：不支持
-    func isCameraExposurePositionSupported() -> Bool {
+    @objc func isCameraExposurePositionSupported() -> Bool {
         let result = rtcEngineKit.isCameraExposurePositionSupported()
         return result
     }
@@ -1949,7 +2072,7 @@ extension AgoraRTCEngineProxy {
     /// 检查是否支持相机自动对焦功能
     ///
     /// - Returns: true：支持；false：不支持
-    func isCameraAutoFocusFaceModeSupported() -> Bool {
+    @objc func isCameraAutoFocusFaceModeSupported() -> Bool {
         let result = rtcEngineKit.isCameraAutoFocusFaceModeSupported()
         return result
     }
@@ -1958,7 +2081,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter zoomFactor: 相机缩放因子。范围：1.0~相机支持的最大值
     /// - Returns: 成功：设置的相机缩放因子；失败：< 0
-    func setCameraZoomFactor(_ zoomFactor: CGFloat) -> CGFloat {
+    @discardableResult
+    @objc func setCameraZoomFactor(_ zoomFactor: CGFloat) -> CGFloat {
         let result = rtcEngineKit.setCameraZoomFactor(zoomFactor)
         return result
     }
@@ -1968,7 +2092,8 @@ extension AgoraRTCEngineProxy {
     /// 成功的调用此方法会在本地触发 AgoraRtcEngineDelegate.rtcEngine(_:cameraFocusDidChangedTo:)
     /// - Parameter position: 视图中触点的坐标
     /// - Returns: true：成功；false：失败
-    func setCameraFocusPositionInPreview(_ position: CGPoint) -> Bool {
+    @discardableResult
+    @objc func setCameraFocusPositionInPreview(_ position: CGPoint) -> Bool {
         let result = rtcEngineKit.setCameraFocusPositionInPreview(position)
         return result
     }
@@ -1978,7 +2103,8 @@ extension AgoraRTCEngineProxy {
     /// 成功的调用此方法会在本地触发 AgoraRtcEngineDelegate.rtcEngine(_:cameraExposureDidChangedTo:)
     /// - Parameter position: 视图中触点的坐标
     /// - Returns: true：成功；false：失败
-    func setCameraExposurePosition(_ position: CGPoint) -> Bool {
+    @discardableResult
+    @objc func setCameraExposurePosition(_ position: CGPoint) -> Bool {
         let result = rtcEngineKit.setCameraExposurePosition(position)
         return result
     }
@@ -1986,7 +2112,8 @@ extension AgoraRTCEngineProxy {
     /// 开启相机闪光功能
     ///
     /// - Returns: true：成功；false：失败
-    func setCameraTorchOn(_ isOn: Bool) -> Bool {
+    @discardableResult
+    @objc func setCameraTorchOn(_ isOn: Bool) -> Bool {
         let result = rtcEngineKit.setCameraTorchOn(isOn)
         return result
     }
@@ -1994,7 +2121,8 @@ extension AgoraRTCEngineProxy {
     /// 是否启用相机自动对焦功能
     ///
     /// - Returns: true：成功；false：失败
-    func setCameraAutoFocusFaceModeEnabled(_ enable: Bool) -> Bool {
+    @discardableResult
+    @objc func setCameraAutoFocusFaceModeEnabled(_ enable: Bool) -> Bool {
         let result = rtcEngineKit.setCameraAutoFocusFaceModeEnabled(enable)
         return result
     }
@@ -2014,7 +2142,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - type: 目前只支持视频元数据
     /// - Returns: true：成功；false：失败
-    func setMediaMetadataDataSource(_ metadataDataSource: AgoraMediaMetadataDataSource?, with type: AgoraMetadataType) -> Bool {
+    @discardableResult
+    @objc func setMediaMetadataDataSource(_ metadataDataSource: AgoraMediaMetadataDataSource?, with type: AgoraMetadataType) -> Bool {
         let result = rtcEngineKit.setMediaMetadataDataSource(metadataDataSource, with: type)
         return result
     }
@@ -2027,7 +2156,8 @@ extension AgoraRTCEngineProxy {
     /// - Parameters:
     ///   - type: 目前只支持视频元数据
     /// - Returns: true：成功；false：失败
-    func setMediaMetadataDelegate(_ metadataDelegate: AgoraMediaMetadataDelegate?, with type: AgoraMetadataType) -> Bool {
+    @discardableResult
+    @objc func setMediaMetadataDelegate(_ metadataDelegate: AgoraMediaMetadataDelegate?, with type: AgoraMetadataType) -> Bool {
         let result = rtcEngineKit.setMediaMetadataDelegate(metadataDelegate, with: type)
         return result
     }
@@ -2043,7 +2173,7 @@ extension AgoraRTCEngineProxy {
     ///
     /// AgoraRtcEngineKit.rate(_:rating:description:) 和 AgoraRtcEngineKit.complain(_:description:) 需要此方法获取callId
     /// - Returns: 当前的呼叫ID
-    func getCallId() -> String? {
+    @objc func getCallId() -> String? {
         let result = rtcEngineKit.getCallId()
         return result
     }
@@ -2055,7 +2185,8 @@ extension AgoraRTCEngineProxy {
     ///   - rating: 评分。范围：1~5。如果超出范围，会出现 AgoraErrorCode.invalidArgument 错误
     ///   - description: 评分的描述，800字节内
     /// - Returns: 成功：0；失败：< 0（AgoraErrorCode.invalidArgument，AgoraErrorCode.notReady）
-    func rate(_ callId: String, rating: Int, description: String?) -> Int32 {
+    @discardableResult
+    @objc func rate(_ callId: String, rating: Int, description: String?) -> Int32 {
         let result = rtcEngineKit.rate(callId, rating: rating, description: description)
         return result
     }
@@ -2066,7 +2197,8 @@ extension AgoraRTCEngineProxy {
     ///   - callId: AgoraRtcEngineKit.getCallId 获取的callId
     ///   - description: 抱怨的描述，800字节内
     /// - Returns: 成功：0；失败：< 0
-    func complain(_ callId: String, description: String?) -> Int32 {
+    @discardableResult
+    @objc func complain(_ callId: String, description: String?) -> Int32 {
         let result = rtcEngineKit.complain(callId, description: description)
         return result
     }
@@ -2074,7 +2206,7 @@ extension AgoraRTCEngineProxy {
     /// 启用/禁用向主队列分派委托的方法
     ///
     /// - Returns: 成功：0；失败：< 0
-    func enableMainQueueDispatch(_ enabled: Bool) -> Int32 {
+    @objc func enableMainQueueDispatch(_ enabled: Bool) -> Int32 {
         let result = rtcEngineKit.enableMainQueueDispatch(enabled)
         return result
     }
@@ -2091,7 +2223,8 @@ extension AgoraRTCEngineProxy {
     /// **注意：** ios 默认的日志输出目录：App Sandbox/Library/caches/agorasdk.log；确保此方法在 AgoraRtcEngineKit.sharedEngine(withAppId:delegate:) 后立即调用
     /// - Parameter filePath: 日志文件的绝对路径。日志文件是utf-8的
     /// - Returns: 成功：0；失败：< 0
-    func setLogFile(_ filePath: String) -> Int32 {
+    @discardableResult
+    @objc func setLogFile(_ filePath: String) -> Int32 {
         let result = rtcEngineKit.setLogFile(filePath)
         return result
     }
@@ -2102,7 +2235,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter filter: AgoraLogFilter
     /// - Returns: 成功：0；失败：< 0
-    func setLogFilter(_ filter: AgoraLogFilter) -> Int32 {
+    @discardableResult
+    @objc func setLogFilter(_ filter: AgoraLogFilter) -> Int32 {
         let result = rtcEngineKit.setLogFilter(filter.rawValue)
         return result
     }
@@ -2111,7 +2245,8 @@ extension AgoraRTCEngineProxy {
     ///
     /// SDK有两个日志文件，每个文件的默认大小为512KB。如果您将fileSizeInBytes设置为1024KB， SDK输出的日志文件的总最大大小为2MB，如果日志文件的总大小超过了设置的值，新的输出日志文件将覆盖旧的输出日志文件
     /// - Returns: 成功：0；失败：< 0
-    func setLogFileSize(_ fileSizeInKBytes: UInt) -> Int32 {
+    @discardableResult
+    @objc func setLogFileSize(_ fileSizeInKBytes: UInt) -> Int32 {
         let result = rtcEngineKit.setLogFileSize(fileSizeInKBytes)
         return result
     }
@@ -2119,7 +2254,7 @@ extension AgoraRTCEngineProxy {
     /// 返回SDK引擎的本机处理程序
     ///
     /// 此接口用于获取用于特殊场景(如注册音频和视频帧观察者)的SDK引擎的本机CC++处理程序
-    func getNativeHandle() -> UnsafeMutableRawPointer? {
+    @objc func getNativeHandle() -> UnsafeMutableRawPointer? {
         let result = rtcEngineKit.getNativeHandle()
         return result
     }
@@ -2139,13 +2274,15 @@ extension AgoraRTCEngineProxy {
     ///
     /// - Parameter options: JSON格式的SDK选项
     /// - Returns: 成功：0；失败：< 0
-    func setParameters(_ options: String) -> Int32 {
+    @discardableResult
+    @objc func setParameters(_ options: String) -> Int32 {
         let result = rtcEngineKit.setParameters(options)
         return result
     }
     
     /// 获取SDK的参数以进行定制
-    func getParameter(_ parameter: String, args: String?) -> String? {
+    @discardableResult
+    @objc func getParameter(_ parameter: String, args: String?) -> String? {
         let result = rtcEngineKit.getParameter(parameter, args: args)
         return result
     }

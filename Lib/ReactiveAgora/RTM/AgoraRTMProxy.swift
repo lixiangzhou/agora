@@ -59,11 +59,6 @@ class AgoraRTMProxy: NSObject {
     /// func send(_ message: AgoraRtmMessage, toPeer: String, completion: AgoraRtmSendPeerMessageBlock? = nil)
     let (sendMsgSignal, sendMsgObserver) = Signal<((AgoraRtmMessage, String, AgoraRtmSendMessageOptions?), AgoraRtmSendPeerMessageErrorCode), Never>.pipe()
     
-    /// 创建频道方法 信号量
-    ///
-    /// func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate? = nil) -> AgoraRtmChannel?
-    let (createChannelSignal, createChannelObserver) = Signal<((String, AgoraRtmChannelDelegate?), AgoraRtmChannel?), Never>.pipe()
-    
     /// 销毁频道方法 信号量
     ///
     /// func destroyChannelWithId(_ channelId: String) -> Bool
@@ -211,10 +206,10 @@ extension AgoraRTMProxy {
     ///   - channelId: RTM中频道的唯一名字。字符串的长度必须小于64字节，可用的字符如下：26个英文字母（大小写都行）；数字0-9；空格；"!", "#", "$", "%", "&", "(", ")", "+", "-", ":", ";", "<", "=", ".", ">", "?", "@", "[", "]", "^", "_", " {", "}", "|", "~", ","
     ///   - delegate: AgoraRtmChannelDelegate
     /// - Returns: 成功时：返回AgoraRtmChannel；失败时：返回nil（可能的原因：channelId无效；已存在相同的channelId；频道数量超限）
+    @discardableResult
     func createChannel(withId channelId: String, delegate: AgoraRtmChannelDelegate? = nil) -> AgoraRtmChannel? {
         Agora.log(channelId, delegate as Any)
         let channel = rtmKit.createChannel(withId: channelId, delegate: delegate)
-        createChannelObserver.send(value: ((channelId, delegate), channel))
         return channel
     }
     
