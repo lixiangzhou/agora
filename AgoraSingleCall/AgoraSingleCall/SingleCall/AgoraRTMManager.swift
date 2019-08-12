@@ -15,6 +15,8 @@ class AgoraRTMManager: NSObject {
     
     private var agoraRtmKit: AgoraRtmKit!
     
+    private(set) var attributesNeedUpdate = [AgoraRtmAttribute]()
+    
     func setup() {
         agoraRtmKit = AgoraRtmKit(appId: AgoraManager.shared.appId, delegate: self)
     }
@@ -61,6 +63,28 @@ class AgoraRTMManager: NSObject {
     func askToLeaveChannel(_ uid: String, completion: ((AgoraRtmSendPeerMessageErrorCode) -> Void)? = nil) {
         AgoraManager.shared.role = .none
         agoraRtmKit.send(AgoraRtmMessage(text: ""), toPeer: uid, completion: completion)
+    }
+    
+    func addLocal(name: String, portrait: String) {
+        let nameAttr = AgoraRtmAttribute()
+        nameAttr.key = "name"
+        nameAttr.value = name
+        
+        let portraitAttr = AgoraRtmAttribute()
+        portraitAttr.key = "portrait"
+        portraitAttr.value = portrait
+        
+        attributesNeedUpdate.append(nameAttr)
+        attributesNeedUpdate.append(portraitAttr)
+    }
+    
+    func addOrUpdateAttributes() {
+        agoraRtmKit.addOrUpdateLocalUserAttributes(attributesNeedUpdate) { [weak self] (code) in
+            print("addOrUpdateLocalUserAttributes", code.rawValue)
+            if code == .attributeOperationErrorOk {
+                self?.attributesNeedUpdate.removeAll()
+            }
+        }
     }
     
     var connectionState = AgoraRtmConnectionState.disconnected {

@@ -16,21 +16,31 @@ class ViewController: UIViewController {
     
     let rtmProxy = AgoraRTMProxy()
     let callProxy = AgoraRTMCallProxy()
+    let rtcProxy = AgoraRTCEngineProxy(delegate: nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
 //        rtmProxy.rtmCallKit = callProxy.callKit
-        rtmProxy.login(user: "test")
+//        rtmProxy.login(user: "test")
+        
+        rtcProxy.reactive.signal(for: #selector(AgoraRTCEngineProxy.joinChannel(byToken:channelId:info:uid:joinSuccess:))).observeValues { (result) in
+            print(result)
+        }
+        
         
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let invitation = AgoraRtmLocalInvitation(calleeId: "KKKK")
-        invitation.channelId = "hahah"
-//        invitation.content = "Content"
-        callProxy.callKit.send(invitation) { code in
-            print(code, code.rawValue)
+//        let invitation = AgoraRtmLocalInvitation(calleeId: "KKKK")
+//        invitation.channelId = "hahah"
+////        invitation.content = "Content"
+//        callProxy.callKit.send(invitation) { code in
+//            print(code, code.rawValue)
+//        }
+        
+        rtcProxy.joinChannel(byToken: "TOKEN", channelId: "CHANNELID", info: "INFO", uid: 111) { (channel, uid, elapsed) in
+            print(channel, uid, elapsed)
         }
     }
 }
